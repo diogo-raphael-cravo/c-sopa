@@ -1,0 +1,6 @@
+Este documento explica como conseguir a biblioteca ncurses, caso não a tenha.
+No Ubuntu: "apt-get install libncurses5-dev libncursesw5-dev"
+
+
+
+Mais detalhes no link: http://www.howtoforge.com/curses.h-no-such-file-or-directory
