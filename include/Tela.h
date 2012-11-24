@@ -31,9 +31,10 @@ void tela_inicializar(void);
 void tela_fechar(void);
 
 /**
-* Espera que o usuário digita um caractere e o retorna.
+* Espera que o usuário digite uma linha até [ENTER].
+* @return int	A linha que o usuário digitou.
 */
-char tela_esperarCaractere(void);
+char* tela_esperarLinhaUsuario(void);
 
 /**
 * Espera input do usuário e digita na tela.
