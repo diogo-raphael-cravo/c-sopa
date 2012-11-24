@@ -82,7 +82,7 @@ void desenharTabela(void){
 /**
 * Inicializa a tela.
 */
-void inicializarTela(void){
+void tela_inicializar(void){
 	initscr();   /*Esta função  inicializa a ncurses. Para todos os programas  
                    devemos sempre inicializar a ncurses e depois finalizar, como 
                   veremos adiante. */
@@ -124,7 +124,7 @@ void inicializarTela(void){
 /**
 * Termina o uso da tela.
 */
-void fecharTela(void){
+void tela_fechar(void){
 	endwin(); /*Sempre que finalizarmos um programa com a biblioteca curses, 
                      devemos executar este comando.*/
 }
@@ -132,19 +132,19 @@ void fecharTela(void){
 /**
 * Espera que o usuário digita um caractere e o retorna.
 */
-char esperarCaractere(void){
+char tela_esperarCaractere(void){
 	return getch();      //Fica esperando que o usuário aperte alguma tecla.
 }
 
 /**
 * Espera input do usuário e digita na tela.
 */
-void runTela(void){
+void tela_run(void){
 	int colunaDigitada = COLUNA_CARACTERE_INPUT_USUARIO;
 	moverCursorParaCaractere(LINHA_CARACTERE_INPUT_USUARIO,colunaDigitada);
 	char caractereDigitado;
 	while(true){
-		caractereDigitado = esperarCaractere();		
+		caractereDigitado = tela_esperarCaractere();		
 		moverCursorParaCaractere(LINHA_CARACTERE_INPUT_USUARIO,colunaDigitada);
 		colunaDigitada++;
 		addch(caractereDigitado);		
@@ -155,7 +155,7 @@ void runTela(void){
 * Adiciona uma coluna a esta tela com o nome dado.
 * @param char*	nomeColuna_param	O nome que ficará no topo da coluna.
 */
-void adicionarColuna(char* nomeColuna_param){
+void tela_adicionarColuna(char* nomeColuna_param){
 	quantidadeColunas++;
 	nomesColunas[quantidadeColunas-1] = nomeColuna_param;
 	moverCursor(3,quantidadeColunas);
@@ -170,7 +170,7 @@ void adicionarColuna(char* nomeColuna_param){
 *				o texto pode ser enrolado.
 * @param int	coluna_param	Coluna em que o texto será escrito. Começando em 1.
 */
-void escreverNaColuna(char* texto_param, int coluna_param){
+void tela_escreverNaColuna(char* texto_param, int coluna_param){
 	ultimaLinhaEscrita++;
 	moverCursor(ultimaLinhaEscrita,coluna_param);
 	int colunasNestaLinha = CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS-1;

@@ -4,20 +4,20 @@
 
 int main(void)
 {
-	inicializarTela();
-	adicionarColuna("PRIMEIRA COLUNA");
-	adicionarColuna("SEGUNDA COLUNA");
-	adicionarColuna("TERCEIRA COLUNA");
-	adicionarColuna("QUARTA COLUNA");
-	adicionarColuna("QUINTA COLUNA");
-	escreverNaColuna("Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",1);
-	escreverNaColuna("Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",2);
-	escreverNaColuna("ccccccc",2);
-	escreverNaColuna("ddddddd",1);
-	escreverNaColuna("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",3);
-	escreverNaColuna("quartaquartaquartaquartaquartaquartaquartaquartaquartaquarta",4);
-	runTela();
-	fecharTela();
+	tela_inicializar();
+	tela_adicionarColuna("PRIMEIRA COLUNA");
+	tela_adicionarColuna("SEGUNDA COLUNA");
+	tela_adicionarColuna("TERCEIRA COLUNA");
+	tela_adicionarColuna("QUARTA COLUNA");
+	tela_adicionarColuna("QUINTA COLUNA");
+	tela_escreverNaColuna("Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",1);
+	tela_escreverNaColuna("Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",2);
+	tela_escreverNaColuna("ccccccc",2);
+	tela_escreverNaColuna("ddddddd",1);
+	tela_escreverNaColuna("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",3);
+	tela_escreverNaColuna("quartaquartaquartaquartaquartaquartaquartaquartaquartaquarta",4);
+	tela_run();
+	tela_fechar();
 	return 0;
 }
 

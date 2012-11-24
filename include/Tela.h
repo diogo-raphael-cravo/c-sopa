@@ -23,28 +23,28 @@ blablablah    |               |               |
 /**
 * Inicializa a tela.
 */
-void inicializarTela(void);
+void tela_inicializar(void);
 
 /**
 * Termina o uso da tela.
 */
-void fecharTela(void);
+void tela_fechar(void);
 
 /**
 * Espera que o usuário digita um caractere e o retorna.
 */
-char esperarCaractere(void);
+char tela_esperarCaractere(void);
 
 /**
 * Espera input do usuário e digita na tela.
 */
-void runTela(void);
+void tela_run(void);
 
 /**
 * Adiciona uma coluna a esta tela com o nome dado.
 * @param char*	nomeColuna_param	O nome que ficará no topo da coluna.
 */
-void adicionarColuna(char* nomeColuna_param);
+void tela_adicionarColuna(char* nomeColuna_param);
 
 /**
 * Escreve o texto na linha dada.
@@ -52,4 +52,4 @@ void adicionarColuna(char* nomeColuna_param);
 *				o texto pode ser enrolado.
 * @param int	coluna_param	Coluna em que o texto será escrito. Começando em 1.
 */
-void escreverNaColuna(char* texto_param, int coluna_param);
+void tela_escreverNaColuna(char* texto_param, int coluna_param);
