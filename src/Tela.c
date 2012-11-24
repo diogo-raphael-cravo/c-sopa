@@ -11,23 +11,68 @@ int quantidadeColunas;
 //A última linha em que houve escrita.
 int ultimaLinhaEscrita;
 //A quantidade total de linhas em que se pode escrever. Medida em caracteres.
-#define CARACTERES_POR_LINHA_PARA_ESCRITA 50
+#define CARACTERES_POR_LINHA_PARA_ESCRITA 40
 //A quantidade total de colunas em que se pode escrever. Medida em caracteres.
-#define CARACTERES_POR_COLUNA_PARA_ESCRITA 50
+#define CARACTERES_POR_COLUNA_PARA_ESCRITA 130
 //Os nomes das colunas da tela.
 char** nomesColunas;
-
+//Linha em que o usuário pode escrever.
+#define LINHA_CARACTERE_INPUT_USUARIO 1
+//Coluna em que o usuário pode escrever.
+#define COLUNA_CARACTERE_INPUT_USUARIO 2
 
 //---------------------------------------------------------------------
 //			FUNÇÕES PRIVADAS DESTE ARQUIVO						
 //---------------------------------------------------------------------
 /**
-* Move o cursor para o início da linha e coluna. Enviar 0,0 mandará para a linha de entrada.
+* Move o cursor para o início da linha e coluna. Enviar 1,1 mandará para a linha de entrada.
 * @param int	linha_param	A linha, da tela, não de caracteres, em que o cursor irá ficar.
 * @param int	coluna_param	A coluna, da tela, não de caracteres, em que o cursor irá ficar.
 */
 void moverCursor(int linha_param, int coluna_param){
-	move(linha_param,coluna_param*CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS);	
+	if(linha_param != 1){
+		move((linha_param-1),1+(coluna_param-1)*CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS);	
+	} else {
+		move((linha_param-1),(coluna_param-1)*CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS);	
+	}		
+}
+
+/**
+* Move o cursor para o caractere na posição dada. Inicia em 1,1.
+* @param int	linha_param	A linha, da tela, em caracteres, em que o cursor irá ficar.
+* @param int	coluna_param	A coluna, da tela, em caracteres, em que o cursor irá ficar.
+*/
+void moverCursorParaCaractere(int linha_param, int coluna_param){
+	move((linha_param-1),(coluna_param-1));	
+}
+
+/**
+* Desenha os limites da tabela.
+*/
+void desenharTabela(void){
+	int linha = 2;
+	int coluna = 1;
+	for(linha=2; linha<=CARACTERES_POR_LINHA_PARA_ESCRITA; linha++){
+		if(linha==2){
+			for(coluna=1; coluna<=CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
+				moverCursorParaCaractere(linha, coluna);
+				addch(ACS_CKBOARD);
+			}
+		} else if(linha==CARACTERES_POR_LINHA_PARA_ESCRITA){
+			for(coluna=1; coluna<=CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
+				moverCursorParaCaractere(linha, coluna);
+				addch(ACS_CKBOARD);
+			}
+		} else {
+			int colunaTabela;
+			for(colunaTabela=0; colunaTabela<MAXIMO_COLUNAS; colunaTabela++){
+				moverCursorParaCaractere(linha, 1+(colunaTabela)*CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS);
+				addch(ACS_CKBOARD);
+			}		
+			moverCursorParaCaractere(linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
+			addch(ACS_CKBOARD);
+		}
+	}
 }
 
 
@@ -43,6 +88,8 @@ void inicializarTela(void){
                   veremos adiante. */
 
 	start_color(); //Esta função torna possível o uso das cores
+
+	assume_default_colors(-1,-1); //Funciona somente em terminais que suportem ISO6429
 
 	//Abaixo estamos definindo os pares de cores que serão utilizados no programa
 	//init_pair(1,COLOR_WHITE,COLOR_BLUE); //Texto(Branco) | Fundo(Azul)
@@ -65,9 +112,13 @@ void inicializarTela(void){
                                                         posição acima. */
 	//attroff(COLOR_PAIR(2));
 	//refresh();    //Atualiza a tela
-	ultimaLinhaEscrita = 2;
+	ultimaLinhaEscrita = 4;
 	quantidadeColunas = 0;
 	nomesColunas = (char**) malloc(MAXIMO_COLUNAS * sizeof(char**));
+
+	moverCursor(LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO-1);
+	printw(">");
+	desenharTabela();
 }
 
 /**
@@ -86,14 +137,31 @@ char esperarCaractere(void){
 }
 
 /**
+* Espera input do usuário e digita na tela.
+*/
+void runTela(void){
+	int colunaDigitada = COLUNA_CARACTERE_INPUT_USUARIO;
+	moverCursorParaCaractere(LINHA_CARACTERE_INPUT_USUARIO,colunaDigitada);
+	char caractereDigitado;
+	while(true){
+		caractereDigitado = esperarCaractere();		
+		moverCursorParaCaractere(LINHA_CARACTERE_INPUT_USUARIO,colunaDigitada);
+		colunaDigitada++;
+		addch(caractereDigitado);		
+	}
+}
+
+/**
 * Adiciona uma coluna a esta tela com o nome dado.
 * @param char*	nomeColuna_param	O nome que ficará no topo da coluna.
 */
 void adicionarColuna(char* nomeColuna_param){
 	quantidadeColunas++;
 	nomesColunas[quantidadeColunas-1] = nomeColuna_param;
-	moverCursor(2,quantidadeColunas);
+	moverCursor(3,quantidadeColunas);
+	attron(A_BOLD);
 	printw(nomeColuna_param);
+	attroff(A_BOLD);
 }
 
 /**
@@ -104,8 +172,17 @@ void adicionarColuna(char* nomeColuna_param){
 */
 void escreverNaColuna(char* texto_param, int coluna_param){
 	ultimaLinhaEscrita++;
-	moverCursor(ultimaLinhaEscrita,coluna_param);			
-	printw(texto_param);
+	moverCursor(ultimaLinhaEscrita,coluna_param);
+	int colunasNestaLinha = CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS-1;
+	int i=0;
+	while(texto_param[i] != '\0'){
+		if(i%colunasNestaLinha == 0 && i!=0){
+			ultimaLinhaEscrita++;
+			moverCursor(ultimaLinhaEscrita,coluna_param);
+		}
+		addch(texto_param[i]);
+		i++;
+	}
 }
 
 

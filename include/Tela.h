@@ -36,6 +36,11 @@ void fecharTela(void);
 char esperarCaractere(void);
 
 /**
+* Espera input do usuário e digita na tela.
+*/
+void runTela(void);
+
+/**
 * Adiciona uma coluna a esta tela com o nome dado.
 * @param char*	nomeColuna_param	O nome que ficará no topo da coluna.
 */
