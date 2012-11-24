@@ -65,7 +65,7 @@ int main(void)
 	controladorInterrupcoes_rodar(&global_controladorInterrupcoes);
 	console_rodar(&global_console);
 
-	tela_fechar(&global_tela);
+	tela_fechar();
 	return 0;
 }
 
