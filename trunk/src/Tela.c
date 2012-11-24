@@ -48,29 +48,70 @@ void moverCursorParaCaractere(int linha_param, int coluna_param){
 
 /**
 * Desenha os limites da tabela.
+* OBS:
+*	ACS_HLINE (a one-character piece of a horizontal line)
+*	ACS_VLINE (vertical line)
+*	ACS_ULCORNER (upper-left corner of a box)
+*	ACS_URCORNER (upper-right corner)
+*	ACS_LLCORNER (lower-left corner)
+*	ACS_LRCORNER (lower-right corner)
+*	ACS_TTEE (top T, where the top of a vertical line touches a horizontal line)
+*	ACS_BTEE (bottom T)
+*	ACS_LTEE (left T)
+*	ACS_RTEE (right T)
+*	ACS_PLUS (intersection of horizontal and vertical line).
 */
 void desenharTabela(void){
 	int linha = 2;
 	int coluna = 1;
 	for(linha=2; linha<=CARACTERES_POR_LINHA_PARA_ESCRITA; linha++){
 		if(linha==2){
-			for(coluna=1; coluna<=CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
+			moverCursorParaCaractere(linha, 1);
+			addch(ACS_ULCORNER);
+			for(coluna=2; coluna<CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
 				moverCursorParaCaractere(linha, coluna);
-				addch(ACS_CKBOARD);
+				if(coluna%(CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS)==1){
+					addch(ACS_TTEE);
+				} else {
+					addch(ACS_HLINE);
+				}
 			}
+			moverCursorParaCaractere(linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
+			addch(ACS_URCORNER);
 		} else if(linha==CARACTERES_POR_LINHA_PARA_ESCRITA){
-			for(coluna=1; coluna<=CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
+			moverCursorParaCaractere(linha, 1);
+			addch(ACS_LLCORNER);
+			for(coluna=2; coluna<CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
 				moverCursorParaCaractere(linha, coluna);
-				addch(ACS_CKBOARD);
+				if(coluna%(CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS)==1){
+					addch(ACS_BTEE);
+				} else {
+					addch(ACS_HLINE);
+				}
 			}
+			moverCursorParaCaractere(linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
+			addch(ACS_LRCORNER);
+		} else if(linha==4){
+			moverCursorParaCaractere(linha, 1);
+			addch(ACS_LTEE);
+			for(coluna=2; coluna<CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
+				moverCursorParaCaractere(linha, coluna);
+				if(coluna%(CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS)==1){
+					addch(ACS_PLUS);
+				} else {
+					addch(ACS_HLINE);
+				}
+			}
+			moverCursorParaCaractere(linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
+			addch(ACS_RTEE);
 		} else {
 			int colunaTabela;
 			for(colunaTabela=0; colunaTabela<MAXIMO_COLUNAS; colunaTabela++){
 				moverCursorParaCaractere(linha, 1+(colunaTabela)*CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS);
-				addch(ACS_CKBOARD);
+				addch(ACS_VLINE);
 			}		
 			moverCursorParaCaractere(linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
-			addch(ACS_CKBOARD);
+			addch(ACS_VLINE);
 		}
 	}
 }
@@ -119,6 +160,8 @@ void tela_inicializar(void){
 	moverCursor(LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO-1);
 	printw(">");
 	desenharTabela();
+
+	nocbreak();
 }
 
 /**
@@ -130,24 +173,25 @@ void tela_fechar(void){
 }
 
 /**
-* Espera que o usuário digita um caractere e o retorna.
+* Espera que o usuário digite uma linha até [ENTER].
 */
-char tela_esperarCaractere(void){
-	return getch();      //Fica esperando que o usuário aperte alguma tecla.
+char* tela_esperarLinhaUsuario(void){
+	moverCursorParaCaractere(LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
+	char* digitado = (char*)malloc(CARACTERES_POR_COLUNA_PARA_ESCRITA*sizeof(char));
+	scanw("%s",digitado);
+	moverCursorParaCaractere(LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
+	clrtoeol();
+	return digitado;      //Fica esperando que o usuário aperte alguma tecla.
 }
 
 /**
 * Espera input do usuário e digita na tela.
 */
 void tela_run(void){
-	int colunaDigitada = COLUNA_CARACTERE_INPUT_USUARIO;
-	moverCursorParaCaractere(LINHA_CARACTERE_INPUT_USUARIO,colunaDigitada);
-	char caractereDigitado;
+	char* linhaDigitada;
 	while(true){
-		caractereDigitado = tela_esperarCaractere();		
-		moverCursorParaCaractere(LINHA_CARACTERE_INPUT_USUARIO,colunaDigitada);
-		colunaDigitada++;
-		addch(caractereDigitado);		
+		linhaDigitada = tela_esperarLinhaUsuario();
+		//printw(linhaDigitada);
 	}
 }
 
