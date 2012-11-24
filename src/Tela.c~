@@ -157,7 +157,7 @@ void tela_inicializar(TELA *tela_param){
 
 	moverCursor(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO-1);
 	printw(">");
-	desenharTabela(tela_param);
+	desenharTabela();
 
 	nocbreak();
 }

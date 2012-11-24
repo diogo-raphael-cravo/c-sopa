@@ -24,7 +24,7 @@ struct str_tela{
 	char** nomesColunas; //Os nomes das colunas da tela.
 };
 
-typedef struct str_tela TELA;
+typedef str_tela TELA;
 
 //Número máximo de colunas.
 #define MAXIMO_COLUNAS 5

@@ -1,0 +1,19 @@
+/**
+* Concentra as funções de manipulação do controlador de interrupções.
+*/
+//---------------------------------------------------------------------
+//			DADOS						
+//---------------------------------------------------------------------
+struct str_controladorInterrupcoes{
+
+};
+
+typedef struct str_controladorInterrupcoes CONTROLADOR_INTERRUPCOES;
+
+//---------------------------------------------------------------------
+//			FUNÇÕES						
+//---------------------------------------------------------------------
+/**
+* Inicia thread do controlador de interrupções.
+*/
+void controladorInterrupcoes_rodar(void);
