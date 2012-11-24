@@ -5,11 +5,11 @@
 int main(void)
 {
 	tela_inicializar();
-	tela_adicionarColuna("     PRIMEIRA COLUNA");
-	tela_adicionarColuna("     SEGUNDA COLUNA");
-	tela_adicionarColuna("     TERCEIRA COLUNA");
-	tela_adicionarColuna("      QUARTA COLUNA");
-	tela_adicionarColuna("     QUINTA COLUNA");
+	tela_adicionarColuna("     PROCESSADOR    ");
+	tela_adicionarColuna("       TIMER        ");
+	tela_adicionarColuna("       KERNEL       ");
+	tela_adicionarColuna("       DISCO        ");
+	tela_adicionarColuna("       CONSOLE      ");
 	tela_escreverNaColuna("Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",1);
 	tela_escreverNaColuna("Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",2);
 	tela_escreverNaColuna("ccccccc",2);
