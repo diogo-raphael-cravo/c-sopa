@@ -77,6 +77,7 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param);
 * @param char*	texto_param	O texto que será escrito. Como há um espaço limitado para cada linha,
 *				o texto pode ser enrolado.
 * @param int	coluna_param	Coluna em que o texto será escrito. Começando em 1.
+* Obs.: Para maior liberdade, utilize com sprintf (buffer, "%d plus %d is %d", a, b, a+b).
 */
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param);
 
