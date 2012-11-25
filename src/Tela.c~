@@ -14,7 +14,7 @@
 //A quantidade total de linhas em que se pode escrever. Medida em caracteres.
 #define CARACTERES_POR_COLUNA_PARA_ESCRITA 39
 //A quantidade total de colunas em que se pode escrever dentro de uma coluna. Medida em caracteres.
-#define CARACTERES_POR_LINHA_PARA_ESCRITA 10
+#define CARACTERES_POR_LINHA_PARA_ESCRITA 25
 //Linha em que o usuário pode escrever.
 #define LINHA_CARACTERE_INPUT_USUARIO 1
 //Coluna em que o usuário pode escrever.
@@ -263,6 +263,7 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param){
 * @param char*	texto_param	O texto que será escrito. Como há um espaço limitado para cada linha,
 *				o texto pode ser enrolado.
 * @param int	coluna_param	Coluna em que o texto será escrito. Começando em 1.
+* Obs.: Para maior liberdade, utilize com sprintf (buffer, "%d plus %d is %d", a, b, a+b).
 */
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param){
 	int linhasParaExibir = strlen(texto_param)/CARACTERES_POR_LINHA_PARA_ESCRITA;
@@ -273,12 +274,12 @@ void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param
 		tela_param->totalTextosColunas++;
 		tela_param->ultimoTextoColunaExibido = tela_param->totalTextosColunas-1;
 		tela_param->ultimaLinhaEscrita++;
-		tela_param->textosColunas[tela_param->totalTextosColunas-1] = texto_param;
-							//string_pegarSubtextoNaOrdem(texto_param, CARACTERES_POR_LINHA_PARA_ESCRITA, i);
+		tela_param->textosColunas[tela_param->totalTextosColunas-1] = 
+						string_pegarSubtextoNaOrdem(texto_param, CARACTERES_POR_LINHA_PARA_ESCRITA, i);
 		tela_param->colunasTextosColunas[tela_param->totalTextosColunas-1] = coluna_param;
 
 		privada_moverCursor(tela_param, tela_param->ultimaLinhaEscrita, coluna_param);
-		printw(texto_param);//tela_param->textosColunas[tela_param->totalTextosColunas-1]);
+		printw(tela_param->textosColunas[tela_param->totalTextosColunas-1]);
 
 		if(tela_param->ultimaLinhaEscrita==CARACTERES_POR_COLUNA_PARA_ESCRITA){
 			tela_rolar(tela_param, 1);
@@ -286,7 +287,8 @@ void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param
 		}
 
 	}
-	refresh();
+	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
+	refresh();	
 }
 
 /**
@@ -304,7 +306,7 @@ void tela_rolar(TELA *tela_param, int quantidadeLinhas_param){
 			+quantidadeLinhas_param+1);
 	} else {
 		privada_imprimirAPartirDe(tela_param, tela_param->ultimoTextoColunaExibido - CARACTERES_POR_COLUNA_PARA_ESCRITA
-			+quantidadeLinhas_param-1);
+			+quantidadeLinhas_param+1);
 	}
 }
 

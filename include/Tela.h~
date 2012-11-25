@@ -80,4 +80,12 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param);
 */
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param);
 
-
+/**
+* Joga a tela para cima ou para baixo, mostrando textos escondidos.
+* @param TELA	*tela_param 			A tela em que a operação será realizada.
+* @param int	quantidadeLinhas_param 	A quantidade de linhas que se deseja ler.
+*										0 < quantidadeLinhas_param esconderá textos acima e mostrará textos abaixo.
+*										quantidadeLinhas_param < 0 esconderá textos abaixo e mostrará textos acimo.
+*										quantidadeLinhas_param == 0 não fará nada.
+*/
+void tela_rolar(TELA *tela_param, int quantidadeLinhas_param);

@@ -51,7 +51,7 @@ int main(void)
 	tela_adicionarColuna(&global_tela, "          DISCO");
 	tela_adicionarColuna(&global_tela, "        CONSOLE");
 	
-	tela_escreverNaColuna(&global_tela, "1",1);
+/*	tela_escreverNaColuna(&global_tela, "1",1);
 	tela_escreverNaColuna(&global_tela, "2",2);
 	tela_escreverNaColuna(&global_tela, "3",3);
 	tela_escreverNaColuna(&global_tela, "4",4);
@@ -91,13 +91,12 @@ int main(void)
 	tela_escreverNaColuna(&global_tela, "38",3);
 	tela_escreverNaColuna(&global_tela, "39",4);
 	tela_escreverNaColuna(&global_tela, "40",5);
-	tela_rolar(&global_tela, 5);
-	//tela_escreverNaColuna(&global_tela, "Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",3);
-	//tela_escreverNaColuna(&global_tela, "Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",4);
-	//tela_escreverNaColuna(&global_tela, "Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",1);
-	//tela_escreverNaColuna(&global_tela, "Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",2);
-	//tela_escreverNaColuna(&global_tela, "Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",3);
-	//tela_escreverNaColuna(&global_tela, "Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",4);
+	tela_rolar(&global_tela, -5);*/
+	tela_escreverNaColuna(&global_tela, "COLUNA1>Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",1);
+	tela_escreverNaColuna(&global_tela, "COLUNA2>Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",2);
+	tela_escreverNaColuna(&global_tela, "COLUNA3>Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",3);
+	tela_escreverNaColuna(&global_tela, "COLUNA4>Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",4);
+	tela_escreverNaColuna(&global_tela, "COLUNA5>Estah eh a mensagem de coluna um e ela eh muito grande. Tao grande que vai ter que ser enrolada em novas linhas.",5);
 
 
 	tela_rodar(&global_tela);

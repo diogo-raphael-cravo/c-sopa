@@ -21,18 +21,20 @@
 * @param int	tamanhoSubtexto_param	Tamanho de cada subtexto.
 * @param int	ordemSubtexto_param		Qual subtexto será retornado.
 * @return char*	O subtexto de tamanho tamanhoSubtexto_param na ordem ordemSubtexto_param.
+* Obs.: Adaptado de http://www.programmingsimplified.com/c/source-code/c-substring
 */
 char* string_pegarSubtextoNaOrdem(char* texto_param, int tamanhoSubtexto_param, int ordemSubtexto_param){
-	/*int i=0;
-	int quantidadeSubtextosEmTexto = strlen(texto_param)/tamanhoSubtexto_param
-		+ (0 < strlen(texto_param)%tamanhoSubtexto_param ? 1 : 0);
-	char* subtexto = (char*)malloc(quantidadeSubtextosEmTexto*sizeof(char*));
-	for(i=tamanhoSubtexto_param*ordemSubtexto_param; 
-		i<tamanhoSubtexto_param*(ordemSubtexto_param+1) && texto_param[i]!='\0'; 
-		i++){
-		subtexto[i] = texto_param[i];
-	}
-	subtexto[i] = '\0';
-	return subtexto;*/
-	return "abc";
+	char *ponteiro;
+	int c;
+	int posicao = ordemSubtexto_param*tamanhoSubtexto_param;
+	ponteiro = malloc(tamanhoSubtexto_param+1);
+	for(c=0 ; c<posicao-1; c++){
+		texto_param++; 
+	} 
+	for(c=0 ; c<tamanhoSubtexto_param; c++){
+		*(ponteiro+c) = *texto_param;      
+		texto_param++;   
+	} 
+	*(ponteiro+c) = '\0';
+	return ponteiro;
 }
