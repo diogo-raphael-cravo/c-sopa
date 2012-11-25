@@ -18,17 +18,23 @@ blablablah    |               |               |
 //			DADOS						
 //---------------------------------------------------------------------
 
+//Número máximo de colunas.
+#define MAXIMO_COLUNAS 5
+//Número máximo de linhas salvas.
+#define MAXIMO_LINHAS_SALVAS 1000
+
 struct str_tela{
 	int quantidadeColunas; 	//A quantidade de colunas desta tela. 
 	int ultimaLinhaEscrita; //A última linha em que houve escrita.
 	char** nomesColunas; //Os nomes das colunas da tela.
+	char* textosColunas[MAXIMO_LINHAS_SALVAS]; //Ordenação de todos os textos que já foram escritos
+		// na tela com tela_escreverNaColuna, ordenados linha a linha.
+	int colunasTextosColunas[MAXIMO_LINHAS_SALVAS]; //Colunas em que foram escritos os textos em textosColunas.
+	int totalTextosColunas; //O número de textos em textosColunas.
+	int ultimoTextoColunaExibido; //Índice em textosColunas do primeiro texto que está sendo exibido.
 };
 
 typedef struct str_tela TELA;
-
-//Número máximo de colunas.
-#define MAXIMO_COLUNAS 5
-
 
 //---------------------------------------------------------------------
 //			FUNÇÕES						
@@ -73,3 +79,13 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param);
 * @param int	coluna_param	Coluna em que o texto será escrito. Começando em 1.
 */
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param);
+
+/**
+* Joga a tela para cima ou para baixo, mostrando textos escondidos.
+* @param TELA	*tela_param 			A tela em que a operação será realizada.
+* @param int	quantidadeLinhas_param 	A quantidade de linhas que se deseja ler.
+*										0 < quantidadeLinhas_param esconderá textos acima e mostrará textos abaixo.
+*										quantidadeLinhas_param < 0 esconderá textos abaixo e mostrará textos acimo.
+*										quantidadeLinhas_param == 0 não fará nada.
+*/
+void tela_rolar(TELA *tela_param, int quantidadeLinhas_param);

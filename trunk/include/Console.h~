@@ -1,5 +1,10 @@
 /**
 * Concentra as funções de manipulação do console.
+* ====================================
+*
+* 			ATENÇÃO: Não confundir o console com a tela!
+*
+* ====================================
 */
 //---------------------------------------------------------------------
 //			DADOS						
@@ -9,7 +14,7 @@ struct str_console{
 
 };
 
-typedef str_console CONSOLE;
+typedef struct str_console CONSOLE;
 
 //---------------------------------------------------------------------
 //			FUNÇÕES						
