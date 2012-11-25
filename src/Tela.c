@@ -1,3 +1,4 @@
+#include "../include/Util/String.h"
 #include "../include/Tela.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,10 +7,14 @@
 /**
 * Variáveis globais acessíveis somente neste arquivo.
 */
+//Comprimento da tela.
+#define TELA_COMPRIMENTO 130
+//Largura da tela.
+#define TELA_LARGURA 40
 //A quantidade total de linhas em que se pode escrever. Medida em caracteres.
-#define CARACTERES_POR_LINHA_PARA_ESCRITA 40
-//A quantidade total de colunas em que se pode escrever. Medida em caracteres.
-#define CARACTERES_POR_COLUNA_PARA_ESCRITA 130
+#define CARACTERES_POR_COLUNA_PARA_ESCRITA 39
+//A quantidade total de colunas em que se pode escrever dentro de uma coluna. Medida em caracteres.
+#define CARACTERES_POR_LINHA_PARA_ESCRITA 10
 //Linha em que o usuário pode escrever.
 #define LINHA_CARACTERE_INPUT_USUARIO 1
 //Coluna em que o usuário pode escrever.
@@ -24,11 +29,11 @@
 * @param int	linha_param	A linha, da tela, não de caracteres, em que o cursor irá ficar.
 * @param int	coluna_param	A coluna, da tela, não de caracteres, em que o cursor irá ficar.
 */
-void moverCursor(TELA *tela_param, int linha_param, int coluna_param){
+void privada_moverCursor(TELA *tela_param, int linha_param, int coluna_param){
 	if(linha_param != 1){
-		move((linha_param-1),1+(coluna_param-1)*CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS);	
+		move((linha_param-1),1+(coluna_param-1)*TELA_COMPRIMENTO/MAXIMO_COLUNAS);	
 	} else {
-		move((linha_param-1),(coluna_param-1)*CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS);	
+		move((linha_param-1),(coluna_param-1)*TELA_COMPRIMENTO/MAXIMO_COLUNAS);	
 	}		
 }
 
@@ -38,7 +43,7 @@ void moverCursor(TELA *tela_param, int linha_param, int coluna_param){
 * @param int	linha_param	A linha, da tela, em caracteres, em que o cursor irá ficar.
 * @param int	coluna_param	A coluna, da tela, em caracteres, em que o cursor irá ficar.
 */
-void moverCursorParaCaractere(TELA *tela_param, int linha_param, int coluna_param){
+void privada_moverCursorParaCaractere(TELA *tela_param, int linha_param, int coluna_param){
 	move((linha_param-1),(coluna_param-1));	
 }
 
@@ -58,60 +63,96 @@ void moverCursorParaCaractere(TELA *tela_param, int linha_param, int coluna_para
 *	ACS_RTEE (right T)
 *	ACS_PLUS (intersection of horizontal and vertical line).
 */
-void desenharTabela(TELA *tela_param){
+void privada_desenharTabela(TELA *tela_param){
 	int linha = 2;
 	int coluna = 1;
-	for(linha=2; linha<=CARACTERES_POR_LINHA_PARA_ESCRITA; linha++){
+	for(linha=2; linha<=TELA_LARGURA; linha++){
 		if(linha==2){
-			moverCursorParaCaractere(tela_param, linha, 1);
+			privada_moverCursorParaCaractere(tela_param, linha, 1);
 			addch(ACS_ULCORNER);
-			for(coluna=2; coluna<CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
-				moverCursorParaCaractere(tela_param, linha, coluna);
-				if(coluna%(CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS)==1){
+			for(coluna=2; coluna<TELA_COMPRIMENTO; coluna++){
+				privada_moverCursorParaCaractere(tela_param, linha, coluna);
+				if(coluna%(TELA_COMPRIMENTO/MAXIMO_COLUNAS)==1){
 					addch(ACS_TTEE);
 				} else {
 					addch(ACS_HLINE);
 				}
 			}
-			moverCursorParaCaractere(tela_param, linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
+			privada_moverCursorParaCaractere(tela_param, linha, TELA_COMPRIMENTO);
 			addch(ACS_URCORNER);
-		} else if(linha==CARACTERES_POR_LINHA_PARA_ESCRITA){
-			moverCursorParaCaractere(tela_param, linha, 1);
+		} else if(linha==TELA_LARGURA){
+			privada_moverCursorParaCaractere(tela_param, linha, 1);
 			addch(ACS_LLCORNER);
-			for(coluna=2; coluna<CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
-				moverCursorParaCaractere(tela_param, linha, coluna);
-				if(coluna%(CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS)==1){
+			for(coluna=2; coluna<TELA_COMPRIMENTO; coluna++){
+				privada_moverCursorParaCaractere(tela_param, linha, coluna);
+				if(coluna%(TELA_COMPRIMENTO/MAXIMO_COLUNAS)==1){
 					addch(ACS_BTEE);
 				} else {
 					addch(ACS_HLINE);
 				}
 			}
-			moverCursorParaCaractere(tela_param, linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
+			privada_moverCursorParaCaractere(tela_param, linha, TELA_COMPRIMENTO);
 			addch(ACS_LRCORNER);
 		} else if(linha==4){
-			moverCursorParaCaractere(tela_param, linha, 1);
+			privada_moverCursorParaCaractere(tela_param, linha, 1);
 			addch(ACS_LTEE);
-			for(coluna=2; coluna<CARACTERES_POR_COLUNA_PARA_ESCRITA; coluna++){
-				moverCursorParaCaractere(tela_param, linha, coluna);
-				if(coluna%(CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS)==1){
+			for(coluna=2; coluna<TELA_COMPRIMENTO; coluna++){
+				privada_moverCursorParaCaractere(tela_param, linha, coluna);
+				if(coluna%(TELA_COMPRIMENTO/MAXIMO_COLUNAS)==1){
 					addch(ACS_PLUS);
 				} else {
 					addch(ACS_HLINE);
 				}
 			}
-			moverCursorParaCaractere(tela_param, linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
+			privada_moverCursorParaCaractere(tela_param, linha, TELA_COMPRIMENTO);
 			addch(ACS_RTEE);
 		} else {
 			int colunaTabela;
 			for(colunaTabela=0; colunaTabela<MAXIMO_COLUNAS; colunaTabela++){
-				moverCursorParaCaractere(tela_param, linha, 1+(colunaTabela)*CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS);
+				privada_moverCursorParaCaractere(tela_param, linha, 1+(colunaTabela)*TELA_COMPRIMENTO/MAXIMO_COLUNAS);
 				addch(ACS_VLINE);
 			}		
-			moverCursorParaCaractere(tela_param, linha, CARACTERES_POR_COLUNA_PARA_ESCRITA);
+			privada_moverCursorParaCaractere(tela_param, linha, TELA_COMPRIMENTO);
 			addch(ACS_VLINE);
 		}
 	}
 }
+
+/**
+* Limpa a tabela, apagando todos os textos.
+* @param TELA	*tela_param 			A tela em que a operação será realizada.
+*/
+void privada_limparTela(TELA *tela_param){
+	int linha=0;
+	for(linha=5; linha<TELA_LARGURA; linha++){
+		privada_moverCursorParaCaractere(tela_param, linha, 1);
+		clrtoeol();
+	}
+	privada_desenharTabela(tela_param);
+}
+
+/**
+* Imprime na tela todos os caracteres guardados em textosColunas à partir do índice dado, considerando o máximo de 
+* caracteres que cabem na tabela.
+* @param TELA	*tela_param 			A tela em que a operação será realizada.
+* @param int	indiceInicial_param	Índice em textosColunas do texto que ficará na primeira linha da coluna.
+*/
+void privada_imprimirAPartirDe(TELA *tela_param, int indiceInicial_param){
+	int linhaImpressa = 5;	
+	int indiceTextoParaExibir;
+	for(; linhaImpressa<=CARACTERES_POR_COLUNA_PARA_ESCRITA; linhaImpressa++){
+		indiceTextoParaExibir = indiceInicial_param+linhaImpressa-1;
+		if(0<=indiceTextoParaExibir && indiceTextoParaExibir<tela_param->totalTextosColunas){
+			privada_moverCursor(tela_param, linhaImpressa, tela_param->colunasTextosColunas[indiceTextoParaExibir]);
+			printw(tela_param->textosColunas[indiceTextoParaExibir]);
+			tela_param->ultimoTextoColunaExibido = indiceTextoParaExibir;
+		}
+	}
+}
+
+
+
+
 
 
 //---------------------------------------------------------------------
@@ -153,11 +194,20 @@ void tela_inicializar(TELA *tela_param){
 	//refresh();    //Atualiza a tela
 	tela_param->ultimaLinhaEscrita = 4;
 	tela_param->quantidadeColunas = 0;
+	tela_param->totalTextosColunas = 0;
+	tela_param->ultimoTextoColunaExibido = 0;
 	tela_param->nomesColunas = (char**) malloc(MAXIMO_COLUNAS * sizeof(char**));
-
-	moverCursor(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO-1);
+	tela_param->totalTextosColunas = 0;
+	int i;
+	for(i=0; i<MAXIMO_LINHAS_SALVAS; i++){
+		tela_param->textosColunas[i] = "";		
+	}
+	for(i=0; i<MAXIMO_LINHAS_SALVAS; i++){
+		tela_param->colunasTextosColunas[i] = 0;		
+	}
+	privada_moverCursor(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO-1);
 	printw(">");
-	desenharTabela(tela_param);
+	privada_desenharTabela(tela_param);
 
 	nocbreak();
 }
@@ -171,28 +221,25 @@ void tela_fechar(TELA *tela_param){
                      devemos executar este comando.*/
 }
 
-/**
-* Espera que o usuário digite uma linha até [ENTER].
-* @param TELA	*tela_param A tela em que a operação será realizada.
-*/
-char* tela_esperarLinhaUsuario(TELA *tela_param){
-	moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
-	char* digitado = (char*)malloc(CARACTERES_POR_COLUNA_PARA_ESCRITA*sizeof(char));
-	scanw("%s",digitado);
-	moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
-	clrtoeol();
-	return digitado;      //Fica esperando que o usuário aperte alguma tecla.
-}
+
 
 /**
 * Espera input do usuário e digita na tela.
 * @param TELA	*tela_param A tela em que a operação será realizada.
 */
 void tela_rodar(TELA *tela_param){
-	char* linhaDigitada;
+	int codigoTeclaPressionada;
+	noecho();
+	cbreak();
+	keypad(stdscr, true);
 	while(true){
-		linhaDigitada = tela_esperarLinhaUsuario(tela_param);
-		//printw(linhaDigitada);
+		codigoTeclaPressionada = getch();
+		switch(codigoTeclaPressionada){
+			case KEY_UP: tela_rolar(tela_param, -1);
+				break;
+			case KEY_DOWN: tela_rolar(tela_param, 1);
+				break;
+		}
 	}
 }
 
@@ -204,7 +251,7 @@ void tela_rodar(TELA *tela_param){
 void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param){
 	tela_param->quantidadeColunas++;
 	tela_param->nomesColunas[tela_param->quantidadeColunas-1] = nomeColuna_param;
-	moverCursor(tela_param, 3,tela_param->quantidadeColunas);
+	privada_moverCursor(tela_param, 3,tela_param->quantidadeColunas);
 	attron(A_BOLD);
 	printw(nomeColuna_param);
 	attroff(A_BOLD);
@@ -218,23 +265,48 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param){
 * @param int	coluna_param	Coluna em que o texto será escrito. Começando em 1.
 */
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param){
-	tela_param->ultimaLinhaEscrita++;
-	moverCursor(tela_param, tela_param->ultimaLinhaEscrita,coluna_param);
-	int colunasNestaLinha = CARACTERES_POR_COLUNA_PARA_ESCRITA/MAXIMO_COLUNAS-1;
+	int linhasParaExibir = strlen(texto_param)/CARACTERES_POR_LINHA_PARA_ESCRITA;
+	linhasParaExibir+= 0<strlen(texto_param)%CARACTERES_POR_LINHA_PARA_ESCRITA? 1: 0;
+	
 	int i=0;
-	while(texto_param[i] != '\0'){
-		if(i%colunasNestaLinha == 0 && i!=0){
-			tela_param->ultimaLinhaEscrita++;
-			moverCursor(tela_param, tela_param->ultimaLinhaEscrita,coluna_param);
+	for(i=0; i<linhasParaExibir; i++){
+		tela_param->totalTextosColunas++;
+		tela_param->ultimoTextoColunaExibido = tela_param->totalTextosColunas-1;
+		tela_param->ultimaLinhaEscrita++;
+		tela_param->textosColunas[tela_param->totalTextosColunas-1] = texto_param;
+							//string_pegarSubtextoNaOrdem(texto_param, CARACTERES_POR_LINHA_PARA_ESCRITA, i);
+		tela_param->colunasTextosColunas[tela_param->totalTextosColunas-1] = coluna_param;
+
+		privada_moverCursor(tela_param, tela_param->ultimaLinhaEscrita, coluna_param);
+		printw(texto_param);//tela_param->textosColunas[tela_param->totalTextosColunas-1]);
+
+		if(tela_param->ultimaLinhaEscrita==CARACTERES_POR_COLUNA_PARA_ESCRITA){
+			tela_rolar(tela_param, 1);
+			tela_param->ultimaLinhaEscrita = CARACTERES_POR_COLUNA_PARA_ESCRITA-1;
 		}
-		addch(texto_param[i]);
-		i++;
+
 	}
+	refresh();
 }
 
-
-
-
+/**
+* Joga a tela para cima ou para baixo, mostrando textos escondidos.
+* @param TELA	*tela_param 			A tela em que a operação será realizada.
+* @param int	quantidadeLinhas_param 	A quantidade de linhas que se deseja ler.
+*										0 < quantidadeLinhas_param esconderá textos acima e mostrará textos abaixo.
+*										quantidadeLinhas_param < 0 esconderá textos abaixo e mostrará textos acimo.
+*										quantidadeLinhas_param == 0 não fará nada.
+*/
+void tela_rolar(TELA *tela_param, int quantidadeLinhas_param){
+	privada_limparTela(tela_param);	
+	if(0 < quantidadeLinhas_param){
+		privada_imprimirAPartirDe(tela_param, tela_param->ultimoTextoColunaExibido - CARACTERES_POR_COLUNA_PARA_ESCRITA
+			+quantidadeLinhas_param+1);
+	} else {
+		privada_imprimirAPartirDe(tela_param, tela_param->ultimoTextoColunaExibido - CARACTERES_POR_COLUNA_PARA_ESCRITA
+			+quantidadeLinhas_param+1);
+	}
+}
 
 
 
