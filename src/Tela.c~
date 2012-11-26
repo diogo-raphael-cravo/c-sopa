@@ -197,6 +197,7 @@ void tela_inicializar(TELA *tela_param){
 	tela_param->quantidadeColunas = 0;
 	tela_param->totalTextosColunas = 0;
 	tela_param->ultimoTextoColunaExibido = 0;
+	tela_param->abertaParaImpressoes = 1;
 	tela_param->nomesColunas = (char**) malloc(MAXIMO_COLUNAS * sizeof(char**));
 	tela_param->totalTextosColunas = 0;
 	int i;
@@ -218,13 +219,16 @@ void tela_inicializar(TELA *tela_param){
 * @param TELA	*tela_param A tela em que a operação será realizada.
 */
 char* tela_esperarLinhaUsuario(TELA *tela_param){
+	sem_wait(&global_mutexAcessoTela);	
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
 	char* digitado = (char*)malloc(100*sizeof(char));
+	sem_post(&global_mutexAcessoTela);	
 	echo();
 	scanw("%s",digitado);
+	sem_wait(&global_mutexAcessoTela);	
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
 	clrtoeol();
-
+	sem_post(&global_mutexAcessoTela);	
 	return digitado;      //Fica esperando que o usuário aperte alguma tecla.
 }
 
@@ -250,14 +254,18 @@ void tela_rodar(TELA *tela_param){
 	keypad(stdscr, true);
 	while(true){
 		codigoTeclaPressionada = getch();
-		sem_wait(&sem_name);	
+		sem_wait(&global_mutexAcessoTela);	
 		switch(codigoTeclaPressionada){
 			case KEY_UP: tela_rolar(tela_param, -1);
 				break;
 			case KEY_DOWN: tela_rolar(tela_param, 1);
 				break;
+			case KEY_RIGHT: tela_param->abertaParaImpressoes = 0; sem_wait(&global_mutexParaTela);	
+				break;
+			case KEY_LEFT: tela_param->abertaParaImpressoes = 1; sem_post(&global_mutexParaTela);	
+				break;
 		}
-		sem_post(&sem_name);	
+		sem_post(&global_mutexAcessoTela);	
 	}
 }
 
@@ -284,7 +292,10 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param){
 * Obs.: Para maior liberdade, utilize com sprintf (buffer, "%d plus %d is %d", a, b, a+b).
 */
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param){
-	sem_wait(&sem_name);	
+	if(!tela_param->abertaParaImpressoes){
+		sem_wait(&global_mutexParaTela);		
+	}
+	sem_wait(&global_mutexAcessoTela);	
 
 	int linhasParaExibir = strlen(texto_param)/CARACTERES_POR_LINHA_PARA_ESCRITA;
 	linhasParaExibir+= 0<strlen(texto_param)%CARACTERES_POR_LINHA_PARA_ESCRITA? 1: 0;
@@ -310,7 +321,7 @@ void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
 	refresh();	
 
-	sem_post(&sem_name);
+	sem_post(&global_mutexAcessoTela);
 }
 
 /**

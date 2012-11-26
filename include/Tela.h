@@ -32,6 +32,7 @@ struct str_tela{
 	int colunasTextosColunas[MAXIMO_LINHAS_SALVAS]; //Colunas em que foram escritos os textos em textosColunas.
 	int totalTextosColunas; //O número de textos em textosColunas.
 	int ultimoTextoColunaExibido; //Índice em textosColunas do primeiro texto que está sendo exibido.
+	int abertaParaImpressoes; //Indica se elementos podem imprimir na tela.
 };
 
 typedef struct str_tela TELA;
