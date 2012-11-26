@@ -1,8 +1,9 @@
 #include "../include/Util/String.h"
-#include "../include/Tela.h"
-#include <stdio.h>
+//#include "../include/Tela.h"
+//#include <stdio.h>
 #include <stdlib.h>
 #include <curses.h>
+#include "../include/DadosComuns.h"
 
 /**
 * Variáveis globais acessíveis somente neste arquivo.
@@ -213,6 +214,24 @@ void tela_inicializar(TELA *tela_param){
 }
 
 /**
+* Espera que o usuário digite uma linha até [ENTER].
+* @param TELA	*tela_param A tela em que a operação será realizada.
+*/
+char* tela_esperarLinhaUsuario(TELA *tela_param){
+	sem_wait(&sem_name);	
+	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
+	char* digitado = (char*)malloc(100*sizeof(char));
+	sem_post(&sem_name);	
+	echo();
+	scanw("%s",digitado);
+	sem_wait(&sem_name);	
+	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
+	clrtoeol();
+	sem_post(&sem_name);	
+	return digitado;      //Fica esperando que o usuário aperte alguma tecla.
+}
+
+/**
 * Termina o uso da tela.
 * @param TELA	*tela_param A tela em que a operação será realizada.
 */
@@ -234,12 +253,14 @@ void tela_rodar(TELA *tela_param){
 	keypad(stdscr, true);
 	while(true){
 		codigoTeclaPressionada = getch();
+		sem_wait(&sem_name);	
 		switch(codigoTeclaPressionada){
 			case KEY_UP: tela_rolar(tela_param, -1);
 				break;
 			case KEY_DOWN: tela_rolar(tela_param, 1);
 				break;
 		}
+		sem_post(&sem_name);	
 	}
 }
 
@@ -266,6 +287,8 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param){
 * Obs.: Para maior liberdade, utilize com sprintf (buffer, "%d plus %d is %d", a, b, a+b).
 */
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param){
+	sem_wait(&sem_name);	
+
 	int linhasParaExibir = strlen(texto_param)/CARACTERES_POR_LINHA_PARA_ESCRITA;
 	linhasParaExibir+= 0<strlen(texto_param)%CARACTERES_POR_LINHA_PARA_ESCRITA? 1: 0;
 	
@@ -289,6 +312,8 @@ void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param
 	}
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
 	refresh();	
+
+	sem_post(&sem_name);
 }
 
 /**

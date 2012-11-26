@@ -21,7 +21,7 @@ blablablah    |               |               |
 //Número máximo de colunas.
 #define MAXIMO_COLUNAS 5
 //Número máximo de linhas salvas.
-#define MAXIMO_LINHAS_SALVAS 1000
+#define MAXIMO_LINHAS_SALVAS 100000
 
 struct str_tela{
 	int quantidadeColunas; 	//A quantidade de colunas desta tela. 
@@ -63,6 +63,12 @@ char* tela_esperarLinhaUsuario(TELA *tela_param);
 * @param TELA	*tela_param A tela em que a operação será realizada.
 */
 void tela_rodar(TELA *tela_param);
+
+/**
+* Espera que o usuário digite uma linha até [ENTER].
+* @param TELA	*tela_param A tela em que a operação será realizada.
+*/
+char* tela_esperarLinhaUsuario(TELA *tela_param);
 
 /**
 * Adiciona uma coluna a esta tela com o nome dado.

@@ -1,4 +1,5 @@
-#include "../include/Console.h"
+#include "../include/DadosComuns.h"
+
 /**
 * Variáveis globais acessíveis somente neste arquivo.
 */
@@ -18,21 +19,12 @@
 * @param CONSOLE	*console_param O console que irá rodar.
 */
 void console_rodar(CONSOLE *console_param){
-
-
-
+	char* digitado;
+	while(1){
+		usleep(1000*1000*10);
+//		digitado = tela_esperarLinhaUsuario(&global_tela);
+		tela_escreverNaColuna(&global_tela, "Usuario digitou no CONSOLE.",5);
+	}
 }
 
-/**
-* Espera que o usuário digite uma linha até [ENTER].
-* @param CONSOLE	*console_param O console que irá rodar.
-*/
-char* console_esperarLinhaUsuario(CONSOLE *console_param){
-/*	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
-	char* digitado = (char*)malloc(TELA_COMPRIMENTO*sizeof(char));
-	scanw("%s",digitado);
-	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
-	clrtoeol();
-	return digitado;      //Fica esperando que o usuário aperte alguma tecla.
-*/
-}
+

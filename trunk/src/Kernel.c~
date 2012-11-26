@@ -1,4 +1,5 @@
-#include "../include/Kernel.h"
+#include "../include/DadosComuns.h"
+
 /**
 * Variáveis globais acessíveis somente neste arquivo.
 */
@@ -15,9 +16,11 @@
 //---------------------------------------------------------------------
 /**
 * Inicia thread do kernel.
-* @param KERNEL	kernel_param	O kernel que será inicializado.
+* @param KERNEL	*kernel_param	O kernel que será inicializado.
 */
-void kernel_rodar(KERNEL kernel_param){
-
-
+void kernel_rodar(KERNEL *kernel_param){
+	while(1){
+		usleep(1);
+		tela_escreverNaColuna(&global_tela, "Mensagem do KERNEL.",3);
+	}
 }

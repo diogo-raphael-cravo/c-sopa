@@ -5,7 +5,7 @@
 //			DADOS						
 //---------------------------------------------------------------------
 struct str_processador{
-	int seila;
+	int seila;	
 };
 
 typedef struct str_processador PROCESSADOR;
@@ -15,6 +15,6 @@ typedef struct str_processador PROCESSADOR;
 //---------------------------------------------------------------------
 /**
 * Inicia thread do processador.
-* @param PROCESSADOR	processador_param O processador que irá rodar.
+* @param PROCESSADOR	*processador_param O processador que irá rodar.
 */
-void processador_rodar(PROCESSADOR processador_param);
+void processador_rodar(void* processador_param);

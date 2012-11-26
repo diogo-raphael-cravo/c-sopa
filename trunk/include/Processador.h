@@ -5,7 +5,7 @@
 //			DADOS						
 //---------------------------------------------------------------------
 struct str_processador{
-	int seila;
+	int seila;	
 };
 
 typedef struct str_processador PROCESSADOR;
