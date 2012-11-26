@@ -26,7 +26,8 @@
 *							MAIN
 ----------------------------------------------------------------------*/
 int main(void){
-	sem_init(&sem_name, 0, 1);
+	sem_init(&global_mutexAcessoTela, 0, 1);
+	sem_init(&global_mutexParaTela, 0, 1);
 
 	tela_inicializar(&global_tela);
 	tela_adicionarColuna(&global_tela, "       PROCESSADOR");

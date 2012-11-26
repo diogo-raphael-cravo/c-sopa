@@ -26,7 +26,7 @@
 *							MAIN
 ----------------------------------------------------------------------*/
 int main(void){
-	sem_init(&sem_name, 0, 1);
+	sem_init(&global_mutexAcessoTela, 0, 1);
 
 	tela_inicializar(&global_tela);
 	tela_adicionarColuna(&global_tela, "       PROCESSADOR");
@@ -54,9 +54,9 @@ int main(void){
 
 	pthread_create(&global_threadIdProcessador, NULL, processador_rodar, &global_processador);
 	pthread_create(&global_threadIdTimer, NULL, timer_rodar, &global_timer);
-//	pthread_create(&global_threadIdDisco, NULL, disco_rodar, &global_disco);
+	pthread_create(&global_threadIdDisco, NULL, disco_rodar, &global_disco);
 	pthread_create(&global_threadIdKernel, NULL, kernel_rodar, &global_kernel);
-//	pthread_create(&global_threadIdConsole, NULL, console_rodar, &global_console);
+	pthread_create(&global_threadIdConsole, NULL, console_rodar, &global_console);
 	tela_rodar(&global_tela);
 
 	tela_fechar(&global_tela);
