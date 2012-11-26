@@ -21,7 +21,7 @@ blablablah    |               |               |
 //Número máximo de colunas.
 #define MAXIMO_COLUNAS 5
 //Número máximo de linhas salvas.
-#define MAXIMO_LINHAS_SALVAS 1000
+#define MAXIMO_LINHAS_SALVAS 100000
 
 struct str_tela{
 	int quantidadeColunas; 	//A quantidade de colunas desta tela. 
@@ -65,6 +65,12 @@ char* tela_esperarLinhaUsuario(TELA *tela_param);
 void tela_rodar(TELA *tela_param);
 
 /**
+* Espera que o usuário digite uma linha até [ENTER].
+* @param TELA	*tela_param A tela em que a operação será realizada.
+*/
+char* tela_esperarLinhaUsuario(TELA *tela_param);
+
+/**
 * Adiciona uma coluna a esta tela com o nome dado.
 * @param TELA	*tela_param A tela em que a operação será realizada.
 * @param char*	nomeColuna_param	O nome que ficará no topo da coluna.
@@ -77,6 +83,7 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param);
 * @param char*	texto_param	O texto que será escrito. Como há um espaço limitado para cada linha,
 *				o texto pode ser enrolado.
 * @param int	coluna_param	Coluna em que o texto será escrito. Começando em 1.
+* Obs.: Para maior liberdade, utilize com sprintf (buffer, "%d plus %d is %d", a, b, a+b).
 */
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param);
 

@@ -1,4 +1,5 @@
-#include "../include/Timer.h"
+#include "../include/DadosComuns.h"
+
 /**
 * Variáveis globais acessíveis somente neste arquivo.
 */
@@ -18,5 +19,8 @@
 * @param TIMER	*timer_param	O timer que irá rodar.
 */
 void timer_rodar(TIMER *timer_param){
-
+	while(1){
+		usleep(1000*1000);
+		tela_escreverNaColuna(&global_tela, "Mensagem do TIMER.",2);
+	}
 }
