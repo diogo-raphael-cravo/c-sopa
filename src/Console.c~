@@ -1,4 +1,5 @@
 #include "../include/DadosComuns.h"
+#include <curses.h>
 
 /**
 * Variáveis globais acessíveis somente neste arquivo.
@@ -19,11 +20,16 @@
 * @param CONSOLE	*console_param O console que irá rodar.
 */
 void console_rodar(CONSOLE *console_param){
-	char* digitado;
+	char* digitado = (char*)malloc(100*sizeof(char));
+	sem_wait(&global_mutexParaEscritaConsole);
 	while(1){
-		usleep(1000*1000*10);
-//		digitado = tela_esperarLinhaUsuario(&global_tela);
-		tela_escreverNaColuna(&global_tela, "Usuario digitou no CONSOLE.",5);
+		digitado = tela_esperarLinhaUsuario(&global_tela);
+		if(digitado[0] != '\0'){
+			tela_escreverNaColuna(&global_tela, "Usuario digitou no CONSOLE.",5);
+		} else {
+			sem_post(&global_mutexParaEscritaTela);
+			sem_wait(&global_mutexParaEscritaConsole);
+		}
 	}
 }
 
