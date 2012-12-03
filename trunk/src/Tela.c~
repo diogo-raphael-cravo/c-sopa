@@ -151,8 +151,26 @@ void privada_imprimirAPartirDe(TELA *tela_param, int indiceInicial_param){
 	}
 }
 
-
-
+/**
+* Alterna gráfico que indica se o usuário pode ou não escrever na linha do console.
+* @param TELA	*tela_param 			A tela em que a operação será realizada.
+* @param Boleano	podeEscrever_param	Indica se o usuário pode ou não escrever na linha do console.
+*/
+void privada_indicaSeUsuarioPodeEscrever(TELA *tela_param, int podeEscrever_param){
+	sem_wait(&global_mutexAcessoTela);	
+	if(podeEscrever_param){
+		attron(COLOR_PAIR(2));
+		privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO, COLUNA_CARACTERE_INPUT_USUARIO-1);
+		printw(">");
+		attroff(COLOR_PAIR(2));
+	} else {
+		attron(COLOR_PAIR(1));
+		privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO, COLUNA_CARACTERE_INPUT_USUARIO-1);
+		printw(">");
+		attroff(COLOR_PAIR(1));
+	}
+	sem_post(&global_mutexAcessoTela);	
+}
 
 
 
@@ -171,6 +189,9 @@ void tela_inicializar(TELA *tela_param){
 	start_color(); //Esta função torna possível o uso das cores
 
 	assume_default_colors(-1,-1); //Funciona somente em terminais que suportem ISO6429
+
+	init_pair(1,COLOR_WHITE,COLOR_RED);
+	init_pair(2,COLOR_WHITE,COLOR_GREEN);
 
 	//Abaixo estamos definindo os pares de cores que serão utilizados no programa
 	//init_pair(1,COLOR_WHITE,COLOR_BLUE); //Texto(Branco) | Fundo(Azul)
@@ -208,7 +229,9 @@ void tela_inicializar(TELA *tela_param){
 		tela_param->colunasTextosColunas[i] = 0;		
 	}
 	privada_moverCursor(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO-1);
+	attron(COLOR_PAIR(1));
 	printw(">");
+	attroff(COLOR_PAIR(1));
 	privada_desenharTabela(tela_param);
 
 	nocbreak();
@@ -219,16 +242,36 @@ void tela_inicializar(TELA *tela_param){
 * @param TELA	*tela_param A tela em que a operação será realizada.
 */
 char* tela_esperarLinhaUsuario(TELA *tela_param){
-	sem_wait(&global_mutexAcessoTela);	
+
+	sem_wait(&global_mutexAcessoTela);
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
 	char* digitado = (char*)malloc(100*sizeof(char));
-	sem_post(&global_mutexAcessoTela);	
+	char mostrado[2];
+	mostrado[1] = '\0';
+	int indiceCharDigitado=0;
 	echo();
+	cbreak();
+	sem_post(&global_mutexAcessoTela);	
+
 	scanw("%s",digitado);
+	/*do{
+		digitado[indiceCharDigitado] = getch();
+		
+		sem_wait(&global_mutexAcessoTela);
+		privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO+indiceCharDigitado,COLUNA_CARACTERE_INPUT_USUARIO);
+		mostrado[0] = digitado[indiceCharDigitado];
+		printw(mostrado);
+		sem_post(&global_mutexAcessoTela);
+		
+		indiceCharDigitado++;
+	}while(digitado[indiceCharDigitado-1] != '\n');
+	digitado[indiceCharDigitado] = '\0';*/
+
 	sem_wait(&global_mutexAcessoTela);	
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
 	clrtoeol();
 	sem_post(&global_mutexAcessoTela);	
+
 	return digitado;      //Fica esperando que o usuário aperte alguma tecla.
 }
 
@@ -252,20 +295,31 @@ void tela_rodar(TELA *tela_param){
 	noecho();
 	cbreak();
 	keypad(stdscr, true);
+
 	while(true){
 		codigoTeclaPressionada = getch();
-		sem_wait(&global_mutexAcessoTela);	
 		switch(codigoTeclaPressionada){
 			case KEY_UP: tela_rolar(tela_param, -1);
 				break;
 			case KEY_DOWN: tela_rolar(tela_param, 1);
 				break;
-			case KEY_RIGHT: tela_param->abertaParaImpressoes = 0; sem_wait(&global_mutexParaTela);	
+			case KEY_RIGHT: if(tela_param->abertaParaImpressoes == 1){							
+								tela_param->abertaParaImpressoes = 0;
+								sem_wait(&global_mutexParaTela);	
+							}
 				break;
-			case KEY_LEFT: tela_param->abertaParaImpressoes = 1; sem_post(&global_mutexParaTela);	
+			case KEY_LEFT: if(tela_param->abertaParaImpressoes == 0){
+								tela_param->abertaParaImpressoes = 1; 
+						   		sem_post(&global_mutexParaTela);	
+						   }
+				break;
+			case KEY_BACKSPACE:
+							privada_indicaSeUsuarioPodeEscrever(tela_param, 1);
+							sem_post(&global_mutexParaEscritaConsole);
+							sem_wait(&global_mutexParaEscritaTela);
+							privada_indicaSeUsuarioPodeEscrever(tela_param, 0);
 				break;
 		}
-		sem_post(&global_mutexAcessoTela);	
 	}
 }
 
@@ -294,6 +348,7 @@ void tela_adicionarColuna(TELA *tela_param, char* nomeColuna_param){
 void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param){
 	if(!tela_param->abertaParaImpressoes){
 		sem_wait(&global_mutexParaTela);		
+		sem_post(&global_mutexParaTela);	
 	}
 	sem_wait(&global_mutexAcessoTela);	
 
