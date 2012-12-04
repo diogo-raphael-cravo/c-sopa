@@ -117,6 +117,12 @@ void privada_desenharTabela(TELA *tela_param){
 			addch(ACS_VLINE);
 		}
 	}
+	linha = TELA_LARGURA + 1;
+	privada_moverCursorParaCaractere(tela_param, linha, 1);
+	printw("Para acessar o console, digite [BACKSPACE]. Para sair do console, digite [ENTER] sem ter escrito nada.");
+	linha++;
+	privada_moverCursorParaCaractere(tela_param, linha, 1);
+	printw("Para parar as threads, digite [KEY_RIGHT]. Para continuar, [KEY_LEFT]. Para rolar o texto para cima, [KEY_UP]. Para baixo, [KEY_DOWN].");
 }
 
 /**
@@ -249,23 +255,25 @@ char* tela_esperarLinhaUsuario(TELA *tela_param){
 	char mostrado[2];
 	mostrado[1] = '\0';
 	int indiceCharDigitado=0;
-	echo();
-	//cbreak();
+	noecho();
+	cbreak();
 	sem_post(&global_mutexAcessoTela);	
 
-	scanw("%s",digitado);
-	/*do{
+	//scanw("%s",digitado);
+	do{
 		digitado[indiceCharDigitado] = getch();
 		
 		sem_wait(&global_mutexAcessoTela);
-		privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO+indiceCharDigitado,COLUNA_CARACTERE_INPUT_USUARIO);
+		privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO, 
+			COLUNA_CARACTERE_INPUT_USUARIO+indiceCharDigitado);
 		mostrado[0] = digitado[indiceCharDigitado];
 		printw(mostrado);
 		sem_post(&global_mutexAcessoTela);
-		
+
 		indiceCharDigitado++;
+		
 	}while(digitado[indiceCharDigitado-1] != '\n');
-	digitado[indiceCharDigitado] = '\0';*/
+	digitado[indiceCharDigitado-1] = '\0';
 
 	sem_wait(&global_mutexAcessoTela);	
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
