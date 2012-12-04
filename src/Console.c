@@ -20,6 +20,7 @@
 * @param CONSOLE	*console_param O console que irá rodar.
 */
 void console_rodar(CONSOLE *console_param){
+	console_param = (CONSOLE*) console_param;
 	char* digitado = (char*)malloc(100*sizeof(char));
 	sem_wait(&global_mutexParaEscritaConsole);
 	while(1){
