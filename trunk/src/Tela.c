@@ -1,8 +1,3 @@
-#include "../include/Util/String.h"
-//#include "../include/Tela.h"
-//#include <stdio.h>
-#include <stdlib.h>
-#include <curses.h>
 #include "../include/DadosComuns.h"
 
 /**

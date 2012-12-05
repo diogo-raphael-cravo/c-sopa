@@ -38,6 +38,8 @@ int main(void){
 	tela_adicionarColuna(&global_tela, "          DISCO");
 	tela_adicionarColuna(&global_tela, "        CONSOLE");
 
+	memoria_inicializar(&global_memoria);
+
 	pthread_create(&global_threadIdProcessador, NULL, processador_rodar, &global_processador);
 	pthread_create(&global_threadIdTimer, NULL, timer_rodar, &global_timer);
 	pthread_create(&global_threadIdDisco, NULL, disco_rodar, &global_disco);
