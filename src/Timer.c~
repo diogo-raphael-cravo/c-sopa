@@ -20,7 +20,8 @@
 */
 void timer_rodar(TIMER *timer_param){
 	while(1){
-		usleep(1000*1000*2);
+		usleep(1000*1000);
+		controladorInterrupcoes_sincronizado_set(,);
 		tela_escreverNaColuna(&global_tela, "Mensagem do TIMER.",2);
 	}
 }

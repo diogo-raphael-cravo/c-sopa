@@ -14,7 +14,7 @@ typedef struct str_kernel KERNEL;
 //			FUNÇÕES						
 //---------------------------------------------------------------------
 /**
-* Inicia thread do kernel.
-* @param KERNEL	*kernel_param	O kernel que será inicializado.
+* @param KERNEL			*kernel_param		O kernel que irá rodar.
+* @param INTERRUPCAO	interrupcao_param	A interrupção que definirá o comportamento do kernel.
 */
-void kernel_rodar(KERNEL *kernel_param);
+void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param);

@@ -21,6 +21,7 @@
 void disco_rodar(DISCO *disco_param){
 	while(1){
 		usleep(1000*1000*10);
+		controladorInterrupcoes_sincronizado_set(&global_controladorInterrupcoes, INTERRUPCAO_DISCO);
 		tela_escreverNaColuna(&global_tela, "Mensagem do DISCO.",4);
 	}
 }
