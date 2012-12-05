@@ -20,3 +20,5 @@
 * @return char*	O subtexto de tamanho tamanhoSubtexto_param na ordem ordemSubtexto_param.
 */
 char* string_pegarSubtextoNaOrdem(char* texto_param, int tamanhoSubtexto_param, int ordemSubtexto_param);
+
+

@@ -8,6 +8,8 @@
 //Constantes
 #define TAMANHO_INSTRUCAO_PALAVRAS 4
 
+typedef PALAVRA INSTRUCAO;
+
 struct str_processador{
 	int PC;
 	PALAVRA IR[TAMANHO_INSTRUCAO_PALAVRAS];
