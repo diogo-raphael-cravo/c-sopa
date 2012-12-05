@@ -15,6 +15,17 @@
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
 /**
+* @param PROCESSADOR	*processador_param	O processador que será inicializado.
+*/
+void processador_inicializar(PROCESSADOR *processador_param){
+	processador_param->PC = 0;
+	int palavra=0;
+	for(; palavra<TAMANHO_INSTRUCAO_PALAVRAS; palavra++){
+		processador_param->IR[palavra] = 0;
+	}
+}
+
+/**
 * Inicia thread do processador.
 * @param PROCESSADOR	*processador_param O processador que irá rodar.
 */

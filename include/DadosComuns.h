@@ -5,19 +5,28 @@
 /*----------------------------------------------------------------------
 *						INCLUDES E DEFINES
 ----------------------------------------------------------------------*/
-	//Aplicação
-#include "../include/Tela.h"
-#include "../include/Kernel.h"
-#include "../include/Processador.h"
-#include "../include/Disco.h"
-#include "../include/Timer.h"
-#include "../include/Memoria.h"
-#include "../include/Console.h"
-#include "../include/ControladorInterrupcoes.h"
 	//Bibliotecas
 #include <stdio.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdlib.h>
+#include <curses.h>
+	//Aplicação. Dependências devem ser anotadas em forma de comentários.
+#include "../include/Tela.h" 						//Depende de: 
+#include "../include/Kernel.h" 						//Depende de: 
+#include "../include/Disco.h" 						//Depende de: 
+#include "../include/Timer.h" 						//Depende de: 
+#include "../include/Memoria.h" 					//Depende de: 
+#include "../include/Processador.h" 				//Depende de: memoria.h
+#include "../include/Console.h" 					//Depende de: 
+#include "../include/ControladorInterrupcoes.h" 	//Depende de: 
+#include "../include/Util/String.h" 				//Depende de: 
+
+/*----------------------------------------------------------------------
+*						DEFINIÇÕES GLOBAIS
+----------------------------------------------------------------------*/
+
+
 
 /*----------------------------------------------------------------------
 *						VARIÁVEIS GLOBAIS

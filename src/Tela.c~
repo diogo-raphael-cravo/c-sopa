@@ -1,6 +1,4 @@
 #include "../include/Util/String.h"
-//#include "../include/Tela.h"
-//#include <stdio.h>
 #include <stdlib.h>
 #include <curses.h>
 #include "../include/DadosComuns.h"
@@ -260,7 +258,6 @@ char* tela_esperarLinhaUsuario(TELA *tela_param){
 	cbreak();
 	sem_post(&global_mutexAcessoTela);	
 
-	//scanw("%s",digitado);
 	do{
 		digitado[indiceCharDigitado] = inteiroDigitado = getch();
 		

@@ -28,7 +28,7 @@
 int main(void){
 	sem_init(&global_mutexAcessoTela, 0, 1);
 	sem_init(&global_mutexParaTela, 0, 1);
-	sem_init(&global_mutexParaEscritaTela, 0, 1);
+	sem_init(&global_mutexParaEscritaTela, 0, 0);
 	sem_init(&global_mutexParaEscritaConsole, 0, 0);
 
 	tela_inicializar(&global_tela);
