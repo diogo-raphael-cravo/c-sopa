@@ -13,13 +13,13 @@
 #include <curses.h>
 	//Aplicação. Dependências devem ser anotadas em forma de comentários.
 #include "../include/Tela.h" 						//Depende de: 
-#include "../include/Kernel.h" 						//Depende de: Tela.h
+#include "../include/ControladorInterrupcoes.h" 	//Depende de: 
+#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Disco.h" 						//Depende de: Tela.h
-#include "../include/Timer.h" 						//Depende de: Tela.h
+#include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Memoria.h" 					//Depende de: 
 #include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h
 #include "../include/Console.h" 					//Depende de: Tela.h
-#include "../include/ControladorInterrupcoes.h" 	//Depende de: 
 #include "../include/Util/String.h" 				//Depende de: 
 
 /*----------------------------------------------------------------------

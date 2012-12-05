@@ -25,18 +25,18 @@ typedef struct str_memoria MEMORIA;
 /**
 * @param MEMORIA	*memoria_param	A memória que será inicializada.
 */
-void memoria_inicializar(MEMORIA *memoria_param);
+void memoria_sincronizado_inicializar(MEMORIA *memoria_param);
 
 /**
 * @param MEMORIA	*memoria_param			A memória em que a escrita será feita.
 * @param int		endereco_param			Endereço da memória em que a escrita será feita.
 * @param PALAVRA 	dadosEscritos_param		O que será efetivamente escrito em endereco_param.
 */
-void memoria_escrever(MEMORIA *memoria_param, int endereco_param, PALAVRA dadosEscritos_param);
+void memoria_sincronizado_escrever(MEMORIA *memoria_param, int endereco_param, PALAVRA dadosEscritos_param);
 
 /**
 * @param MEMORIA	*memoria_param			A memória em que a leitura será feita.
 * @param int		endereco_param			Endereço da memória em que a leitura será feita.
 * @return PALAVRA	Conteúdo da memória no endereço dado.
 */
-PALAVRA memoria_ler(MEMORIA *memoria_param, int endereco_param);
+PALAVRA memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param);
