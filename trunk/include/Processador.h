@@ -7,6 +7,9 @@
 
 //Constantes
 #define TAMANHO_INSTRUCAO_PALAVRAS 4
+	//Instrucoes
+#define INSTRUCAO_INEXISTENTE 0
+#define INSTRUCAO_JPA 1
 
 typedef PALAVRA INSTRUCAO;
 

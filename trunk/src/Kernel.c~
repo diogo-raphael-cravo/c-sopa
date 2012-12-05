@@ -21,5 +21,5 @@
 void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	char mensagem[100];
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
-	tela_escreverNaColuna(&global_tela, mensagem, 1);
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
 }

@@ -7,8 +7,10 @@
 
 //Constantes
 #define TAMANHO_INSTRUCAO_PALAVRAS 4
+	//Instrucoes
+#define INSTRUCAO_JPA 0
 
-typedef INSTRUCAO PALAVRA;
+typedef PALAVRA INSTRUCAO;
 
 struct str_processador{
 	int PC;
