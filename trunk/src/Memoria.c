@@ -17,7 +17,7 @@ void privada_limpar(MEMORIA *memoria_param){
 	int palavra=0;
 	for(; particao<QUANTIDADE_PARTICOES_MEMORIA; particao++){
 		for(palavra=0; palavra<QUANTIDADE_PALAVRAS_PARTICAO; palavra++){
-			memoria_param->particoes[particao][palavra] = 0;
+			memoria_param->particoes[particao][palavra] = 2*palavra;
 		}
 	}
 }

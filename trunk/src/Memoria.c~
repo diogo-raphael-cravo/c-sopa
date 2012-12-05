@@ -58,7 +58,7 @@ PALAVRA memoria_ler(MEMORIA *memoria_param, int endereco_param){
 	PALAVRA dadosLidos;
 	int particao = 0;
 	int palavra = endereco_param;
-	dadosLidos = memoria_param;
+	dadosLidos = memoria_param->particoes[particao][palavra];
 	sem_post(&memoria_param->mutexAcessoMemoria);
 	return dadosLidos;
 }
