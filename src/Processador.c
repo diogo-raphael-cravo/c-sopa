@@ -73,6 +73,9 @@ void processador_inicializar(PROCESSADOR *processador_param){
 	for(; palavra<TAMANHO_INSTRUCAO_PALAVRAS; palavra++){
 		processador_param->IR[palavra] = 0;
 	}
+	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
+		processador_param->registrador.conteudo[palavra] = 0;
+	}
 }
 
 /**
@@ -108,6 +111,46 @@ void processador_rodar(PROCESSADOR *processador_param){
 	}
 }
 
+/**
+* @param PROCESSADOR	*processador_param	O processador no qual a informação será buscada.
+* @return int	PC do processador.
+*/
+int processador_getPC(PROCESSADOR *processador_param){
+	return processador_param->PC;
+}
+
+/**
+* @param PROCESSADOR	*processador_param	O processador no qual a informação será buscada.
+* @return REGISTRADOR*	Cópia profunda do registrador do processador.
+*/
+REGISTRADOR* processador_getRegistrador(PROCESSADOR *processador_param){
+	int palavra;
+	REGISTRADOR *registradorCopia = (REGISTRADOR*) malloc(sizeof(REGISTRADOR*));
+	for(palavra=0; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
+		registradorCopia->conteudo[palavra] = processador_param->registrador.conteudo[palavra];
+	}
+	return registradorCopia;
+}
+
+/**
+* @param PROCESSADOR	*processador_param	O processador no qual a operação será realizada.
+* @param int				PC_param		O PC que o processador deverá ter.
+*/
+void processador_setPC(PROCESSADOR *processador_param, int PC_param){
+	processador_param->PC = PC_param;
+}
+
+/**
+* @param PROCESSADOR	*processador_param		O processador no qual a operação será realizada.
+* @param REGISTRADOR	*registrador_param		Registrador que contém o valor que conterá o registrador 
+*												do processador ao fim da operação.
+*/
+void processador_setRegistrador(PROCESSADOR *processador_param, REGISTRADOR *registrador_param){
+	int palavra;
+	for(palavra=0; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
+		processador_param->registrador.conteudo[palavra] = registrador_param->conteudo[palavra];
+	}
+}
 
 
 
