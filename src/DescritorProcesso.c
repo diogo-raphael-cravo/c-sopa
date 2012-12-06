@@ -22,10 +22,9 @@
 void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param){
 	descritorProcesso_param->PID = PID_param;
 	descritorProcesso_param->PC = 0;
-	descritorProcesso_param->registrador = (REGISTRADOR*)malloc(sizeof(REGISTRADOR*));
 	int palavra=0;
 	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		descritorProcesso_param->registrador->conteudo[palavra] = 0;
+		descritorProcesso_param->registrador.conteudo[palavra] = 0;
 	}
 }
 
@@ -53,7 +52,7 @@ REGISTRADOR* descritorProcesso_getRegistrador(DESCRITOR_PROCESSO *descritorProce
 	int palavra=0;
 	REGISTRADOR* registradorCriado = (REGISTRADOR*) malloc(sizeof(REGISTRADOR*));
 	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		registradorCriado->conteudo[palavra] = descritorProcesso_param->registrador->conteudo[palavra];
+		registradorCriado->conteudo[palavra] = descritorProcesso_param->registrador.conteudo[palavra];
 	}
 	return registradorCriado;
 }
@@ -74,7 +73,7 @@ void descritorProcesso_setPC(DESCRITOR_PROCESSO *descritorProcesso_param, int PC
 void descritorProcesso_setRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param, REGISTRADOR *registrador_param){
 	int palavra=0;
 	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		descritorProcesso_param->registrador->conteudo[palavra] = registrador_param->conteudo[palavra];
+		descritorProcesso_param->registrador.conteudo[palavra] = registrador_param->conteudo[palavra];
 	}
 }
 
