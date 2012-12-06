@@ -33,9 +33,9 @@ void privada_limpar(MEMORIA *memoria_param){
 PALAVRA privada_bytesParaPalavra(MEMORIA *memoria_param, BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param){
 	PALAVRA palavraFinal;
 	palavraFinal = 0;
-	palavraFinal = palavraFinal | (byte0_param & 0xFF000000);
-	palavraFinal = palavraFinal | (byte1_param & 0x00FF0000);
-	palavraFinal = palavraFinal | (byte2_param & 0x0000FF00);
+	palavraFinal = palavraFinal | (byte0_param*256*256*256 & 0xFF000000);
+	palavraFinal = palavraFinal | (byte1_param*256*256 & 0x00FF0000);
+	palavraFinal = palavraFinal | (byte2_param*256 & 0x0000FF00);
 	palavraFinal = palavraFinal | (byte3_param & 0x000000FF);
 	return palavraFinal;
 }

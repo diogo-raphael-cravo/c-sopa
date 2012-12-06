@@ -50,7 +50,7 @@ int descritorProcesso_getPC(DESCRITOR_PROCESSO *descritorProcesso_param){
 */
 REGISTRADOR* descritorProcesso_getRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param){
 	int palavra=0;
-	REGISTRADOR* registradorCriado = (REGISTRADOR*) malloc(sizeof(REGISTRADOR*));
+	REGISTRADOR* registradorCriado = (REGISTRADOR*) malloc(sizeof(REGISTRADOR));
 	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
 		registradorCriado->conteudo[palavra] = descritorProcesso_param->registrador.conteudo[palavra];
 	}
