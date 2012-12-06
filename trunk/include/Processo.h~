@@ -1,0 +1,22 @@
+/**
+* Concentra as funções de manipulação de processos.
+*/
+//---------------------------------------------------------------------
+//			DADOS						
+//---------------------------------------------------------------------
+struct str_descritorProcesso{
+	int PID; //Process ID.
+	int PC; //Program counter.
+	
+};
+
+typedef struct str_processo PROCESSO;
+
+//---------------------------------------------------------------------
+//			FUNÇÕES						
+//---------------------------------------------------------------------
+/**
+* @param KERNEL			*kernel_param		O kernel que irá rodar.
+* @param INTERRUPCAO	interrupcao_param	A interrupção que definirá o comportamento do kernel.
+*/
+void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param);
