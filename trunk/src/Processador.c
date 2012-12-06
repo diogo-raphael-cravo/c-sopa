@@ -28,7 +28,7 @@ PALAVRA privada_buscaInstrucao(PROCESSADOR *processador_param, MEMORIA *memoria_
 */
 INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 	INSTRUCAO instrucaoEncontrada;
-	if(processador_param->IR[0] == 'J' && processador_param->IR[0] == 'P' && processador_param->IR[0] == 'A'){
+	if(processador_param->IR[0] == 'J'  && processador_param->IR[1] == 'P' && processador_param->IR[2] == 'A'){
 		instrucaoEncontrada = INSTRUCAO_JPA;
 	} else {
 		instrucaoEncontrada = INSTRUCAO_INEXISTENTE;
@@ -55,9 +55,9 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 * @param INSTRUCAO		instrucao_param		A instrução que será carregada no IR.
 */
 void privada_carregaInstrucaoIR(PROCESSADOR *processador_param, INSTRUCAO instrucao_param){
-	processador_param->IR[0] = instrucao_param & 0xFF000000;
-	processador_param->IR[1] = instrucao_param & 0x00FF0000;
-	processador_param->IR[2] = instrucao_param & 0x0000FF00;
+	processador_param->IR[0] = (((instrucao_param & 0xFF000000)/256)/256)/256;
+	processador_param->IR[1] = ((instrucao_param & 0x00FF0000)/256)/256;
+	processador_param->IR[2] = (instrucao_param & 0x0000FF00)/256;
 	processador_param->IR[3] = instrucao_param & 0x000000FF;
 }
 
@@ -125,7 +125,7 @@ int processador_getPC(PROCESSADOR *processador_param){
 */
 REGISTRADOR* processador_getRegistrador(PROCESSADOR *processador_param){
 	int palavra;
-	REGISTRADOR *registradorCopia = (REGISTRADOR*) malloc(sizeof(REGISTRADOR*));
+	REGISTRADOR *registradorCopia = (REGISTRADOR*) malloc(sizeof(REGISTRADOR));
 	for(palavra=0; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
 		registradorCopia->conteudo[palavra] = processador_param->registrador.conteudo[palavra];
 	}
