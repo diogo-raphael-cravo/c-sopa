@@ -10,7 +10,7 @@
 #define PROCESSO_INEXISTENTE NULL;
 
 struct str_kernel{
-	DescritorProcesso* descritoresProcessos[MAXIMO_PROCESSOS_KERNEL]; //Contém os processos no kernel.
+	DESCRITOR_PROCESSO **descritoresProcessos; //Contém os processos no kernel.
 	int processoRodando; //Índice em descritoresProcessos do processo que está rodando.
 };
 

@@ -7,7 +7,7 @@
 struct str_descritorProcesso{
 	int PID; //Process ID.
 	int PC; //Program counter.
-	REGISTRADOR registrador;
+	REGISTRADOR *registrador;
 };
 
 typedef struct str_descritorProcesso DESCRITOR_PROCESSO;

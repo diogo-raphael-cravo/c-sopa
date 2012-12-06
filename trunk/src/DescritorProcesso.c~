@@ -20,11 +20,15 @@
 * @param int				PID_param					A PID deste descritor de processo.
 */
 void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param){
+	sem_t semaf;
+	sem_init();
+	sem_wait(&semaf);
 	descritorProcesso_param->PID = PID_param;
 	descritorProcesso_param->PC = 0;
+	descritorProcesso_param->registrador = (REGISTRADOR*)malloc(sizeof(REGISTRADOR*));
 	int palavra=0;
 	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		descritorProcesso_param->registrador[palavra] = 0;
+		descritorProcesso_param->registrador->conteudo[palavra] = 0;
 	}
 }
 

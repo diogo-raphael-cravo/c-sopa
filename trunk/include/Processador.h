@@ -23,7 +23,7 @@ typedef struct str_registrador REGISTRADOR;
 struct str_processador{
 	int PC;
 	PALAVRA IR[TAMANHO_INSTRUCAO_PALAVRAS];
-	REGISTRADOR registrador;
+	REGISTRADOR *registrador;
 };
 
 typedef struct str_processador PROCESSADOR;
