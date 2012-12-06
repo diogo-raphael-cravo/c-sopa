@@ -62,7 +62,7 @@ void processador_setPC(PROCESSADOR *processador_param, int PC_param);
 
 /**
 * @param PROCESSADOR	*processador_param		O processador no qual a operação será realizada.
-* @param REGISTRADOR	*registrador_param	Registrador que contém o valor que conterá o registrador 
+* @param REGISTRADOR	*registrador_param		Registrador que contém o valor que conterá o registrador 
 *												do processador ao fim da operação.
 */
 void processador_setRegistrador(PROCESSADOR *processador_param, REGISTRADOR *registrador_param);

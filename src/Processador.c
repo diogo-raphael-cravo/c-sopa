@@ -74,7 +74,7 @@ void processador_inicializar(PROCESSADOR *processador_param){
 		processador_param->IR[palavra] = 0;
 	}
 	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		processador_param->registrador.conteudo[palavra] = 0;
+		processador_param->registrador->conteudo[palavra] = 0;
 	}
 }
 
@@ -89,10 +89,10 @@ void processador_rodar(PROCESSADOR *processador_param){
 
 	while(1){
 		usleep(1000*1000/10);
-		instrucaoLida = privada_buscaInstrucao(processador_param, &global_memoria);
-		privada_carregaInstrucaoIR(processador_param, instrucaoLida);
-		instrucaoBuscada = privada_decodificaInstrucao(processador_param);
-		privada_executaInstrucao(processador_param, instrucaoBuscada);
+		//instrucaoLida = privada_buscaInstrucao(processador_param, &global_memoria);
+		//privada_carregaInstrucaoIR(processador_param, instrucaoLida);
+		//instrucaoBuscada = privada_decodificaInstrucao(processador_param);
+		//privada_executaInstrucao(processador_param, instrucaoBuscada);
 		
 		sprintf(mensagem, "PROCESSADOR: PC=%d IR=%d %d %d %d", 	processador_param->PC,
 			processador_param->IR[0], processador_param->IR[1], processador_param->IR[2],
@@ -104,10 +104,10 @@ void processador_rodar(PROCESSADOR *processador_param){
 			tela_escreverNaColuna(&global_tela, "???", 1);
 		}
 		processador_param->PC += 1;
-		if(controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes) != SEM_INTERRUPCAO){
+		/*if(controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes) != SEM_INTERRUPCAO){
 			kernel_rodar(&global_kernel, controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes));
 			controladorInterrupcoes_sincronizado_reset(&global_controladorInterrupcoes);
-		}
+		}*/
 	}
 }
 
@@ -127,7 +127,7 @@ REGISTRADOR* processador_getRegistrador(PROCESSADOR *processador_param){
 	int palavra;
 	REGISTRADOR *registradorCopia = (REGISTRADOR*) malloc(sizeof(REGISTRADOR*));
 	for(palavra=0; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		registradorCopia->conteudo[palavra] = processador_param->registrador.conteudo[palavra];
+		registradorCopia->conteudo[palavra] = processador_param->registrador->conteudo[palavra];
 	}
 	return registradorCopia;
 }
@@ -148,7 +148,7 @@ void processador_setPC(PROCESSADOR *processador_param, int PC_param){
 void processador_setRegistrador(PROCESSADOR *processador_param, REGISTRADOR *registrador_param){
 	int palavra;
 	for(palavra=0; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		processador_param->registrador.conteudo[palavra] = registrador_param->conteudo[palavra];
+		processador_param->registrador->conteudo[palavra] = registrador_param->conteudo[palavra];
 	}
 }
 

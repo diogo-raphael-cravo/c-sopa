@@ -50,7 +50,7 @@ void descritorProcesso_setPC(DESCRITOR_PROCESSO *descritorProcesso_param, int PC
 * @param REGISTRADOR		*registrador_param			Registrador que contém o valor que conterá o registrador 
 *														do descritor de processo ao fim da operação.
 */
-void descritorProcesso_setRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param, REGISTRADOR registrador_param);
+void descritorProcesso_setRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param, REGISTRADOR *registrador_param);
 
 
 

@@ -21,7 +21,7 @@ blablablah    |               |               |
 //Número máximo de colunas.
 #define MAXIMO_COLUNAS 5
 //Número máximo de linhas salvas.
-#define MAXIMO_LINHAS_SALVAS 100000
+#define MAXIMO_LINHAS_SALVAS 10000
 
 struct str_tela{
 	int quantidadeColunas; 	//A quantidade de colunas desta tela. 
