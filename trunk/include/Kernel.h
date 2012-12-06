@@ -7,10 +7,12 @@
 
 //Constantes
 #define MAXIMO_PROCESSOS_KERNEL 10
-#define PROCESSO_INEXISTENTE NULL;
+#define INDICE_PROCESSO_INEXISTENTE -1
 
 struct str_kernel{
-	DESCRITOR_PROCESSO **descritoresProcessos; //Contém os processos no kernel.
+	DESCRITOR_PROCESSO descritoresProcessos[MAXIMO_PROCESSOS_KERNEL]; //Contém os processos no kernel.
+    int indicesDescritoresProcessosOcupados[MAXIMO_PROCESSOS_KERNEL]; //Indica os índices de descritoresProcessos que contém processos neste kernel.
+                                                                      //Índices que não estiverem aqui não são processos, não existem.
 	int processoRodando; //Índice em descritoresProcessos do processo que está rodando.
 	int quantidadeProcessos; //A quantidade de processos no momento.
 };
