@@ -34,10 +34,11 @@ int main(void){
 	tela_inicializar(&global_tela);
 	tela_adicionarColuna(&global_tela, "       PROCESSADOR");
 	tela_adicionarColuna(&global_tela, "          TIMER");
-	tela_adicionarColuna(&global_tela, "          VAGO");
+	tela_adicionarColuna(&global_tela, "          KERNEL");
 	tela_adicionarColuna(&global_tela, "          DISCO");
 	tela_adicionarColuna(&global_tela, "        CONSOLE");
 
+	kernel_inicializar
 	memoria_sincronizado_inicializar(&global_memoria);
 	controladorInterrupcoes_sincronizado_inicializar(&global_controladorInterrupcoes);
 
