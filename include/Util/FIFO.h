@@ -6,8 +6,8 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define FIFO_ELEMENTO_INEXISTENTE null
-#define FIFO_INDICE_ELEMENTO_INEXISTENTE null
+#define FIFO_ELEMENTO_INEXISTENTE NULL
+#define FIFO_INDICE_ELEMENTO_INEXISTENTE -1
 
 struct str_FIFO{
 	void** conteudo; //Elementos guardados na fifo.
