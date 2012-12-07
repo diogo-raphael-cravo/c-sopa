@@ -11,8 +11,12 @@
 
 struct str_kernel{
 	DESCRITOR_PROCESSO descritoresProcessos[MAXIMO_PROCESSOS_KERNEL]; //Contém os processos no kernel.
-    int indicesDescritoresProcessosOcupados[MAXIMO_PROCESSOS_KERNEL]; //Indica os índices de descritoresProcessos que contém processos neste kernel.
-                                                                      //Índices que não estiverem aqui não são processos, não existem.
+    int indicesDescritoresProcessosExistentes[MAXIMO_PROCESSOS_KERNEL]; //Indica os índices de descritoresProcessos que contém processos neste kernel.
+                                                                        //Índices que não estiverem aqui não são processos, não existem.
+	int filaProcessosBloqueados[MAXIMO_PROCESSOS_KERNEL]; //Indica os índices de descritoresProcessos que contém processos bloqueados.
+															//Os processos são ordenados em uma fila por ordem de "chegada".
+	int filaProcessosProntos[MAXIMO_PROCESSOS_KERNEL]; //Indica os índices de descritoresProcessos que contém processos prontos para rodar.
+														//Os processos são ordenados em uma fila por ordem de "chegada".
 	int processoRodando; //Índice em descritoresProcessos do processo que está rodando.
 	int quantidadeProcessos; //A quantidade de processos no momento.
 };

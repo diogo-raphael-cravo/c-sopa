@@ -6,11 +6,15 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define SEM_INTERRUPCAO 0
-#define INTERRUPCAO_TIMER 2
-#define INTERRUPCAO_DISCO 5
 
-typedef int INTERRUPCAO;
+enum enum_interrupcoes{
+	SEM_INTERRUPCAO=0,
+	INTERRUPCAO_TIMER=2,
+	INTERRUPCAO_DISCO=5,
+	INTERRUPCAO_SOFTWARE_PARA_DISCO=36
+};
+
+typedef enum enum_interrupcoes INTERRUPCAO;
 
 struct str_controladorInterrupcoes{
 	sem_t mutexAcesso; //Controla acesso a métodos sincronizados.

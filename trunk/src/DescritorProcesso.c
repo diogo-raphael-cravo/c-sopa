@@ -77,8 +77,21 @@ void descritorProcesso_setRegistrador(DESCRITOR_PROCESSO *descritorProcesso_para
 	}
 }
 
+/**
+* @param DESCRITOR_PROCESSO			*descritorProcesso_param	O descritor de processo no qual a operação será realizada.
+* @param STATUS_DESCRITOR_PROCESSO	status_param				O status deste processo. Deve ser algum dos definidos no início deste arquivo.
+*/
+void descritorProcesso_setStatus(DESCRITOR_PROCESSO *descritorProcesso_param, STATUS_DESCRITOR_PROCESSO status_param){
+	descritorProcesso_param->status = status_param;
+}
 
-
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será buscada.
+* @return STATUS_DESCRITOR_PROCESSO	O status deste processo. Deve ser algum dos definidos no início deste arquivo.
+*/
+STATUS_DESCRITOR_PROCESSO descritorProcesso_getStatus(DESCRITOR_PROCESSO *descritorProcesso_param){
+	return descritorProcesso_param->status;
+}
 
 
 
