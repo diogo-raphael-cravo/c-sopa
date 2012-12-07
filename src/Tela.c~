@@ -1,6 +1,3 @@
-#include "../include/Util/String.h"
-#include <stdlib.h>
-#include <curses.h>
 #include "../include/DadosComuns.h"
 
 /**
@@ -45,6 +42,7 @@ void privada_moverCursor(TELA *tela_param, int linha_param, int coluna_param){
 void privada_moverCursorParaCaractere(TELA *tela_param, int linha_param, int coluna_param){
 	move((linha_param-1),(coluna_param-1));	
 }
+
 
 /**
 * @param TELA	*tela_param A tela em que a operação será realizada.
@@ -115,6 +113,14 @@ void privada_desenharTabela(TELA *tela_param){
 			addch(ACS_VLINE);
 		}
 	}
+
+	for(coluna=1; coluna<=tela_param->quantidadeColunas; coluna++){
+		privada_moverCursor(tela_param, 3, coluna);
+		attron(A_BOLD);
+		printw(tela_param->nomesColunas[coluna-1]);
+		attroff(A_BOLD);
+	}
+
 	linha = TELA_LARGURA + 1;
 	privada_moverCursorParaCaractere(tela_param, linha, 1);
 	printw("Para acessar o console, digite [BACKSPACE]. Para sair do console, digite [ENTER] sem ter escrito nada.");
@@ -176,8 +182,6 @@ void privada_indicaSeUsuarioPodeEscrever(TELA *tela_param, int podeEscrever_para
 	sem_post(&global_mutexAcessoTela);	
 }
 
-
-
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
@@ -196,6 +200,7 @@ void tela_inicializar(TELA *tela_param){
 
 	init_pair(1,COLOR_WHITE,COLOR_RED);
 	init_pair(2,COLOR_WHITE,COLOR_GREEN);
+	init_pair(3,COLOR_WHITE,COLOR_BLUE); //Tela azul da morte.
 
 	//Abaixo estamos definindo os pares de cores que serão utilizados no programa
 	//init_pair(1,COLOR_WHITE,COLOR_BLUE); //Texto(Branco) | Fundo(Azul)
@@ -316,21 +321,28 @@ void tela_rodar(TELA *tela_param){
 				break;
 			case KEY_DOWN: tela_rolar(tela_param, 1);
 				break;
-			case KEY_RIGHT: if(tela_param->abertaParaImpressoes == 1){							
+			case KEY_RIGHT: if(tela_param->abertaParaImpressoes == 1){
 								tela_param->abertaParaImpressoes = 0;
-								sem_wait(&global_mutexParaTela);	
+								sem_wait(&global_mutexParaTela);
 							}
 				break;
 			case KEY_LEFT: if(tela_param->abertaParaImpressoes == 0){
-								tela_param->abertaParaImpressoes = 1; 
-						   		sem_post(&global_mutexParaTela);	
-						   }
+								tela_param->abertaParaImpressoes = 1;
+								sem_post(&global_mutexParaTela);
+							}
 				break;
 			case KEY_BACKSPACE:
 							privada_indicaSeUsuarioPodeEscrever(tela_param, 1);
 							sem_post(&global_mutexParaEscritaConsole);
 							sem_wait(&global_mutexParaEscritaTela);
 							privada_indicaSeUsuarioPodeEscrever(tela_param, 0);
+				break;
+			case 'q':
+					if(tela_param->abertaParaImpressoes == 1){
+						tela_param->abertaParaImpressoes = 0;
+						sem_wait(&global_mutexParaTela);
+					}
+					tela_imprimirTelaAzulDaMorte(tela_param, "Nao ocorreu erro algum. Esta tela apareceu porque voce apertou 'q'.");
 				break;
 		}
 	}
@@ -411,6 +423,71 @@ void tela_rolar(TELA *tela_param, int quantidadeLinhas_param){
 	}
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
 }
+
+
+/**
+* Muda para a tela azul da morte!
+* Depois de imprimir, espera um caractere do usuário. Quando ele digitar um caractere, restaura a tela 
+* ao seu estado anterior à impressão da tela azul.
+* @param TELA	*tela_param 			A tela em que a operação será realizada.
+* @param char	*descricaoErro_param	A descrição do erro que será exibida.
+************************************************************************************
+* OBS.: Esta função poderia ser fatorada, MAS é um easter egg e deve ficar restrita.
+************************************************************************************
+*/
+void tela_imprimirTelaAzulDaMorte(TELA *tela_param, char *descricaoErro_param){
+	sem_wait(&global_mutexAcessoTela);
+
+	attron(COLOR_PAIR(3));
+	int linha=0;
+	int coluna=0;
+	int largura = TELA_LARGURA+4;
+	int comprimento = TELA_COMPRIMENTO+12;
+	for(linha=0; linha<largura+2000; linha++){
+		for(coluna=0; coluna<comprimento+2000; coluna++){
+			privada_moverCursorParaCaractere(tela_param, linha, coluna);
+			printw(" ");
+		}
+	}
+
+	privada_moverCursorParaCaractere(tela_param, largura/2-5, comprimento/2-2);
+	printw("SOPA");
+	privada_moverCursorParaCaractere(tela_param, largura/2-2, 15);
+	int i=0;
+	int linhasParaExibir = strlen(descricaoErro_param)/(comprimento-2*15);
+	linhasParaExibir+= 0<strlen(descricaoErro_param)%CARACTERES_POR_LINHA_PARA_ESCRITA? 1: 0;
+	for(; i<linhasParaExibir; i++){
+		privada_moverCursorParaCaractere(tela_param, largura/2-2+i, 15);
+		printw(string_pegarSubtextoNaOrdem(descricaoErro_param, comprimento-2*15, i));
+	}
+	privada_moverCursorParaCaractere(tela_param, largura/2-1+i, 15);
+	printw("Pressione qualquer tecla para voltar ao programa.");
+
+	noecho();
+	cbreak();
+	getch();
+
+	attroff(COLOR_PAIR(3));
+	for(linha=0; linha<largura+2000; linha++){
+		for(coluna=0; coluna<comprimento+2000; coluna++){
+			privada_moverCursorParaCaractere(tela_param, linha, coluna);
+			printw(" ");
+		}
+	}
+	tela_rolar(tela_param, -1);
+	tela_rolar(tela_param, 1);
+
+	attron(COLOR_PAIR(1));
+	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO, COLUNA_CARACTERE_INPUT_USUARIO-1);
+	printw(">");
+	attroff(COLOR_PAIR(1));
+
+	
+	sem_post(&global_mutexAcessoTela);
+}
+
+
+
 
 
 

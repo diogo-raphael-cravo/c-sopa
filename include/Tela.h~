@@ -21,7 +21,7 @@ blablablah    |               |               |
 //Número máximo de colunas.
 #define MAXIMO_COLUNAS 5
 //Número máximo de linhas salvas.
-#define MAXIMO_LINHAS_SALVAS 100000
+#define MAXIMO_LINHAS_SALVAS 10000
 
 struct str_tela{
 	int quantidadeColunas; 	//A quantidade de colunas desta tela. 
@@ -97,3 +97,15 @@ void tela_escreverNaColuna(TELA *tela_param, char* texto_param, int coluna_param
 *										quantidadeLinhas_param == 0 não fará nada.
 */
 void tela_rolar(TELA *tela_param, int quantidadeLinhas_param);
+
+/**
+* Muda para a tela azul da morte!
+* Depois de imprimir, espera um caractere do usuário. Quando ele digitar um caractere, restaura a tela 
+* ao seu estado anterior à impressão da tela azul.
+* @param TELA	*tela_param 			A tela em que a operação será realizada.
+* @param char	*descricaoErro_param	A descrição do erro que será exibida.
+************************************************************************************
+* OBS.: Esta função poderia ser fatorada, MAS é um easter egg e deve ficar restrita.
+************************************************************************************
+*/
+void tela_imprimirTelaAzulDaMorte(TELA *tela_param, char *descricaoErro_param){
