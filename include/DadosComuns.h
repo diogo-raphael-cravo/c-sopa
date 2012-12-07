@@ -22,6 +22,7 @@
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Console.h" 					//Depende de: Tela.h
 #include "../include/Util/String.h" 				//Depende de: 
+#include "../include/Util/FIFO.h" 					//Depende de: 
 
 /*----------------------------------------------------------------------
 *						DEFINIÇÕES GLOBAIS

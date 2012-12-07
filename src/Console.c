@@ -1,5 +1,4 @@
 #include "../include/DadosComuns.h"
-#include <curses.h>
 
 /**
 * Variáveis globais acessíveis somente neste arquivo.

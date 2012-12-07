@@ -47,43 +47,6 @@ void privada_escalonar(KERNEL *kernel_param){
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
 }
 
-/**
-* Verifica se o processo está na fila.
-* @param KERNEL 						*kernel_param					O kernel em que a operação será realizada.
-* @param int[MAXIMO_PROCESSOS_KERNEL]	*fila_param						A fila em que o processo será procurado.
-* @param int							indiceDescritorProcesso_param 	O índice do processo procurado em indicesDescritoresProcessosExistentes.
-* @return int	1, se encontrar. 0 caso contrário.
-*/
-int privada_processoEstaNaFila(KERNEL *kernel_param, int fila_param[MAXIMO_PROCESSOS_KERNEL], int indiceDescritorProcesso_param){
-	int encontrou=0;
-	for(indiceDescritor=0; indiceDescritor<MAXIMO_PROCESSOS_KERNEL; indiceDescritor++){
-		if(fila_param[indiceDescritor] == indiceDescritorProcesso_param){
-			encontrou = 1;
-		}
-	}
-	return encontrou;
-}
-
-/**
-* Insere o processo na primeira posição vazia fila dada. O processo não pode ser inserido mais de uma vez na fila.
-* @param KERNEL 						*kernel_param					O kernel em que a operação será realizada.
-* @param int[MAXIMO_PROCESSOS_KERNEL]	*fila_param						A fila em que o processo será inserido.
-* @param int							indiceDescritorProcesso_param 	O índice do processo em indicesDescritoresProcessosExistentes.
-*/
-void privada_inserirProcessoNaFila(KERNEL *kernel_param, int fila_param[MAXIMO_PROCESSOS_KERNEL], int indiceDescritorProcesso_param){
-	int indiceDescritor;
-	int indicePrimeiraPosicaoLivre = INDICE_PROCESSO_INEXISTENTE;
-
-	if(!privada_processoEstaNaFila(kernel_param, fila_param, indiceDescritorProcesso_param)){
-		for(indiceDescritor=0; indiceDescritor<MAXIMO_PROCESSOS_KERNEL; indiceDescritor++){
-			if(fila_param[indiceDescritor] == INDICE_PROCESSO_INEXISTENTE 
-					&& indicePrimeiraPosicaoLivre == INDICE_PROCESSO_INEXISTENTE){
-				indicePrimeiraPosicaoLivre = indiceDescritor;
-			}
-		}
-		fila_param[indicePrimeiraPosicaoLivre] = indiceDescritorProcesso_param;
-	}
-}
 
 /**
 * Adiciona um processo a este kernel.
