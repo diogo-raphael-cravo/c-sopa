@@ -45,7 +45,7 @@ void FIFO_inserir(FIFO *fifo_param, void* dado_param){
 				indicePrimeiraPosicaoLivre = indiceElemento;
 			}
 		}
-		fifo_param[indicePrimeiraPosicaoLivre] = dado_param;
+		fifo_param->conteudo[indicePrimeiraPosicaoLivre] = dado_param;
 	}
 }
 
