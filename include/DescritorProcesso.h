@@ -4,9 +4,21 @@
 //---------------------------------------------------------------------
 //			DADOS						
 //---------------------------------------------------------------------
+
+//Constantes.
+
+enum enum_statusDescritorProcesso{
+	STATUS_PROCESSO_EXECUTANDO,
+	STATUS_PROCESSO_PRONTO,
+	STATUS_PROCESSO_BLOQUEADO
+};
+
+typedef enum enum_statusDescritorProcesso STATUS_DESCRITOR_PROCESSO;
+
 struct str_descritorProcesso{
 	int PID; //Process ID.
 	int PC; //Program counter.
+	STATUS_DESCRITOR_PROCESSO status; //Indica se está executando, pronto ou bloqueado.
 	REGISTRADOR registrador;
 };
 
@@ -52,7 +64,17 @@ void descritorProcesso_setPC(DESCRITOR_PROCESSO *descritorProcesso_param, int PC
 */
 void descritorProcesso_setRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param, REGISTRADOR *registrador_param);
 
+/**
+* @param DESCRITOR_PROCESSO			*descritorProcesso_param	O descritor de processo no qual a operação será realizada.
+* @param STATUS_DESCRITOR_PROCESSO	status_param				O status deste processo. Deve ser algum dos definidos no início deste arquivo.
+*/
+void descritorProcesso_setStatus(DESCRITOR_PROCESSO *descritorProcesso_param, STATUS_DESCRITOR_PROCESSO status_param);
 
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será buscada.
+* @return STATUS_DESCRITOR_PROCESSO	O status deste processo. Deve ser algum dos definidos no início deste arquivo.
+*/
+STATUS_DESCRITOR_PROCESSO descritorProcesso_getStatus(DESCRITOR_PROCESSO *descritorProcesso_param);
 
 
 
