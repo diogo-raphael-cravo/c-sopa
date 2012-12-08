@@ -68,13 +68,13 @@ void memoria_sincronizado_inicializar(MEMORIA *memoria_param){
 	sem_wait(&memoria_param->mutexAcessoMemoria);
 	privada_limpar(memoria_param);
 
-	privada_escreverBytes(memoria_param, 0,  'X', 'M', 0,   10);
-	privada_escreverBytes(memoria_param, 1,  'X', 'D', 0,   10);
-	privada_escreverBytes(memoria_param, 2,  'S', 'M', 0,   10);
+	privada_escreverBytes(memoria_param, 0,  'X', 'M',  0,  10);
+	privada_escreverBytes(memoria_param, 1,  'X', 'D',  0,  10);
+	privada_escreverBytes(memoria_param, 2,  'S', 'M',  0,  10);
 	privada_escreverBytes(memoria_param, 3,  'J', 'P', 'A', 0);
-	privada_escreverBytes(memoria_param, 30, 'L', 'D', 0,   10);
-	privada_escreverBytes(memoria_param, 31, 'L', 'D', 0,   10);
-	privada_escreverBytes(memoria_param, 32, 'I', 'N', 'T',   36);
+	privada_escreverBytes(memoria_param, 30, 'L', 'D',  0,  10);
+	privada_escreverBytes(memoria_param, 31, 'L', 'D',  0,  10);
+	privada_escreverBytes(memoria_param, 32, 'I', 'N', 'T', 36);
 	privada_escreverBytes(memoria_param, 33, 'J', 'P', 'A', 30);
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
@@ -108,19 +108,29 @@ void memoria_sincronizado_escreverBytes(MEMORIA *memoria_param, int endereco_par
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
 
+
+/**
+* @param MEMORIA	*memoria_param			A memória em que a leitura será feita.
+* @param int		endereco_param			Endereço da memória em que a leitura será feita.
+* @param PALAVRA	*destino_param			Endereço da variável em que o resultado será colocado.
+* @return PALAVRA	Conteúdo da memória no endereço dado.
+*/
+void memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param, PALAVRA *destino_param){
+	sem_wait(&memoria_param->mutexAcessoMemoria);
+	PALAVRA dadosLidos;
+	int particao = 0;
+	int palavra = endereco_param;
+	dadosLidos = memoria_param->particoes[particao][palavra];
+	*destino_param = dadosLidos;
+	sem_post(&memoria_param->mutexAcessoMemoria);
+}
 /**
 * @param MEMORIA	*memoria_param			A memória em que a leitura será feita.
 * @param int		endereco_param			Endereço da memória em que a leitura será feita.
 * @return PALAVRA	Conteúdo da memória no endereço dado.
 */
 PALAVRA memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param){
-	sem_wait(&memoria_param->mutexAcessoMemoria);
-	PALAVRA dadosLidos;
-	int particao = 0;
-	int palavra = endereco_param;
-	dadosLidos = memoria_param->particoes[particao][palavra];
-	sem_post(&memoria_param->mutexAcessoMemoria);
-	return dadosLidos;
+	
 }
 
 

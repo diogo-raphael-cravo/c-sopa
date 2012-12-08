@@ -31,25 +31,25 @@ typedef struct str_controladorInterrupcoes CONTROLADOR_INTERRUPCOES;
 * Inicializa o controlador de interrupções.
 * @param CONTROLADOR_INTERRUPCOES	*controladorInterrupcoes_param O controlador de interrupções que irá ser inicializado.
 */
-void controladorInterrupcoes_sincronizado_inicializar(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param);
+void controladorInterrupcoes_inicializar(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param);
 
 /**
 * @param CONTROLADOR_INTERRUPCOES	*controladorInterrupcoes_param O controlador de interrupções no qual a operação será realizada.
 * @param INTERRUPCAO 	interrupcao_param	A interrupção que o controlador deverá guardar.
 */
-void controladorInterrupcoes_sincronizado_set(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param, INTERRUPCAO interrupcao_param);
+void controladorInterrupcoes_set(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param, INTERRUPCAO interrupcao_param);
 
 /**
 * @param CONTROLADOR_INTERRUPCOES	*controladorInterrupcoes_param O controlador de interrupções no qual a operação será realizada.
 * @return INTERRUPCAO A interrupção que o controlador está guardando.
 */
-INTERRUPCAO controladorInterrupcoes_sincronizado_get(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param);
+INTERRUPCAO controladorInterrupcoes_get(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param);
 
 /**
 * Reseta o valor da interrupção guardada para indicar que não há interrupção guardada.
 * @param CONTROLADOR_INTERRUPCOES	*controladorInterrupcoes_param O controlador de interrupções no qual a operação será realizada.
 */
-void controladorInterrupcoes_sincronizado_reset(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param);
+void controladorInterrupcoes_reset(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param);
 
 
 

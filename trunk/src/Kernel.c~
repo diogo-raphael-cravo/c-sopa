@@ -137,7 +137,7 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	privada_salvarContextoProcessadorNoProcesso(kernel_param, *kernel_param->processoRodando);
 	switch(interrupcao_param){
 		case INTERRUPCAO_CONSOLE:
-			tela_escreverNaColuna(&global_tela, console_, 5);
+			tela_escreverNaColuna(&global_tela, console_ultimaLinhaDigitada(&global_console), 5);
 			break;
 		case INTERRUPCAO_TIMER:
 			privada_escalonar(kernel_param);

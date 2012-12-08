@@ -17,7 +17,7 @@
 */
 PALAVRA privada_buscaInstrucao(PROCESSADOR *processador_param, MEMORIA *memoria_param){
 	PALAVRA palavraLida;
-	palavraLida = memoria_sincronizado_ler(memoria_param, processador_param->PC);
+	memoria_sincronizado_ler(memoria_param, processador_param->PC, &palavraLida);
 	return palavraLida;
 }
 
@@ -107,9 +107,9 @@ void processador_rodar(PROCESSADOR *processador_param){
 		privada_executaInstrucao(processador_param, instrucaoBuscada);
 		
 		
-		if(controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes) != SEM_INTERRUPCAO){
-			kernel_rodar(&global_kernel, controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes));
-			controladorInterrupcoes_sincronizado_reset(&global_controladorInterrupcoes);
+		if(controladorInterrupcoes_get(&global_controladorInterrupcoes) != SEM_INTERRUPCAO){
+			kernel_rodar(&global_kernel, controladorInterrupcoes_get(&global_controladorInterrupcoes));
+			controladorInterrupcoes_reset(&global_controladorInterrupcoes);
 		}
 	}
 }

@@ -42,6 +42,7 @@ void memoria_sincronizado_escreverPalavra(MEMORIA *memoria_param, int endereco_p
 * @param BYTE		byte1_param			O byte que ficará na posição 1 da palavra.
 * @param BYTE		byte2_param			O byte que ficará na posição 2 da palavra.
 * @param BYTE		byte3_param			O byte que ficará na posição 3 da palavra.
+* ATENÇÃO: Escreve uma PALAVRA na memória, mas permite especifica-la byte-a-byte.
 */
 void memoria_sincronizado_escreverBytes(MEMORIA *memoria_param, int endereco_param, 
 	BYTE byte0_param, BYTE byte1_param, BYTE byte2param, BYTE byte3_param);
@@ -49,6 +50,7 @@ void memoria_sincronizado_escreverBytes(MEMORIA *memoria_param, int endereco_par
 /**
 * @param MEMORIA	*memoria_param			A memória em que a leitura será feita.
 * @param int		endereco_param			Endereço da memória em que a leitura será feita.
+* @param PALAVRA	*destino_param			Endereço da variável em que o resultado será colocado.
 * @return PALAVRA	Conteúdo da memória no endereço dado.
 */
 PALAVRA memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param);
