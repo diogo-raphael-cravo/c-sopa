@@ -38,6 +38,7 @@ int main(void){
 	tela_adicionarColuna(&global_tela, "          DISCO");
 	tela_adicionarColuna(&global_tela, "        CONSOLE");
 
+	console_inicializar(&global_console);
 	kernel_inicializar(&global_kernel);
 	memoria_sincronizado_inicializar(&global_memoria);
 	controladorInterrupcoes_sincronizado_inicializar(&global_controladorInterrupcoes);

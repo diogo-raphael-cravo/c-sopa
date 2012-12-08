@@ -21,7 +21,7 @@
 #include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h
 #include "../include/Disco.h" 						//Depende de: Tela.h
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
-#include "../include/Console.h" 					//Depende de: Tela.h
+#include "../include/Console.h" 					//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Util/String.h" 				//Depende de: 
 
 /*----------------------------------------------------------------------
