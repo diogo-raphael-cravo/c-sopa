@@ -76,7 +76,7 @@ void privada_escalonar(KERNEL *kernel_param){
 		}
 		privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
 	} else {
-		tela_escreverNaColuna(&global_tela, "Nao ha processo elegivel para ser executado.", 3);
+		tela_escreverNaColuna(&global_tela, "Nao ha processo elegivel para ser executado. Vou continuar executando o que estava.", 3);
 	}
 }
 
@@ -136,6 +136,9 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 
 	privada_salvarContextoProcessadorNoProcesso(kernel_param, *kernel_param->processoRodando);
 	switch(interrupcao_param){
+		case INTERRUPCAO_CONSOLE:
+			tela_escreverNaColuna(&global_tela, console_, 5);
+			break;
 		case INTERRUPCAO_TIMER:
 			privada_escalonar(kernel_param);
 			break;

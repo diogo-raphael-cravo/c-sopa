@@ -12,17 +12,17 @@
 #include <stdlib.h>
 #include <curses.h>
 	//Aplicação. Dependências devem ser anotadas em forma de comentários.
+#include "../include/Util/FIFO.h" 					//Depende de: 
 #include "../include/Tela.h" 						//Depende de: 
 #include "../include/Memoria.h" 					//Depende de: 
 #include "../include/ControladorInterrupcoes.h" 	//Depende de: 
 #include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h
 #include "../include/DescritorProcesso.h" 			//Depende de: Processador.h
-#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h
+#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h
 #include "../include/Disco.h" 						//Depende de: Tela.h
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Console.h" 					//Depende de: Tela.h
 #include "../include/Util/String.h" 				//Depende de: 
-#include "../include/Util/FIFO.h" 					//Depende de: 
 
 /*----------------------------------------------------------------------
 *						DEFINIÇÕES GLOBAIS
