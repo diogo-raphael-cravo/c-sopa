@@ -12,23 +12,51 @@
 /**
 * Salva contexto do processo fornecido.
 * @param KERNEL	*kernel_param			O kernel em que a operação será realizada.
-* @param int	indiceProcesso_param	Índice em descritoresProcessos do processo em cujo contexto será salvo o contexto da CPU.
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param 	O processo no qual o contexto do processador será salvo.
 */
-void privada_salvarContextoProcessadorNoProcesso(KERNEL *kernel_param, int indiceProcesso_param){
-	descritorProcesso_setPC(&kernel_param->descritoresProcessos[indiceProcesso_param], processador_getPC(&global_processador));
-	descritorProcesso_setRegistrador(&kernel_param->descritoresProcessos[indiceProcesso_param], 
-									processador_getRegistrador(&global_processador));
+void privada_salvarContextoProcessadorNoProcesso(KERNEL *kernel_param, DESCRITOR_PROCESSO *descritorProcesso_param){
+	descritorProcesso_setPC(descritorProcesso_param, processador_getPC(&global_processador));
+	descritorProcesso_setRegistrador(descritorProcesso_param, processador_getRegistrador(&global_processador));
 }
 
 /**
 * Restaura o contexto do processo fornecido no processador.
-* @param KERNEL	*kernel_param			O kernel em que a operação será realizada.
-* @param int	indiceProcesso_param	Índice em descritoresProcessos do processo cujo contexto será restaurado ao processador.
+* @param KERNEL				*kernel_param				O kernel em que a operação será realizada.
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param 	O processo cujo contexto será colocado no processador.
 */
-void privada_restauraContextoProcessoAoProcessador(KERNEL *kernel_param, int indiceProcesso_param){
-	processador_setPC(&global_processador, descritorProcesso_getPC(&kernel_param->descritoresProcessos[indiceProcesso_param]));
-	processador_setRegistrador(&global_processador, 
-		descritorProcesso_getRegistrador(&kernel_param->descritoresProcessos[indiceProcesso_param]));
+void privada_restauraContextoProcessoAoProcessador(KERNEL *kernel_param, DESCRITOR_PROCESSO *descritorProcesso_param){
+	processador_setPC(&global_processador, descritorProcesso_getPC(descritorProcesso_param));
+	processador_setRegistrador(&global_processador, descritorProcesso_getRegistrador(descritorProcesso_param));
+}
+
+/**
+* Manda rodar o processo de índice dado.
+* @param KERNEL				*kernel_param				O kernel ao qual pertencem o processo.
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param 	O processo que irá rodar.
+*/
+void privada_rodarProcesso(KERNEL *kernel_param, DESCRITOR_PROCESSO **descritorProcesso_param){
+	kernel_param->processoRodando = descritorProcesso_param;
+	descritorProcesso_setStatus(*descritorProcesso_param, STATUS_PROCESSO_EXECUTANDO);
+}
+
+/**
+* Tira o processo que está rodando, deixando no estado pronto.
+* @param KERNEL					*kernel_param				O kernel ao qual pertencem o processo.
+*/
+void privada_pararDeRodarProcessoRodando(KERNEL *kernel_param){
+	descritorProcesso_setStatus(*kernel_param->processoRodando, STATUS_PROCESSO_PRONTO);
+	FIFO_inserir(&kernel_param->filaProcessosProntos, kernel_param->processoRodando);
+	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
+}
+
+/**
+* Manda o processo esperar pelo disco.
+* @param KERNEL					*kernel_param				O kernel ao qual pertencem o processo.
+*/
+void privada_mandarProcessoRodandoEsperarDisco(KERNEL *kernel_param){
+	descritorProcesso_setStatus(*kernel_param->processoRodando, STATUS_PROCESSO_BLOQUEADO);
+	FIFO_inserir(&kernel_param->filaProcessosBloqueados, kernel_param->processoRodando);
+	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
 }
 
 /**
@@ -37,14 +65,19 @@ void privada_restauraContextoProcessoAoProcessador(KERNEL *kernel_param, int ind
 */
 void privada_escalonar(KERNEL *kernel_param){
 	char mensagem[100];
-	int indiceProcesso = (kernel_param->processoRodando+1)%2;
-	int PIDProcessoRodando = descritorProcesso_getPID(&kernel_param->descritoresProcessos[kernel_param->processoRodando]);
 
-	privada_pararDeRodarProcesso(kernel_param, kernel_param->processoRodando);
-	privada_rodarProcesso(kernel_param, indiceProcesso);
-	
-	sprintf(mensagem, "CPU esta rodando %d.", PIDProcessoRodando);
-	tela_escreverNaColuna(&global_tela, mensagem, 3);
+	if(!FIFO_vazia(&kernel_param->filaProcessosProntos)){
+		sprintf(mensagem, "CPU estah rodando %d.", 
+			descritorProcesso_getPID(* (DESCRITOR_PROCESSO**) FIFO_espiar(&kernel_param->filaProcessosProntos)));
+		tela_escreverNaColuna(&global_tela, mensagem, 3);
+
+		if(kernel_param->processoRodando != DESCRITOR_PROCESSO_INEXISTENTE){
+			privada_pararDeRodarProcessoRodando(kernel_param);
+		}
+		privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
+	} else {
+		tela_escreverNaColuna(&global_tela, "Nao ha processo elegivel para ser executado. Vou continuar executando o que estava.", 3);
+	}
 }
 
 
@@ -56,63 +89,25 @@ void privada_escalonar(KERNEL *kernel_param){
 * @return int	Indica se conseguiu adicionar o processo.
 */
 int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param){
-	int indiceDescritor = 0;
-	int indiceLivre = INDICE_PROCESSO_INEXISTENTE;
 	int adicionou = 0;
-
+	DESCRITOR_PROCESSO **novoProcesso = (DESCRITOR_PROCESSO**) malloc(sizeof(DESCRITOR_PROCESSO*));
+	*novoProcesso = (DESCRITOR_PROCESSO*) malloc(sizeof(DESCRITOR_PROCESSO));
+	descritorProcesso_inicializar(*novoProcesso, PID_param);
+	descritorProcesso_setPC(*novoProcesso, PC_param);
+	descritorProcesso_setStatus(*novoProcesso, STATUS_PROCESSO_PRONTO);
 	if(kernel_param->quantidadeProcessos < MAXIMO_PROCESSOS_KERNEL){
-	    for(; indiceDescritor<MAXIMO_PROCESSOS_KERNEL; indiceDescritor++){
-			if(kernel_param->indicesDescritoresProcessosExistentes[indiceDescritor] == INDICE_PROCESSO_INEXISTENTE){
-				indiceLivre = indiceDescritor;
-			}
-    	}
-		kernel_param->indicesDescritoresProcessosExistentes[kernel_param->quantidadeProcessos] = indiceLivre;
-		privada_inserirProcessoNaFila(????);
-
-		descritorProcesso_setStatus(&kernel_param->indicesDescritoresProcessosExistentes[kernel_param->quantidadeProcessos],
-			STATUS_PROCESSO_PRONTO);
-		descritorProcesso_inicializar(&kernel_param->descritoresProcessos[indiceLivre], PID_param);
-		descritorProcesso_setPC(&kernel_param->descritoresProcessos[indiceLivre], PC_param);		
+		FIFO_inserir(&kernel_param->filaProcessosProntos, novoProcesso);
 		kernel_param->quantidadeProcessos++;
 		adicionou = 1;
 	} else {
+		free(novoProcesso);
 		adicionou = 0;
 	}
 
 	return adicionou;
 }
 
-/**
-* Manda rodar o processo de índice dado.
-* @param KERNEL	*kernel_param					O kernel ao qual pertencem o processo.
-* @param int	indiceDescritorProcesso_param 	O índice do processo em indicesDescritoresProcessosExistentes.
-*/
-void privada_rodarProcesso(KERNEL	*kernel_param, int indiceDescritorProcesso_param){
-	kernel_param->processoRodando = indiceDescritorProcesso_param;
-	descritorProcesso_setStatus(&kernel_param->indicesDescritoresProcessosExistentes[indiceDescritorProcesso_param],
-			STATUS_PROCESSO_EXECUTANDO);
-}
 
-/**
-* Tira o processo que está rodando, deixando no estado pronto.
-* @param KERNEL	*kernel_param					O kernel ao qual pertencem o processo.
-* @param int	indiceDescritorProcesso_param 	O índice do processo em indicesDescritoresProcessosExistentes.
-*/
-void privada_pararDeRodarProcesso(KERNEL *kernel_param, int indiceDescritorProcesso_param){
-	kernel_param->processoRodando = INDICE_PROCESSO_INEXISTENTE;
-	descritorProcesso_setStatus(&kernel_param->indicesDescritoresProcessosExistentes[indiceDescritorProcesso_param],
-			STATUS_PROCESSO_PRONTO);
-}
-
-/**
-* Manda o processo esperar pelo disco.
-* @param KERNEL	*kernel_param					O kernel ao qual pertencem o processo.
-* @param int	indiceDescritorProcesso_param 	O índice do processo em indicesDescritoresProcessosExistentes.
-*/
-void privada_mandarProcessoEsperarDisco(KERNEL *kernel_param, int indiceDescritorProcesso_param){
-	descritorProcesso_setStatus(&kernel_param->indicesDescritoresProcessosExistentes[indiceDescritorProcesso_param],
-			STATUS_PROCESSO_BLOQUEADO);
-}
 
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
@@ -122,20 +117,12 @@ void privada_mandarProcessoEsperarDisco(KERNEL *kernel_param, int indiceDescrito
 */
 void kernel_inicializar(KERNEL *kernel_param){
 	kernel_param->quantidadeProcessos = 0;
-    int indiceDescritor=0;
-    for(; indiceDescritor<MAXIMO_PROCESSOS_KERNEL; indiceDescritor++){
-        kernel_param->indicesDescritoresProcessosExistentes[indiceDescritor] = INDICE_PROCESSO_INEXISTENTE;
-    }
-	for(; indiceDescritor<MAXIMO_PROCESSOS_KERNEL; indiceDescritor++){
-        kernel_param->filaProcessosBloqueados[indiceDescritor] = INDICE_PROCESSO_INEXISTENTE;
-    }
-	for(; indiceDescritor<MAXIMO_PROCESSOS_KERNEL; indiceDescritor++){
-        kernel_param->filaProcessosProntos[indiceDescritor] = INDICE_PROCESSO_INEXISTENTE;
-    }
+	FIFO_inicializar(&kernel_param->filaProcessosProntos, MAXIMO_PROCESSOS_KERNEL);
+	FIFO_inicializar(&kernel_param->filaProcessosBloqueados, MAXIMO_PROCESSOS_KERNEL);
 
 	privada_adicionarProcesso(kernel_param, 456, 0);
 	privada_adicionarProcesso(kernel_param, 457, 30);
-	privada_rodarProcesso(kernel_param, 0);
+	privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
 }
 
 /**
@@ -147,15 +134,20 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
 
-	privada_salvarContextoProcessadorNoProcesso(kernel_param, kernel_param->processoRodando);
+	privada_salvarContextoProcessadorNoProcesso(kernel_param, *kernel_param->processoRodando);
 	switch(interrupcao_param){
-		case INTERRUPCAO_TIMER: privada_escalonar(kernel_param);
+		case INTERRUPCAO_TIMER:
+			privada_escalonar(kernel_param);
 			break;
 		case INTERRUPCAO_DISCO:
+			FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueados));
 			break;
 		case INTERRUPCAO_SOFTWARE_PARA_DISCO:
+			privada_mandarProcessoRodandoEsperarDisco(kernel_param);
+			privada_escalonar(kernel_param);
 			break;
-		default: tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);
+		default:
+			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);
 	}
-	privada_restauraContextoProcessoAoProcessador(kernel_param, kernel_param->processoRodando);
+	privada_restauraContextoProcessoAoProcessador(kernel_param, *kernel_param->processoRodando);
 }

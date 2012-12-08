@@ -30,6 +30,8 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 	INSTRUCAO instrucaoEncontrada;
 	if(processador_param->IR[0] == 'J'  && processador_param->IR[1] == 'P' && processador_param->IR[2] == 'A'){
 		instrucaoEncontrada = INSTRUCAO_JPA;
+	} else if(processador_param->IR[0] == 'I'  && processador_param->IR[1] == 'N' && processador_param->IR[2] == 'T'){
+		instrucaoEncontrada = INSTRUCAO_INT;
 	} else {
 		instrucaoEncontrada = INSTRUCAO_INEXISTENTE;
 	}
@@ -44,6 +46,10 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instrucao_param){
 	if(instrucao_param == INSTRUCAO_JPA){
 		tela_escreverNaColuna(&global_tela, "Jumping...", 1);
+		processador_param->PC = processador_param->IR[3];
+	} else if(instrucao_param == INSTRUCAO_INT){
+		tela_escreverNaColuna(&global_tela, "Interrupcao de Software.", 1);
+		kernel_rodar(&global_kernel, processador_param->IR[3]);
 	} else {
 		tela_escreverNaColuna(&global_tela, "Instrucao desconhecida.", 1);
 	}
@@ -89,21 +95,18 @@ void processador_rodar(PROCESSADOR *processador_param){
 
 	while(1){
 		usleep(1000*1000/10);
-		instrucaoLida = privada_buscaInstrucao(processador_param, &global_memoria);
-		privada_carregaInstrucaoIR(processador_param, instrucaoLida);
-		instrucaoBuscada = privada_decodificaInstrucao(processador_param);
-		privada_executaInstrucao(processador_param, instrucaoBuscada);
-		
 		sprintf(mensagem, "PROCESSADOR: PC=%d IR=%d %d %d %d", 	processador_param->PC,
 			processador_param->IR[0], processador_param->IR[1], processador_param->IR[2],
 			processador_param->IR[3]);
 		tela_escreverNaColuna(&global_tela, mensagem, 1);
-		if(processador_param->IR[3]=='L'){
-			tela_escreverNaColuna(&global_tela, " Last byte is L : Request for disk", 1);
-		} else {
-			tela_escreverNaColuna(&global_tela, "???", 1);
-		}
+
+		instrucaoLida = privada_buscaInstrucao(processador_param, &global_memoria);
 		processador_param->PC += 1;
+		privada_carregaInstrucaoIR(processador_param, instrucaoLida);
+		instrucaoBuscada = privada_decodificaInstrucao(processador_param);
+		privada_executaInstrucao(processador_param, instrucaoBuscada);
+		
+		
 		if(controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes) != SEM_INTERRUPCAO){
 			kernel_rodar(&global_kernel, controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes));
 			controladorInterrupcoes_sincronizado_reset(&global_controladorInterrupcoes);
