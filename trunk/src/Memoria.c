@@ -67,13 +67,15 @@ void memoria_sincronizado_inicializar(MEMORIA *memoria_param){
 	sem_init(&memoria_param->mutexAcessoMemoria, 0, 1);
 	sem_wait(&memoria_param->mutexAcessoMemoria);
 	privada_limpar(memoria_param);
-	privada_escreverBytes(memoria_param, 0,  'X', 'M', 0,   10);
-	privada_escreverBytes(memoria_param, 1,  'X', 'D', 0,   10);
-	privada_escreverBytes(memoria_param, 2,  'S', 'M', 0,   10);
+
+	privada_escreverBytes(memoria_param, 0,  'X', 'M',  0,  10);
+	privada_escreverBytes(memoria_param, 1,  'X', 'D',  0,  10);
+	privada_escreverBytes(memoria_param, 2,  'S', 'M',  0,  10);
 	privada_escreverBytes(memoria_param, 3,  'J', 'P', 'A', 0);
-	privada_escreverBytes(memoria_param, 30, 'L', 'D', 0,   10);
-	privada_escreverBytes(memoria_param, 31, 'L', 'D', 0,   10);
-	privada_escreverBytes(memoria_param, 32, 'J', 'P', 'A', 30);
+	privada_escreverBytes(memoria_param, 30, 'L', 'D',  0,  10);
+	privada_escreverBytes(memoria_param, 31, 'L', 'D',  0,  10);
+	privada_escreverBytes(memoria_param, 32, 'I', 'N', 'T', 36);
+	privada_escreverBytes(memoria_param, 33, 'J', 'P', 'A', 30);
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
 

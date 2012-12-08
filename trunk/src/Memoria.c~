@@ -33,9 +33,9 @@ void privada_limpar(MEMORIA *memoria_param){
 PALAVRA privada_bytesParaPalavra(MEMORIA *memoria_param, BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param){
 	PALAVRA palavraFinal;
 	palavraFinal = 0;
-	palavraFinal = palavraFinal | (byte0_param & 0xFF000000);
-	palavraFinal = palavraFinal | (byte1_param & 0x00FF0000);
-	palavraFinal = palavraFinal | (byte2_param & 0x0000FF00);
+	palavraFinal = palavraFinal | (byte0_param*256*256*256 & 0xFF000000);
+	palavraFinal = palavraFinal | (byte1_param*256*256 & 0x00FF0000);
+	palavraFinal = palavraFinal | (byte2_param*256 & 0x0000FF00);
 	palavraFinal = palavraFinal | (byte3_param & 0x000000FF);
 	return palavraFinal;
 }
@@ -67,13 +67,15 @@ void memoria_sincronizado_inicializar(MEMORIA *memoria_param){
 	sem_init(&memoria_param->mutexAcessoMemoria, 0, 1);
 	sem_wait(&memoria_param->mutexAcessoMemoria);
 	privada_limpar(memoria_param);
+
 	privada_escreverBytes(memoria_param, 0,  'X', 'M', 0,   10);
 	privada_escreverBytes(memoria_param, 1,  'X', 'D', 0,   10);
 	privada_escreverBytes(memoria_param, 2,  'S', 'M', 0,   10);
 	privada_escreverBytes(memoria_param, 3,  'J', 'P', 'A', 0);
 	privada_escreverBytes(memoria_param, 30, 'L', 'D', 0,   10);
 	privada_escreverBytes(memoria_param, 31, 'L', 'D', 0,   10);
-	privada_escreverBytes(memoria_param, 32, 'J', 'P', 'A', 30);
+	privada_escreverBytes(memoria_param, 32, 'I', 'N', 'T',   36);
+	privada_escreverBytes(memoria_param, 33, 'J', 'P', 'A', 30);
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
 
@@ -102,7 +104,7 @@ void memoria_sincronizado_escreverPalavra(MEMORIA *memoria_param, int endereco_p
 void memoria_sincronizado_escreverBytes(MEMORIA *memoria_param, int endereco_param, 
 		BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param){
 	sem_wait(&memoria_param->mutexAcessoMemoria);
-	privada_escreverBytes(memoria_param, endereco_param, byte0_param, byte1_param, byte2_param, byte3_param){
+	privada_escreverBytes(memoria_param, endereco_param, byte0_param, byte1_param, byte2_param, byte3_param);
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
 

@@ -8,11 +8,14 @@
 //Constantes
 #define TAMANHO_REGISTRADOR_PALAVRAS 16
 #define TAMANHO_INSTRUCAO_PALAVRAS 4
-	//Instrucoes
-#define INSTRUCAO_INEXISTENTE 0
-#define INSTRUCAO_JPA 1
 
-typedef PALAVRA INSTRUCAO;
+enum enum_instrucao{
+	INSTRUCAO_INEXISTENTE,
+	INSTRUCAO_JPA,
+	INSTRUCAO_INT
+};
+
+typedef enum enum_instrucao INSTRUCAO;
 
 struct str_registrador{
 	PALAVRA conteudo[TAMANHO_REGISTRADOR_PALAVRAS];

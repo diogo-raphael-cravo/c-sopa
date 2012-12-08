@@ -29,6 +29,24 @@ void FIFO_inicializar(FIFO *fifo_param, int tamanho_param){
 }
 
 /**
+* Procura o ponteiro nos elementos da fila.
+* @param FIFO	*fifo_param A fifo em que a operação será realizada.
+* @param void	*dado_param O dado que será procurado na fila.
+* @return int	Indica se o ponteiro fornecido está na fila.
+*/
+int FIFO_contem(FIFO *fifo_param, void *dado_param){
+	int indiceElemento;
+	int encontrou = 0;
+	for(indiceElemento=0; indiceElemento<fifo_param->tamanho; indiceElemento++){
+		if(fifo_param->conteudo[indiceElemento] == dado_param){
+			encontrou = 1;
+		}
+	}
+	return encontrou;
+}
+
+
+/**
 * Insere um elemento na última posição da FIFO.
 * @param FIFO	*fifo_param A fifo em que a operação será realizada.
 * @param void	*dado_param	O dado que será inserido na FIFO.
@@ -66,23 +84,6 @@ int FIFO_cheia(FIFO *fifo_param){
 }
 
 /**
-* Procura o ponteiro nos elementos da fila.
-* @param FIFO	*fifo_param A fifo em que a operação será realizada.
-* @param void	*dado_param O dado que será procurado na fila.
-* @return int	Indica se o ponteiro fornecido está na fila.
-*/
-int FIFO_contem(FIFO *fifo_param, void *dado_param){
-	int indiceElemento;
-	int encontrou = 0;
-	for(indiceElemento=0; indiceElemento<fifo_param->tamanho; indiceElemento++){
-		if(fifo_param->conteudo[indiceElemento] == dado_param){
-			encontrou = 1;
-		}
-	}
-	return encontrou;
-}
-
-/**
 * Retorna o primeiro elemento da FIFO. O elemento continua na fila.
 * @param FIFO	*fifo_param A fifo em que a operação será realizada.
 * @return void* O primeiro elemento da FIFO (que está há mais tempo nela).
@@ -113,5 +114,21 @@ void* FIFO_remover(FIFO *fifo_param){
 	}
 	return elemento;
 }
+
+/**
+* @param FIFO	*fifo_param A fifo em que a operação será realizada.
+* @return int	O número de elementos na fifo.
+*/
+int FIFO_quantidadeElementos(FIFO *fifo_param){
+	int quantidade=0;
+	int indice;
+	for(indice=0; indice<fifo_param->tamanho-1; indice++){
+		if(fifo_param->conteudo[indice] != FIFO_ELEMENTO_INEXISTENTE){
+			quantidade++;
+		}
+	}
+	return quantidade;
+}
+
 
 

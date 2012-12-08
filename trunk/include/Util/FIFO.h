@@ -72,3 +72,8 @@ void* FIFO_espiar(FIFO *fifo_param);
 */
 void* FIFO_remover(FIFO *fifo_param);
 
+/**
+* @param FIFO	*fifo_param A fifo em que a operação será realizada.
+* @return int	O número de elementos na fifo.
+*/
+int FIFO_quantidadeElementos(FIFO *fifo_param);
