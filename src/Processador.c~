@@ -101,14 +101,15 @@ void processador_rodar(PROCESSADOR *processador_param){
 		tela_escreverNaColuna(&global_tela, mensagem, 1);
 
 		instrucaoLida = privada_buscaInstrucao(processador_param, &global_memoria);
+		processador_param->PC += 1;
 		privada_carregaInstrucaoIR(processador_param, instrucaoLida);
 		instrucaoBuscada = privada_decodificaInstrucao(processador_param);
 		privada_executaInstrucao(processador_param, instrucaoBuscada);
 		
-		processador_param->PC += 1;
-		if(controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes) != SEM_INTERRUPCAO){
-			kernel_rodar(&global_kernel, controladorInterrupcoes_sincronizado_get(&global_controladorInterrupcoes));
-			controladorInterrupcoes_sincronizado_reset(&global_controladorInterrupcoes);
+		
+		if(controladorInterrupcoes_get(&global_controladorInterrupcoes) != SEM_INTERRUPCAO){
+			kernel_rodar(&global_kernel, controladorInterrupcoes_get(&global_controladorInterrupcoes));
+			controladorInterrupcoes_reset(&global_controladorInterrupcoes);
 		}
 	}
 }

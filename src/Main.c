@@ -41,7 +41,7 @@ int main(void){
 	console_inicializar(&global_console);
 	kernel_inicializar(&global_kernel);
 	memoria_sincronizado_inicializar(&global_memoria);
-	controladorInterrupcoes_sincronizado_inicializar(&global_controladorInterrupcoes);
+	controladorInterrupcoes_inicializar(&global_controladorInterrupcoes);
 
 	pthread_create(&global_threadIdProcessador, NULL, processador_rodar, &global_processador);
 	pthread_create(&global_threadIdTimer, NULL, timer_rodar, &global_timer);

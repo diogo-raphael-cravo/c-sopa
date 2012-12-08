@@ -148,6 +148,7 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 		case INTERRUPCAO_SOFTWARE_PARA_DISCO:
 			privada_mandarProcessoRodandoEsperarDisco(kernel_param);
 			privada_escalonar(kernel_param);
+			disco_darUmaVolta(&global_disco);
 			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);

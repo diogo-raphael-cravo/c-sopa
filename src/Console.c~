@@ -34,7 +34,7 @@ void console_rodar(CONSOLE *console_param){
 		digitado = tela_esperarLinhaUsuario(&global_tela);
 		usuarioDesejaSairDoConsole = (digitado[0] == '\0');
 		if(!usuarioDesejaSairDoConsole){
-			console_param->ultimaLinhaDigitada
+			console_param->ultimaLinhaDigitada = (char*) malloc(strlen(digitado)*sizeof(char));
 			console_param->ultimaLinhaDigitada = digitado;
 			controladorInterrupcoes_sincronizado_set(&global_controladorInterrupcoes, INTERRUPCAO_CONSOLE);
 		} else {

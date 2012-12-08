@@ -5,7 +5,7 @@
 //			DADOS						
 //---------------------------------------------------------------------
 struct str_disco{
-
+	sem_t mutexAcessoDisco;
 };
 
 typedef struct str_disco DISCO;
@@ -18,3 +18,9 @@ typedef struct str_disco DISCO;
 * @param DISCO	*disco_param	O disco que irá 'rodar'.
 */
 void disco_rodar(DISCO *disco_param);
+
+/**
+* Libera o disco para dar uma volta.
+* @param DISCO	*disco_param	O disco em que a operação será realizada.
+*/
+void disco_darUmaVolta(DISCO *disco_param);
