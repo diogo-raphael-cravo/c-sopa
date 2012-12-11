@@ -6,8 +6,7 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define TAMANHO_REGISTRADOR_PALAVRAS 16
-#define TAMANHO_INSTRUCAO_PALAVRAS 4
+#define TAMANHO_INSTRUCAO_PALAVRAS TAMANHO_REGISTRADOR_BYTES
 
 enum enum_instrucao{
 	INSTRUCAO_INEXISTENTE,
@@ -17,15 +16,9 @@ enum enum_instrucao{
 
 typedef enum enum_instrucao INSTRUCAO;
 
-struct str_registrador{
-	PALAVRA conteudo[TAMANHO_REGISTRADOR_PALAVRAS];
-};
-
-typedef struct str_registrador REGISTRADOR;
-
 struct str_processador{
 	int PC;
-	PALAVRA IR[TAMANHO_INSTRUCAO_PALAVRAS];
+	REGISTRADOR IR;
 	REGISTRADOR registrador;
 };
 
@@ -53,7 +46,7 @@ int processador_getPC(PROCESSADOR *processador_param);
 
 /**
 * @param PROCESSADOR	*processador_param	O processador no qual a informação será buscada.
-* @return REGISTRADOR*	Cópia profunda do registrador do processador.
+* @return REGISTRADOR*	O registrador do processador.
 */
 REGISTRADOR* processador_getRegistrador(PROCESSADOR *processador_param);
 

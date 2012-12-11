@@ -47,7 +47,7 @@ int descritorProcesso_getPC(DESCRITOR_PROCESSO *descritorProcesso_param);
 
 /**
 * @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será buscada.
-* @return REGISTRADOR*	Cópia profunda do registrador do processo.
+* @return REGISTRADOR*	O registrador do processo.
 */
 REGISTRADOR* descritorProcesso_getRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param);
 

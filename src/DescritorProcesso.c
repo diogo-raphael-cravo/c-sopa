@@ -22,10 +22,7 @@
 void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param){
 	descritorProcesso_param->PID = PID_param;
 	descritorProcesso_param->PC = 0;
-	int palavra=0;
-	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		descritorProcesso_param->registrador.conteudo[palavra] = 0;
-	}
+	registrador_inicializar(&descritorProcesso_param->registrador);
 }
 
 /**
@@ -46,15 +43,10 @@ int descritorProcesso_getPC(DESCRITOR_PROCESSO *descritorProcesso_param){
 
 /**
 * @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será buscada.
-* @return REGISTRADOR*	Cópia profunda do registrador do processo.
+* @return REGISTRADOR*	O registrador do processo.
 */
 REGISTRADOR* descritorProcesso_getRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param){
-	int palavra=0;
-	REGISTRADOR* registradorCriado = (REGISTRADOR*) malloc(sizeof(REGISTRADOR));
-	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		registradorCriado->conteudo[palavra] = descritorProcesso_param->registrador.conteudo[palavra];
-	}
-	return registradorCriado;
+	return &descritorProcesso_param->registrador;
 }
 
 /**
@@ -71,10 +63,7 @@ void descritorProcesso_setPC(DESCRITOR_PROCESSO *descritorProcesso_param, int PC
 *														do descritor de processo ao fim da operação.
 */
 void descritorProcesso_setRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param, REGISTRADOR *registrador_param){
-	int palavra=0;
-	for(; palavra<TAMANHO_REGISTRADOR_PALAVRAS; palavra++){
-		descritorProcesso_param->registrador.conteudo[palavra] = registrador_param->conteudo[palavra];
-	}
+	registrador_copiar(&descritorProcesso_param->registrador, registrador_param);
 }
 
 /**

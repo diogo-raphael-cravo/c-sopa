@@ -17,8 +17,9 @@
 #include "../include/Tela.h" 						//Depende de: 
 #include "../include/Memoria.h" 					//Depende de: 
 #include "../include/ControladorInterrupcoes.h" 	//Depende de: 
-#include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h
-#include "../include/DescritorProcesso.h" 			//Depende de: Processador.h
+#include "../include/Registrador.h"					//Depende de: Memoria.h
+#include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h, Registrador.h
+#include "../include/DescritorProcesso.h" 			//Depende de: Processador.h, Registrador.h
 #include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h
 #include "../include/Disco.h" 						//Depende de: Tela.h, Memoria.h, Processador.h, String.h
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
