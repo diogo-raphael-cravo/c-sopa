@@ -33,12 +33,11 @@ int privada_posicaoEstahLivre(DISCO *disco_param, int posicao_param){
 */
 void privada_escreverNaProximaPalavraLivre(DISCO *disco_param, BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param){
 	int primeiraPosicaoLivre=0;
-	int posicaoDisco;
-	for(posicaoDisco=0; posicaoDisco<TAMANHO_DISCO_PALAVRAS; posicaoDisco++){
-		if(privada_posicaoEstahLivre(disco_param, posicaoDisco)){
-			primeiraPosicaoLivre = posicaoDisco;
-		}
+	int posicaoDisco=0;
+	while(!privada_posicaoEstahLivre(disco_param, posicaoDisco) && posicaoDisco<TAMANHO_DISCO_PALAVRAS){
+		posicaoDisco++;
 	}
+	primeiraPosicaoLivre = posicaoDisco;
 	disco_param->conteudo[primeiraPosicaoLivre] = 
 		((((byte0_param & 0xFF000000)/256)/256)/256)
 		| (((byte1_param & 0x00FF0000)/256)/256)
@@ -89,6 +88,7 @@ void disco_darUmaVolta(DISCO *disco_param){
 void disco_carregar(DISCO *disco_param, char *caminhoArquivo_param){
 	int posicaoPalavra = 0;
 	int palavra[TAMANHO_INSTRUCAO_PALAVRAS];
+	int posicaoEscrita=0;
 	char linha[200];
 	char* byte;
 	char* palavraBytes[TAMANHO_INSTRUCAO_PALAVRAS];
@@ -112,9 +112,11 @@ void disco_carregar(DISCO *disco_param, char *caminhoArquivo_param){
 			palavra[1] = string_paraInt(palavraBytes[1]);
 			palavra[2] = string_paraInt(palavraBytes[2]);
 			palavra[3] = string_paraInt(palavraBytes[3]);
-			sprintf(mensagem, "Acabei de ler '%s %s %s %s'.", palavraBytes[0], palavraBytes[1], palavraBytes[2], palavraBytes[3]);
 			tela_escreverNaColuna(&global_tela, mensagem, 4);
 			privada_escreverNaProximaPalavraLivre(disco_param, palavra[0], palavra[1], palavra[2], palavra[3]);
+			sprintf(mensagem, "Lido '%s %s %s %s', gravado '%d'.", 
+				palavraBytes[0], palavraBytes[1], palavraBytes[2], palavraBytes[3], disco_param->conteudo[posicaoEscrita]);
+			posicaoEscrita++;
 		}
 	}
 }
