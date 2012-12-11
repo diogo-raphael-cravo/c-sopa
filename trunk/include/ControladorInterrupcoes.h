@@ -10,6 +10,7 @@
 enum enum_interrupcoes{
 	SEM_INTERRUPCAO=0,
 	INTERRUPCAO_TIMER=2,
+	INTERRUPCAO_MEMORIA=3,
 	INTERRUPCAO_DISCO=5,
 	INTERRUPCAO_CONSOLE=15,
 	INTERRUPCAO_SOFTWARE_PARA_DISCO=36
@@ -20,6 +21,7 @@ typedef enum enum_interrupcoes INTERRUPCAO;
 struct str_controladorInterrupcoes{
 	sem_t mutexAcesso; //Controla acesso a métodos sincronizados.
 	INTERRUPCAO interrupcaoGuardada;
+	int haInterrupcaoMemoria; //Indica se houve uma INTERRUPCAO_MEMORIA, que tem preferência sob outras interrupções.
 };
 
 typedef struct str_controladorInterrupcoes CONTROLADOR_INTERRUPCOES;
