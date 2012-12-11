@@ -7,9 +7,12 @@
 
 //Constantes
 #define CAMINHO_ARQUIVO_BASE_DISCO "dados/disco.txt"
+#define TAMANHO_DISCO_PALAVRAS 1024
+#define POSICAO_VAZIA -99999
 
 struct str_disco{
 	sem_t mutexAcessoDisco;
+	PALAVRA conteudo[TAMANHO_DISCO_PALAVRAS];
 };
 
 typedef struct str_disco DISCO;
