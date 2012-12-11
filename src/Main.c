@@ -41,6 +41,7 @@ int main(void){
 	console_inicializar(&global_console);
 	kernel_inicializar(&global_kernel);
 	memoria_sincronizado_inicializar(&global_memoria);
+	MMU_sincronizado_inicializar(&global_MMU, &global_memoria);
 	controladorInterrupcoes_inicializar(&global_controladorInterrupcoes);
 
 	pthread_create(&global_threadIdDisco, NULL, disco_rodar, &global_disco);

@@ -33,7 +33,7 @@ void controladorInterrupcoes_inicializar(CONTROLADOR_INTERRUPCOES *controladorIn
 void controladorInterrupcoes_set(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param, INTERRUPCAO interrupcao_param){
 	sem_wait(&controladorInterrupcoes_param->mutexAcesso);
 	if(interrupcao_param == INTERRUPCAO_MEMORIA){
-		haInterrupcaoMemoria = 1;
+		controladorInterrupcoes_param->haInterrupcaoMemoria = 1;
 	} else {
 		controladorInterrupcoes_param->interrupcaoGuardada = interrupcao_param;
 	}
@@ -44,7 +44,7 @@ void controladorInterrupcoes_set(CONTROLADOR_INTERRUPCOES *controladorInterrupco
 * @return INTERRUPCAO A interrupção que o controlador está guardando.
 */
 INTERRUPCAO controladorInterrupcoes_get(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param){
-	if(haInterrupcaoMemoria){
+	if(controladorInterrupcoes_param->haInterrupcaoMemoria){
 		return INTERRUPCAO_MEMORIA;
 	} else {
 		return controladorInterrupcoes_param->interrupcaoGuardada;		
@@ -56,8 +56,8 @@ INTERRUPCAO controladorInterrupcoes_get(CONTROLADOR_INTERRUPCOES *controladorInt
 * @param CONTROLADOR_INTERRUPCOES	*controladorInterrupcoes_param O controlador de interrupções no qual a operação será realizada.
 */
 void controladorInterrupcoes_reset(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param){
-	if(haInterrupcaoMemoria){
-		haInterrupcaoMemoria = 0;
+	if(controladorInterrupcoes_param->haInterrupcaoMemoria){
+		controladorInterrupcoes_param->haInterrupcaoMemoria = 0;
 	} else {
 		controladorInterrupcoes_param->interrupcaoGuardada = SEM_INTERRUPCAO;
 	}
