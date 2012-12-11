@@ -338,10 +338,6 @@ void tela_rodar(TELA *tela_param){
 							privada_indicaSeUsuarioPodeEscrever(tela_param, 0);
 				break;
 			case 'q':
-					if(tela_param->abertaParaImpressoes == 1){
-						tela_param->abertaParaImpressoes = 0;
-						sem_wait(&global_mutexParaTela);
-					}
 					tela_imprimirTelaAzulDaMorte(tela_param, "Nao ocorreu erro algum. Esta tela apareceu porque voce apertou 'q'.");
 				break;
 		}
@@ -436,6 +432,10 @@ void tela_rolar(TELA *tela_param, int quantidadeLinhas_param){
 ************************************************************************************
 */
 void tela_imprimirTelaAzulDaMorte(TELA *tela_param, char *descricaoErro_param){
+	if(tela_param->abertaParaImpressoes == 1){
+		tela_param->abertaParaImpressoes = 0;
+		sem_wait(&global_mutexParaTela);
+	}
 	sem_wait(&global_mutexAcessoTela);
 
 	attron(COLOR_PAIR(3));

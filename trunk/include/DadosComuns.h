@@ -15,7 +15,8 @@
 #include "../include/Util/FIFO.h" 					//Depende de: 
 #include "../include/Util/String.h" 				//Depende de: 
 #include "../include/Tela.h" 						//Depende de: 
-#include "../include/Memoria.h" 					//Depende de: 
+#include "../include/Memoria.h" 					//Depende de: Tela.h
+#include "../include/MMU.h" 						//Depende de: Memoria.h
 #include "../include/ControladorInterrupcoes.h" 	//Depende de: 
 #include "../include/Registrador.h"					//Depende de: Memoria.h
 #include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h, Registrador.h
@@ -53,5 +54,6 @@ TIMER 						global_timer;
 CONTROLADOR_INTERRUPCOES 	global_controladorInterrupcoes;
 TELA 						global_tela;
 MEMORIA 					global_memoria;
+MMU							global_MMU;
 CONSOLE 					global_console;
 
