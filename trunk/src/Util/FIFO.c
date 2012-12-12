@@ -173,8 +173,8 @@ void FIFO_esvaziar(FIFO *fifo_param){
 * @param FIFO	*fifo_param A fifo que será destruída.
 */
 void FIFO_destruir(FIFO *fifo_param){
-	free(fifo_param->conteudo);
-	free(fifo_param);
+	//free(fifo_param->conteudo);
+	//free(fifo_param);
 }
 
 
