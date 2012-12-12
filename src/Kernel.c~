@@ -18,8 +18,8 @@
 void privada_rodarProcesso(KERNEL *kernel_param, DESCRITOR_PROCESSO **descritorProcesso_param){
 	kernel_param->processoRodando = descritorProcesso_param;
 	descritorProcesso_setStatus(*descritorProcesso_param, STATUS_PROCESSO_EXECUTANDO);
-	//MMU_sincronizado_setBase(&global_MMU, descritorProcesso_getEnderecoInicio(*descritorProcesso_param));
-	//MMU_sincronizado_setLimite(&global_MMU, descritorProcesso_getTamanhoAreaMemoriaPalavras(*descritorProcesso_param));
+	MMU_sincronizado_setBase(&global_MMU, descritorProcesso_getEnderecoInicio(*descritorProcesso_param));
+	MMU_sincronizado_setLimite(&global_MMU, descritorProcesso_getTamanhoAreaMemoriaPalavras(*descritorProcesso_param));
 }
 
 /**
@@ -30,8 +30,8 @@ void privada_pararDeRodarProcessoRodando(KERNEL *kernel_param){
 	descritorProcesso_setStatus(*kernel_param->processoRodando, STATUS_PROCESSO_PRONTO);
 	FIFO_inserir(&kernel_param->filaProcessosProntos, kernel_param->processoRodando);
 	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
-	//MMU_sincronizado_setBase(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
-	//MMU_sincronizado_setLimite(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
+	MMU_sincronizado_setBase(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
+	MMU_sincronizado_setLimite(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
 }
 
 /**
@@ -42,8 +42,8 @@ void privada_mandarProcessoRodandoEsperarDisco(KERNEL *kernel_param){
 	descritorProcesso_setStatus(*kernel_param->processoRodando, STATUS_PROCESSO_BLOQUEADO);
 	FIFO_inserir(&kernel_param->filaProcessosBloqueados, kernel_param->processoRodando);
 	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
-	//MMU_sincronizado_setBase(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
-	//MMU_sincronizado_setLimite(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
+	MMU_sincronizado_setBase(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
+	MMU_sincronizado_setLimite(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
 }
 
 /**
@@ -148,11 +148,11 @@ int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param,
 			kernel_param->quantidadeProcessos++;
 			adicionou = 1;
 		} else {
-			free(novoProcesso);
+			free(*novoProcesso);
 			adicionou = 0;
 		}
 	} else {
-		free(novoProcesso);
+		free(*novoProcesso);
 		adicionou = 0;
 	}
 
@@ -174,9 +174,14 @@ void kernel_inicializar(KERNEL *kernel_param){
 	FIFO_inicializar(&kernel_param->filaProcessosBloqueados, MAXIMO_PROCESSOS_KERNEL);
 	FIFO_inicializar(&kernel_param->filaMemoriaAlocada, MAXIMO_PROCESSOS_KERNEL);
 
-	privada_adicionarProcesso(kernel_param, 456, 0, 100);
-	privada_adicionarProcesso(kernel_param, 457, 30, 100);
-	privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
+	int adicionou = privada_adicionarProcesso(kernel_param, 456, 0, 100);
+	adicionou = adicionou || privada_adicionarProcesso(kernel_param, 457, 30, 100);
+
+	if(adicionou){
+		privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
+	} else {
+		tela_imprimirTelaAzulDaMorte(tela_param, "O kernel nao estah conseguindo iniciar, ele nao consegue criar processos!");
+	}
 }
 
 /**
@@ -184,7 +189,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 * @param INTERRUPCAO	interrupcao_param	A interrupção que definirá o comportamento do kernel.
 */
 void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
-	char mensagem[500];
+	char mensagem[200];
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
 
