@@ -148,11 +148,11 @@ int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param,
 			kernel_param->quantidadeProcessos++;
 			adicionou = 1;
 		} else {
-			free(novoProcesso);
+			free(*novoProcesso);
 			adicionou = 0;
 		}
 	} else {
-		free(novoProcesso);
+		free(*novoProcesso);
 		adicionou = 0;
 	}
 
@@ -174,9 +174,14 @@ void kernel_inicializar(KERNEL *kernel_param){
 	FIFO_inicializar(&kernel_param->filaProcessosBloqueados, MAXIMO_PROCESSOS_KERNEL);
 	FIFO_inicializar(&kernel_param->filaMemoriaAlocada, MAXIMO_PROCESSOS_KERNEL);
 
-	privada_adicionarProcesso(kernel_param, 456, 0, 100);
-	privada_adicionarProcesso(kernel_param, 457, 30, 100);
-	privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
+	int adicionou = privada_adicionarProcesso(kernel_param, 456, 0, 100);
+	adicionou = adicionou || privada_adicionarProcesso(kernel_param, 457, 30, 100);
+
+	if(adicionou){
+		privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
+	} else {
+		tela_imprimirTelaAzulDaMorte(&global_tela, "O kernel nao estah conseguindo iniciar, ele nao consegue criar processos!");
+	}
 }
 
 /**
@@ -184,7 +189,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 * @param INTERRUPCAO	interrupcao_param	A interrupção que definirá o comportamento do kernel.
 */
 void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
-	char mensagem[500];
+	char mensagem[200];
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
 
