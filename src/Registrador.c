@@ -109,3 +109,41 @@ void registrador_copiar(REGISTRADOR *registradorDestino_param, REGISTRADOR *regi
 	}
 }
 
+/**
+* @param REGISTRADOR	*registrador_param	Registrador cujo conteúdo será alterado.
+* @param int			parcela_param	A quantidade que deve ser somada ao valor do registrador.
+*/
+void registrador_somar(REGISTRADOR *registrador_param, int parcela_param){
+	registrador_param->conteudo[3] = registrador_param->conteudo[3]+parcela_param;
+
+	if(256 < registrador_param->conteudo[3]){
+		registrador_param->conteudo[3] -= 256;
+		registrador_param->conteudo[2] += 1;
+	}
+	if(256 < registrador_param->conteudo[2]){
+		registrador_param->conteudo[2] = 0;
+		registrador_param->conteudo[1] += 1;
+	}
+	if(256 < registrador_param->conteudo[1]){
+		registrador_param->conteudo[1] = 0;
+		registrador_param->conteudo[0] += 1;
+	}
+	if(256 < registrador_param->conteudo[0]){
+		registrador_param->conteudo[0] = 0;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
