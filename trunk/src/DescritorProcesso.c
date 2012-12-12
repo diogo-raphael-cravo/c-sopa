@@ -21,8 +21,7 @@
 */
 void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param){
 	descritorProcesso_param->PID = PID_param;
-	descritorProcesso_param->PC = 0;
-	registrador_inicializar(&descritorProcesso_param->registrador);
+	
 }
 
 /**
@@ -31,39 +30,6 @@ void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, 
 */
 int descritorProcesso_getPID(DESCRITOR_PROCESSO *descritorProcesso_param){
 	return descritorProcesso_param->PID;
-}
-
-/**
-* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será buscada.
-* @return int	PC do processo.
-*/
-int descritorProcesso_getPC(DESCRITOR_PROCESSO *descritorProcesso_param){
-	return descritorProcesso_param->PC;
-}
-
-/**
-* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será buscada.
-* @return REGISTRADOR*	O registrador do processo.
-*/
-REGISTRADOR* descritorProcesso_getRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param){
-	return &descritorProcesso_param->registrador;
-}
-
-/**
-* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a operação será realizada.
-* @param int				PC_param					O PC que o descritor de processo deverá ter.
-*/
-void descritorProcesso_setPC(DESCRITOR_PROCESSO *descritorProcesso_param, int PC_param){
-	descritorProcesso_param->PC = PC_param;
-}
-
-/**
-* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a operação será realizada.
-* @param REGISTRADOR		*registrador_param			Registrador que contém o valor que conterá o registrador 
-*														do descritor de processo ao fim da operação.
-*/
-void descritorProcesso_setRegistrador(DESCRITOR_PROCESSO *descritorProcesso_param, REGISTRADOR *registrador_param){
-	registrador_copiar(&descritorProcesso_param->registrador, registrador_param);
 }
 
 /**
@@ -80,6 +46,22 @@ void descritorProcesso_setStatus(DESCRITOR_PROCESSO *descritorProcesso_param, ST
 */
 STATUS_DESCRITOR_PROCESSO descritorProcesso_getStatus(DESCRITOR_PROCESSO *descritorProcesso_param){
 	return descritorProcesso_param->status;
+}
+
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será salva.
+* @param CONTEXTO			*contexto_param				O contexto que o processo terá.
+*/
+void descritorProcesso_setContexto(DESCRITOR_PROCESSO *descritorProcesso_param, CONTEXTO *contexto_param){
+	contexto_copiar(&descritorProcesso_param->contextoProcesso, contexto_param);
+}
+
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será recuperada.
+* @return CONTEXTO*	O contexto do processo.
+*/
+CONTEXTO* descritorProcesso_getContexto(DESCRITOR_PROCESSO *descritorProcesso_param){
+	return &descritorProcesso_param->contextoProcesso;
 }
 
 

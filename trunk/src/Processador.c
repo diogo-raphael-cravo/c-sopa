@@ -17,7 +17,7 @@
 */
 PALAVRA privada_buscaInstrucao(PROCESSADOR *processador_param, MEMORIA *memoria_param){
 	PALAVRA palavraLida;
-	memoria_sincronizado_ler(memoria_param, processador_param->PC, &palavraLida);
+	memoria_sincronizado_ler(memoria_param, contexto_getPC(&processador_param->contextoProcessador), &palavraLida);
 	return palavraLida;
 }
 
@@ -46,7 +46,7 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instrucao_param){
 	if(instrucao_param == INSTRUCAO_JPA){
 		tela_escreverNaColuna(&global_tela, "Jumping...", 1);
-		processador_param->PC = processador_param->IR.conteudo[3];
+		contexto_setPC(&processador_param->contextoProcessador, processador_param->IR.conteudo[3]);
 	} else if(instrucao_param == INSTRUCAO_INT){
 		tela_escreverNaColuna(&global_tela, "Interrupcao de Software.", 1);
 		kernel_rodar(&global_kernel, processador_param->IR.conteudo[3]);
@@ -64,9 +64,8 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 * @param PROCESSADOR	*processador_param	O processador que será inicializado.
 */
 void processador_inicializar(PROCESSADOR *processador_param){
-	processador_param->PC = 0;
 	registrador_inicializar(&processador_param->IR);
-	registrador_inicializar(&processador_param->registrador);
+	contexto_inicializar(&processador_param->contextoProcessador);
 }
 
 /**
@@ -80,13 +79,13 @@ void processador_rodar(PROCESSADOR *processador_param){
 
 	while(1){
 		usleep(1000*1000/10);
-		sprintf(mensagem, "PROCESSADOR: PC=%d IR=%d %d %d %d", 	processador_param->PC,
+		sprintf(mensagem, "PROCESSADOR: PC=%d IR=%d %d %d %d", 	contexto_getPC(&processador_param->contextoProcessador),
 			processador_param->IR.conteudo[0], processador_param->IR.conteudo[1], processador_param->IR.conteudo[2],
 			processador_param->IR.conteudo[3]);
 		tela_escreverNaColuna(&global_tela, mensagem, 1);
 
 		instrucaoLida = privada_buscaInstrucao(processador_param, &global_memoria);
-		processador_param->PC += 1;
+		contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 		registrador_carregarPalavra(&processador_param->IR, instrucaoLida);
 		instrucaoBuscada = privada_decodificaInstrucao(processador_param);
 		privada_executaInstrucao(processador_param, instrucaoBuscada);
@@ -100,40 +99,20 @@ void processador_rodar(PROCESSADOR *processador_param){
 }
 
 /**
-* @param PROCESSADOR	*processador_param	O processador no qual a informação será buscada.
-* @return int	PC do processador.
+* @param PROCESSADOR		*processador_param	O processador cujo contexto será restaurado.
+* @param CONTEXTO			*contexto_param		O contexto que o processador terá.
 */
-int processador_getPC(PROCESSADOR *processador_param){
-	return processador_param->PC;
+void processador_setContexto(PROCESSADOR *processador_param, CONTEXTO *contexto_param){
+	contexto_copiar(&processador_param->contextoProcessador, contexto_param);
 }
 
 /**
-* @param PROCESSADOR	*processador_param	O processador no qual a informação será buscada.
-* @return REGISTRADOR*	O registrador do processador.
+* @param PROCESSADOR		*processador_param	O processador cujo contexto será retornado.
+* @return CONTEXTO*	O contexto do processador.
 */
-REGISTRADOR* processador_getRegistrador(PROCESSADOR *processador_param){
-	return &processador_param->registrador;
+CONTEXTO* processador_getContexto(PROCESSADOR *processador_param){
+	return &processador_param->contextoProcessador;
 }
-
-/**
-* @param PROCESSADOR	*processador_param	O processador no qual a operação será realizada.
-* @param int				PC_param		O PC que o processador deverá ter.
-*/
-void processador_setPC(PROCESSADOR *processador_param, int PC_param){
-	processador_param->PC = PC_param;
-}
-
-/**
-* @param PROCESSADOR	*processador_param		O processador no qual a operação será realizada.
-* @param REGISTRADOR	*registrador_param		Registrador que contém o valor que conterá o registrador 
-*												do processador ao fim da operação.
-*/
-void processador_setRegistrador(PROCESSADOR *processador_param, REGISTRADOR *registrador_param){
-	registrador_copiar(&processador_param->registrador, registrador_param);
-}
-
-
-
 
 
 
