@@ -13,12 +13,9 @@
 * @param MEMORIA	*memoria_param	A memória que será limpa.
 */
 void privada_limpar(MEMORIA *memoria_param){
-	int particao=0;
 	int palavra=0;
-	for(; particao<QUANTIDADE_PARTICOES_MEMORIA; particao++){
-		for(palavra=0; palavra<QUANTIDADE_PALAVRAS_PARTICAO; palavra++){
-			memoria_param->particoes[particao][palavra] = 2*palavra;
-		}
+	for(; palavra<QUANTIDADE_PALAVRAS_MEMORIA; palavra++){
+		memoria_param->palavras[palavra] = 2*palavra;
 	}
 }
 
@@ -51,10 +48,9 @@ PALAVRA privada_bytesParaPalavra(MEMORIA *memoria_param, BYTE byte0_param, BYTE 
 */
 void privada_escreverBytes(MEMORIA *memoria_param, int endereco_param, 
 		BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param){
-	int particao = 0;
 	int palavra = endereco_param;
 	PALAVRA palavraReconstruida = privada_bytesParaPalavra(memoria_param, byte0_param, byte1_param, byte2_param, byte3_param);
-	memoria_param->particoes[particao][palavra] = palavraReconstruida;
+	memoria_param->palavras[palavra] = palavraReconstruida;
 }
 
 //---------------------------------------------------------------------
@@ -86,9 +82,12 @@ void memoria_sincronizado_inicializar(MEMORIA *memoria_param){
 */
 void memoria_sincronizado_escreverPalavra(MEMORIA *memoria_param, int endereco_param, PALAVRA dadosEscritos_param){
 	sem_wait(&memoria_param->mutexAcessoMemoria);
-	int particao = 0;
 	int palavra = endereco_param;
-	memoria_param->particoes[particao][palavra] = dadosEscritos_param;
+	if(palavra < QUANTIDADE_PALAVRAS_MEMORIA){
+		memoria_param->palavras[palavra] = dadosEscritos_param;
+	} else {
+		tela_imprimirTelaAzulDaMorte(&global_tela, "Ocorreu um erro fatal! Um programa tentou escrever em um endereco fisico inexistente!");
+	}
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
 
@@ -104,7 +103,11 @@ void memoria_sincronizado_escreverPalavra(MEMORIA *memoria_param, int endereco_p
 void memoria_sincronizado_escreverBytes(MEMORIA *memoria_param, int endereco_param, 
 		BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param){
 	sem_wait(&memoria_param->mutexAcessoMemoria);
-	privada_escreverBytes(memoria_param, endereco_param, byte0_param, byte1_param, byte2_param, byte3_param);
+	if(endereco_param < QUANTIDADE_PALAVRAS_MEMORIA){
+		privada_escreverBytes(memoria_param, endereco_param, byte0_param, byte1_param, byte2_param, byte3_param);
+	} else {
+		tela_imprimirTelaAzulDaMorte(&global_tela, "Ocorreu um erro fatal! Um programa tentou escrever em um endereco fisico inexistente!");
+	}
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
 
@@ -118,21 +121,15 @@ void memoria_sincronizado_escreverBytes(MEMORIA *memoria_param, int endereco_par
 void memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param, PALAVRA *destino_param){
 	sem_wait(&memoria_param->mutexAcessoMemoria);
 	PALAVRA dadosLidos;
-	int particao = 0;
 	int palavra = endereco_param;
-	dadosLidos = memoria_param->particoes[particao][palavra];
+	if(palavra < QUANTIDADE_PALAVRAS_MEMORIA){
+		dadosLidos = memoria_param->palavras[palavra];
+	} else {
+		tela_imprimirTelaAzulDaMorte(&global_tela, "Ocorreu um erro fatal! Um programa tentou ler um endereco fisico inexistente!");
+		dadosLidos = 0;
+	}
 	*destino_param = dadosLidos;
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
-/**
-* @param MEMORIA	*memoria_param			A memória em que a leitura será feita.
-* @param int		endereco_param			Endereço da memória em que a leitura será feita.
-* @return PALAVRA	Conteúdo da memória no endereço dado.
-*/
-PALAVRA memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param){
-	
-}
-
-
 
 

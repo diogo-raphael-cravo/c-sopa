@@ -106,7 +106,7 @@ void memoria_sincronizado_escreverBytes(MEMORIA *memoria_param, int endereco_par
 	if(endereco_param < QUANTIDADE_PALAVRAS_MEMORIA){
 		privada_escreverBytes(memoria_param, endereco_param, byte0_param, byte1_param, byte2_param, byte3_param);
 	} else {
-		tela_imprimirTelaAzulDaMorte(&global_tela, "Ocorreu um erro fatal! Um programa tentou escrever em um endereco fisico inexistente!");
+		tela_imprimirTelaAzulDaMorte(&global_tela, "Ocorreu um erro fatal! Um programa tentou escrever em um endereco fisico da memoria inexistente!");
 	}
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
@@ -125,7 +125,7 @@ void memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param, PALAVR
 	if(palavra < QUANTIDADE_PALAVRAS_MEMORIA){
 		dadosLidos = memoria_param->palavras[palavra];
 	} else {
-		tela_imprimirTelaAzulDaMorte(&global_tela, "Ocorreu um erro fatal! Um programa tentou ler um endereco fisico inexistente!");
+		tela_imprimirTelaAzulDaMorte(&global_tela, "Ocorreu um erro fatal! Um programa tentou ler um endereco fisico da memoria inexistente!");
 		dadosLidos = 0;
 	}
 	*destino_param = dadosLidos;
