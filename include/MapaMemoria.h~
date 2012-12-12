@@ -1,0 +1,26 @@
+/**
+* Concentra as funções de manipulação de memória.
+*/
+//---------------------------------------------------------------------
+//			DADOS						
+//---------------------------------------------------------------------
+
+//Constantes
+
+struct str_alocacaoMemoria{
+	int enderecoInicio; //Início do programa na memória.
+	int tamanhoAreaMemoriaPalavras; //Tamanho da área de memória reservada ao programa, em palavras.
+};
+
+typedef struct str_alocacaoMemoria ALOCACAO_MEMORIA;
+
+struct str_mapaMemoria{
+
+};
+
+typedef struct str_mapaMemoria MAPA_MEMORIA;
+
+//---------------------------------------------------------------------
+//			FUNÇÕES						
+//---------------------------------------------------------------------
+

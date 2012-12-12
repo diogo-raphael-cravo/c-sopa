@@ -118,7 +118,7 @@ void MMU_sincronizado_escreverLogico(MMU *MMU_param, int endereco_param, PALAVRA
 */
 int MMU_existeEspacoFisicoParaBloco(MMU *MMU_param, int enderecoInicial_param, int tamanhoBlocoPalavras_param){
 	int haEspaco = 0;
-	if(0 <= enderecoInicial_param
+	if(0 < enderecoInicial_param
 			&& enderecoInicial_param+tamanhoBlocoPalavras_param < QUANTIDADE_PALAVRAS_MEMORIA){
 		haEspaco = 1;
 	}

@@ -82,7 +82,7 @@ void MMU_sincronizado_escreverLogico(MMU *MMU_param, int endereco_param, PALAVRA
 * @return int	Indica se a memória tem posições físicas suficientes para gravar o bloco. 
 * ATENÇÃO: Não considera alocação! Somente EXISTÊNCIA de células físicas!
 */
-int MMU_existeEspacoFisicoParaBloco(MMU *MMU_param, int enderecoInicial_param, int tamanhoBlocoPalavras_param);
+void MMU_existeEspacoFisicoParaBloco(MMU *MMU_param, int enderecoInicial_param, int tamanhoBlocoPalavras_param);
 
 
 
