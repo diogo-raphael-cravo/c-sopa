@@ -10,8 +10,19 @@
 
 enum enum_instrucao{
 	INSTRUCAO_INEXISTENTE,
-	INSTRUCAO_JPA,
-	INSTRUCAO_INT
+	INSTRUCAO_ABSOLUTE_JUMP,
+	INSTRUCAO_LOAD_REGISTER_FROM_MEMORY,
+	INSTRUCAO_LOAD_REGISTER_FROM_CONSTANT,
+	INSTRUCAO_WRITE_REGISTER_IN_MEMORY,
+	INSTRUCAO_SUBTRACT_REGISTERS,
+	INSTRUCAO_ADD_REGISTERS,
+	INSTRUCAO_DECREMENT_REGISTER,
+	INSTRUCAO_INCREMENT_REGISTER,
+	INSTRUCAO_COMPARE_REGISTERS,
+	INSTRUCAO_JUMP_ON_ZERO,
+	INSTRUCAO_JUMP_ON_EQUAL,
+	INSTRUCAO_JUMP_ON_LESS,
+	INSTRUCAO_SOFTWARE_INTERRUPT
 };
 
 typedef enum enum_instrucao INSTRUCAO;
@@ -19,6 +30,9 @@ typedef enum enum_instrucao INSTRUCAO;
 struct str_processador{
 	REGISTRADOR IR;
 	CONTEXTO contextoProcessador;
+	int Z; //Registrador de estado de comparação: zero.
+	int E; //Registrador de estado de comparação: igual.
+	int L; //Registrador de estado de comparação: menor.
 };
 
 typedef struct str_processador PROCESSADOR;
