@@ -58,5 +58,12 @@ void contexto_setPC(CONTEXTO *contexto_param, int PC_param);
 */
 void contexto_setRegistrador(CONTEXTO *contexto_param, REGISTRADOR *registrador_param, int indiceRegistrador_param);
 
+/**
+* @param CONTEXTO		*contexto_param			O contexto no qual a operação será realizada.
+* @param PALAVRA		*palavra_param			Palavra que contém o valor que conterá o registrador 
+*												do contexto ao fim da operação.
+* @param int			indiceRegistrador_param	O índice em contexto_param->registradores do registrador que se quer.
+*/
+void contexto_setRegistradorPalavra(CONTEXTO *contexto_param, PALAVRA palavra_param, int indiceRegistrador_param);
 
 
