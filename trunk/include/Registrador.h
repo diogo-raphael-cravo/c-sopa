@@ -73,4 +73,11 @@ int registrador_contem(REGISTRADOR *registrador_param, BYTE byte0_param, BYTE by
 */
 void registrador_copiar(REGISTRADOR *registradorDestino_param, REGISTRADOR *registradorOrigem_param);
 
+/**
+* @param REGISTRADOR	*registrador_param	Registrador cujo conteúdo será alterado.
+* @param int			parcela_param	A quantidade que deve ser somada ao valor do registrador.
+*/
+void registrador_somar(REGISTRADOR *registrador_param, int parcela_param);
+
+
 

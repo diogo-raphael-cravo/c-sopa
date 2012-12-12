@@ -68,8 +68,8 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 */
 void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instrucao_param){
 	char mensagem[200];
-	int enderecoDestino, qualInterrupcao, qualRegistrador;
-	PALAVRA palavraGravada;
+	int enderecoDestino, qualInterrupcao, qualRegistrador, registradorOrigem, registradorDestino;
+	PALAVRA palavraGravada, resultadoOperacao, conteudoOrigem, conteudoDestino, conteudoRegistrador;
 	switch(instrucao_param){
 		case INSTRUCAO_ABSOLUTE_JUMP:
 			enderecoDestino = processador_param->IR.conteudo[3];
@@ -89,28 +89,76 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 			break;
 		case INSTRUCAO_LOAD_REGISTER_FROM_CONSTANT:
 			qualRegistrador = processador_param->IR.conteudo[2];
-			dadosGravados = processador_param->IR.conteudo[3];
+			palavraGravada = processador_param->IR.conteudo[3];
 			sprintf(mensagem, "LC %d %d", qualRegistrador, palavraGravada);
 			contexto_setRegistradorPalavra(&processador_param->contextoProcessador, palavraGravada, qualRegistrador);
 			break;
 		case INSTRUCAO_WRITE_REGISTER_IN_MEMORY:
-			
+			qualRegistrador = processador_param->IR.conteudo[2];
+			enderecoDestino = processador_param->IR.conteudo[3];
+			sprintf(mensagem, "WM %d %d", qualRegistrador, enderecoDestino);
+			MMU_sincronizado_escreverLogico(&global_MMU, enderecoDestino, 
+				registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador)));
 			break;
 		case INSTRUCAO_SUBTRACT_REGISTERS:
+			registradorDestino = processador_param->IR.conteudo[2];
+			registradorOrigem = processador_param->IR.conteudo[3];
+			resultadoOperacao = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino))
+				- registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem));
+			sprintf(mensagem, "SU %d %d", registradorDestino, registradorOrigem);
+			contexto_setRegistradorPalavra(&processador_param->contextoProcessador, resultadoOperacao, registradorDestino);
 			break;
 		case INSTRUCAO_ADD_REGISTERS:
+			registradorDestino = processador_param->IR.conteudo[2];
+			registradorOrigem = processador_param->IR.conteudo[3];
+			resultadoOperacao = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino))
+				+ registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem));
+			sprintf(mensagem, "AD %d %d", registradorDestino, registradorOrigem);
+			contexto_setRegistradorPalavra(&processador_param->contextoProcessador, resultadoOperacao, registradorDestino);
 			break;
 		case INSTRUCAO_DECREMENT_REGISTER:
+			qualRegistrador = processador_param->IR.conteudo[3];
+			sprintf(mensagem, "DEC %d", qualRegistrador);
+			registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador), -1);
 			break;
 		case INSTRUCAO_INCREMENT_REGISTER:
+			qualRegistrador = processador_param->IR.conteudo[3];
+			sprintf(mensagem, "INC %d", qualRegistrador);
+			registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador), 1);
 			break;
 		case INSTRUCAO_COMPARE_REGISTERS:
+			registradorOrigem = processador_param->IR.conteudo[2];
+			registradorDestino = processador_param->IR.conteudo[3];
+			conteudoOrigem = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem));
+			conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino));
+			sprintf(mensagem, "CP %d %d", registradorOrigem, registradorDestino);
+			processador_param->Z = (conteudoOrigem==0					 ? 1 : 0);
+			processador_param->E = (conteudoOrigem==conteudoDestino		 ? 1 : 0);
+			processador_param->L = (conteudoOrigem<conteudoDestino		 ? 1 : 0);
 			break;
 		case INSTRUCAO_JUMP_ON_ZERO:
+			qualRegistrador = processador_param->IR.conteudo[3];
+			conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador));
+			sprintf(mensagem, "JPZ %d", qualRegistrador);
+			if(processador_param->Z == 1){
+				contexto_setPC(&processador_param->contextoProcessador, conteudoRegistrador);
+			}
 			break;
 		case INSTRUCAO_JUMP_ON_EQUAL:
+			qualRegistrador = processador_param->IR.conteudo[3];
+			conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador));
+			sprintf(mensagem, "JPZ %d", qualRegistrador);
+			if(processador_param->Z == 1){
+				contexto_setPC(&processador_param->contextoProcessador, conteudoRegistrador);
+			}
 			break;
 		case INSTRUCAO_JUMP_ON_LESS:
+			qualRegistrador = processador_param->IR.conteudo[3];
+			conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador));
+			sprintf(mensagem, "JPZ %d", qualRegistrador);
+			if(processador_param->Z == 1){
+				contexto_setPC(&processador_param->contextoProcessador, conteudoRegistrador);
+			}
 			break;
 		default:
 			sprintf(mensagem, "Instrucao desconhecida.");
