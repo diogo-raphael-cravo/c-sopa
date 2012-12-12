@@ -17,9 +17,8 @@ enum enum_instrucao{
 typedef enum enum_instrucao INSTRUCAO;
 
 struct str_processador{
-	int PC;
 	REGISTRADOR IR;
-	REGISTRADOR registrador;
+	CONTEXTO contextoProcessador;
 };
 
 typedef struct str_processador PROCESSADOR;
@@ -39,28 +38,19 @@ void processador_inicializar(PROCESSADOR *processador_param);
 void processador_rodar(PROCESSADOR *processador_param);
 
 /**
-* @param PROCESSADOR	*processador_param	O processador no qual a informação será buscada.
-* @return int	PC do processador.
+* @param PROCESSADOR		*processador_param	O processador cujo contexto será restaurado.
+* @param CONTEXTO			*contexto_param		O contexto que o processador terá.
 */
-int processador_getPC(PROCESSADOR *processador_param);
+void processador_setContexto(PROCESSADOR *processador_param, CONTEXTO *contexto_param);
 
 /**
-* @param PROCESSADOR	*processador_param	O processador no qual a informação será buscada.
-* @return REGISTRADOR*	O registrador do processador.
+* @param PROCESSADOR		*processador_param	O processador cujo contexto será retornado.
+* @return CONTEXTO*	O contexto do processador.
 */
-REGISTRADOR* processador_getRegistrador(PROCESSADOR *processador_param);
+CONTEXTO* processador_getContexto(PROCESSADOR *processador_param);
 
-/**
-* @param PROCESSADOR	*processador_param	O processador no qual a operação será realizada.
-* @param int				PC_param		O PC que o processador deverá ter.
-*/
-void processador_setPC(PROCESSADOR *processador_param, int PC_param);
 
-/**
-* @param PROCESSADOR	*processador_param		O processador no qual a operação será realizada.
-* @param REGISTRADOR	*registrador_param		Registrador que contém o valor que conterá o registrador 
-*												do processador ao fim da operação.
-*/
-void processador_setRegistrador(PROCESSADOR *processador_param, REGISTRADOR *registrador_param);
+
+
 
 

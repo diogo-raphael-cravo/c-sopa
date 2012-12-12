@@ -9,25 +9,6 @@
 //---------------------------------------------------------------------
 //			FUNÇÕES PRIVADAS DESTE ARQUIVO						
 //---------------------------------------------------------------------
-/**
-* Salva contexto do processo fornecido.
-* @param KERNEL	*kernel_param			O kernel em que a operação será realizada.
-* @param DESCRITOR_PROCESSO	*descritorProcesso_param 	O processo no qual o contexto do processador será salvo.
-*/
-void privada_salvarContextoProcessadorNoProcesso(KERNEL *kernel_param, DESCRITOR_PROCESSO *descritorProcesso_param){
-	descritorProcesso_setPC(descritorProcesso_param, processador_getPC(&global_processador));
-	descritorProcesso_setRegistrador(descritorProcesso_param, processador_getRegistrador(&global_processador));
-}
-
-/**
-* Restaura o contexto do processo fornecido no processador.
-* @param KERNEL				*kernel_param				O kernel em que a operação será realizada.
-* @param DESCRITOR_PROCESSO	*descritorProcesso_param 	O processo cujo contexto será colocado no processador.
-*/
-void privada_restauraContextoProcessoAoProcessador(KERNEL *kernel_param, DESCRITOR_PROCESSO *descritorProcesso_param){
-	processador_setPC(&global_processador, descritorProcesso_getPC(descritorProcesso_param));
-	processador_setRegistrador(&global_processador, descritorProcesso_getRegistrador(descritorProcesso_param));
-}
 
 /**
 * Manda rodar o processo de índice dado.
@@ -93,7 +74,7 @@ int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param)
 	DESCRITOR_PROCESSO **novoProcesso = (DESCRITOR_PROCESSO**) malloc(sizeof(DESCRITOR_PROCESSO*));
 	*novoProcesso = (DESCRITOR_PROCESSO*) malloc(sizeof(DESCRITOR_PROCESSO));
 	descritorProcesso_inicializar(*novoProcesso, PID_param);
-	descritorProcesso_setPC(*novoProcesso, PC_param);
+	contexto_setPC(descritorProcesso_getContexto(*novoProcesso), PC_param);
 	descritorProcesso_setStatus(*novoProcesso, STATUS_PROCESSO_PRONTO);
 	if(kernel_param->quantidadeProcessos < MAXIMO_PROCESSOS_KERNEL){
 		FIFO_inserir(&kernel_param->filaProcessosProntos, novoProcesso);
@@ -134,7 +115,7 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
 
-	privada_salvarContextoProcessadorNoProcesso(kernel_param, *kernel_param->processoRodando);
+	descritorProcesso_setContexto(*kernel_param->processoRodando, processador_getContexto(&global_processador));
 	switch(interrupcao_param){
 		case INTERRUPCAO_CONSOLE:
 			tela_escreverNaColuna(&global_tela, console_ultimaLinhaDigitada(&global_console), 5);
@@ -153,5 +134,5 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 		default:
 			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);
 	}
-	privada_restauraContextoProcessoAoProcessador(kernel_param, *kernel_param->processoRodando);
+	processador_setContexto(&global_processador, descritorProcesso_getContexto(*kernel_param->processoRodando));
 }
