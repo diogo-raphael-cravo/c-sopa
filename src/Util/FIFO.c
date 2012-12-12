@@ -130,5 +130,54 @@ int FIFO_quantidadeElementos(FIFO *fifo_param){
 	return quantidade;
 }
 
+/**
+* @param FIFO	*fifo_param	 A fifo cuja informação é requisitada.
+* @return int	A capacidade total da FIFO, NÃO o número de elementos que ela tem.
+*/
+int FIFO_capacidadeNumeroElementos(FIFO *fifo_param){
+	return fifo_param->tamanho;
+}
+
+/**
+* Copia outra FIFO.
+* @param FIFO	 *fifoDestino_param	A fifo para a qual a cópia será feita.
+* @param FIFO	 *fifoOrigem_param	A fifo para da qual a cópia será feita.
+* ATENÇÃO: ambas devem ter o mesmo tamanho!
+*/
+void FIFO_copiar(FIFO *fifoDestino_param, FIFO *fifoOrigem_param){
+	FIFO copiaTemporaria;
+
+	FIFO_inicializar(&copiaTemporaria, fifoOrigem_param->tamanho);
+	FIFO_esvaziar(fifoDestino_param);
+	while(!FIFO_vazia(fifoOrigem_param)){
+		FIFO_inserir(&copiaTemporaria, FIFO_espiar(fifoOrigem_param));
+		FIFO_inserir(fifoDestino_param, FIFO_remover(fifoOrigem_param));
+	}
+	while(!FIFO_vazia(&copiaTemporaria)){
+		FIFO_inserir(fifoOrigem_param, FIFO_remover(&copiaTemporaria));
+	}
+}
+
+/**
+* Limpa a FIFO, tirando todos seus elementos.
+* @param FIFO	*fifo_param	A fifo que será limpa.
+*/
+void FIFO_esvaziar(FIFO *fifo_param){
+	while(!FIFO_vazia(fifo_param)){
+		FIFO_remover(fifo_param);
+	}
+}
+
+/**
+* Libera a memória alocada.
+* @param FIFO	*fifo_param A fifo que será destruída.
+*/
+void FIFO_destruir(FIFO *fifo_param){
+	free(fifo_param->conteudo);
+	free(fifo_param);
+}
+
+
+
 
 

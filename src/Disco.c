@@ -76,7 +76,7 @@ void privada_executar(DISCO *disco_param, OPERACAO_DISCO operacao_param, int end
 				tela_escreverNaColuna(&global_tela, "A carga nao foi implementada.",4);
 				break;
 			case OPERACAO_NENHUMA_DISCO:
-				tela_escreverNaColuna(&global_tela, "Algum erro.",4);
+				tela_escreverNaColuna(&global_tela, "ERRO: A operacao especificada nao existe.",4);
 		}
 	}
 }

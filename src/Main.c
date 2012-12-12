@@ -36,12 +36,12 @@ int main(void){
 	tela_adicionarColuna(&global_tela, "          TIMER");
 	tela_adicionarColuna(&global_tela, "          KERNEL");
 	tela_adicionarColuna(&global_tela, "          DISCO");
-	tela_adicionarColuna(&global_tela, "        CONSOLE");
+	tela_adicionarColuna(&global_tela, "           ETC");
 
 	console_inicializar(&global_console);
+	MMU_sincronizado_inicializar(&global_MMU, &global_memoria);
 	kernel_inicializar(&global_kernel);
 	memoria_sincronizado_inicializar(&global_memoria);
-	MMU_sincronizado_inicializar(&global_MMU, &global_memoria);
 	controladorInterrupcoes_inicializar(&global_controladorInterrupcoes);
 
 	pthread_create(&global_threadIdDisco, NULL, disco_rodar, &global_disco);

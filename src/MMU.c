@@ -110,6 +110,3 @@ void MMU_sincronizado_escreverLogico(MMU *MMU_param, int endereco_param, PALAVRA
 
 
 
-
-
-

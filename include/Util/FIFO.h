@@ -73,7 +73,40 @@ void* FIFO_espiar(FIFO *fifo_param);
 void* FIFO_remover(FIFO *fifo_param);
 
 /**
-* @param FIFO	*fifo_param A fifo em que a operação será realizada.
+* @param FIFO	*fifo_param	 A fifo em que a operação será realizada.
 * @return int	O número de elementos na fifo.
 */
 int FIFO_quantidadeElementos(FIFO *fifo_param);
+
+/**
+* @param FIFO	*fifo_param	 A fifo cuja informação é requisitada.
+* @return int	A capacidade total da FIFO, NÃO o número de elementos que ela tem.
+*/
+int FIFO_capacidadeNumeroElementos(FIFO *fifo_param);
+
+/**
+* Copia outra FIFO.
+* @param FIFO	 *fifoDestino_param	A fifo para a qual a cópia será feita.
+* @param FIFO	 *fifoOrigem_param	A fifo para da qual a cópia será feita.
+* ATENÇÃO: ambas devem ter o mesmo tamanho!
+*/
+void FIFO_copiar(FIFO *fifoDestino_param, FIFO *fifoOrigem_param);
+
+/**
+* Limpa a FIFO, tirando todos seus elementos.
+* @param FIFO	*fifo_param	A fifo que será limpa.
+*/
+void FIFO_esvaziar(FIFO *fifo_param);
+
+/**
+* Libera a memória alocada.
+* @param FIFO	*fifo_param A fifo que será destruída.
+*/
+void FIFO_destruir(FIFO *fifo_param);
+
+
+
+
+
+
+
