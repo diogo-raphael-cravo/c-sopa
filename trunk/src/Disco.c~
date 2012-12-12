@@ -76,7 +76,7 @@ void privada_executar(DISCO *disco_param, OPERACAO_DISCO operacao_param, int end
 				tela_escreverNaColuna(&global_tela, "A carga nao foi implementada.",4);
 				break;
 			case OPERACAO_NENHUMA_DISCO:
-				tela_escreverNaColuna(&global_tela, "Algum erro.",4);
+				tela_escreverNaColuna(&global_tela, "ERRO: A operacao especificada para o disco nao existe.",4);
 		}
 	}
 }
@@ -102,7 +102,7 @@ void disco_rodar(DISCO *disco_param){
 	disco_param->dadosUltimaLeitura = NULL;
 	disco_param->dadosProximaEscrita = POSICAO_VAZIA;
 	disco_param->enderecoProximaOperacao = 0;
-char mensagem[200];
+
 	while(1){
 		sem_wait(&disco_param->mutexAcessoDisco);
 
@@ -110,9 +110,6 @@ char mensagem[200];
 
 		privada_executar(disco_param, disco_param->proximaOperacao, 
 			disco_param->enderecoProximaOperacao, disco_param->dadosProximaEscrita);
-				
-				sprintf(mensagem, "op=%d", disco_param->proximaOperacao);
-				tela_escreverNaColuna(&global_tela, mensagem,4);
 
 		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_DISCO);
 	}

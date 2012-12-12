@@ -18,10 +18,13 @@
 /**
 * @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo que será inicializado.
 * @param int				PID_param					A PID deste descritor de processo.
+* @param int				enderecoInicio_param		Endereço, na memória, do início do processo.
+* @param int				tamanhoAreaMemoria_param	Tamanho da área de memória do processo, em palavras.
 */
-void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param){
+void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param, int enderecoInicio_param, int tamanhoAreaMemoria_param){
 	descritorProcesso_param->PID = PID_param;
-	
+	descritorProcesso_param->enderecoInicio = enderecoInicio_param;
+	descritorProcesso_param->tamanhoAreaMemoriaPalavras = tamanhoAreaMemoria_param;
 }
 
 /**
@@ -63,6 +66,24 @@ void descritorProcesso_setContexto(DESCRITOR_PROCESSO *descritorProcesso_param, 
 CONTEXTO* descritorProcesso_getContexto(DESCRITOR_PROCESSO *descritorProcesso_param){
 	return &descritorProcesso_param->contextoProcesso;
 }
+
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será recuperada.
+* @return int	O endereço de início do processo na memória.
+*/
+int descritorProcesso_getEnderecoInicio(DESCRITOR_PROCESSO *descritorProcesso_param){
+	return descritorProcesso_param->enderecoInicio;
+}
+
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será recuperada.
+* @return int	O tamanho da área de memória reservada ao processo, em palavras.
+*/
+int descritorProcesso_getTamanhoAreaMemoriaPalavras(DESCRITOR_PROCESSO *descritorProcesso_param){
+	return descritorProcesso_param->tamanhoAreaMemoriaPalavras;
+}
+
+
 
 
 

@@ -17,6 +17,8 @@ typedef enum enum_statusDescritorProcesso STATUS_DESCRITOR_PROCESSO;
 
 struct str_descritorProcesso{
 	int PID; //Process ID.
+	int enderecoInicio; //Início do programa na memória.
+	int tamanhoAreaMemoriaPalavras; //Tamanho da área de memória reservada ao programa, em palavras.
 	STATUS_DESCRITOR_PROCESSO status; //Indica se está executando, pronto ou bloqueado.
 	CONTEXTO contextoProcesso;
 };
@@ -29,8 +31,10 @@ typedef struct str_descritorProcesso DESCRITOR_PROCESSO;
 /**
 * @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo que será inicializado.
 * @param int				PID_param					A PID deste descritor de processo.
+* @param int				enderecoInicio_param		Endereço, na memória, do início do processo.
+* @param int				tamanhoAreaMemoria_param	Tamanho da área de memória do processo, em palavras.
 */
-void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param);
+void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param, int enderecoInicio_param, int tamanhoAreaMemoria_param);
 
 /**
 * @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será buscada.
@@ -61,6 +65,21 @@ void descritorProcesso_setContexto(DESCRITOR_PROCESSO *descritorProcesso_param, 
 * @return CONTEXTO*	O contexto do processo.
 */
 CONTEXTO* descritorProcesso_getContexto(DESCRITOR_PROCESSO *descritorProcesso_param);
+
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será recuperada.
+* @return int	O endereço de início do processo na memória.
+*/
+int descritorProcesso_getEnderecoInicio(DESCRITOR_PROCESSO *descritorProcesso_param);
+
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será recuperada.
+* @return int	O tamanho da área de memória reservada ao processo, em palavras.
+*/
+int descritorProcesso_getTamanhoAreaMemoriaPalavras(DESCRITOR_PROCESSO *descritorProcesso_param);
+
+
+
 
 
 

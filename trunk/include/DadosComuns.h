@@ -23,7 +23,7 @@
 #include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h, Registrador.h, Contexto.h
 #include "../include/DescritorProcesso.h" 			//Depende de: Contexto.h, Registrador.h
 #include "../include/Disco.h" 						//Depende de: Tela.h, Memoria.h, Processador.h, String.h
-#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h
+#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h, MMU.h
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Console.h" 					//Depende de: Tela.h, ControladorInterrupcoes.h
 

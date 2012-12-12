@@ -19,7 +19,7 @@
 #include "../include/MMU.h" 						//Depende de: Memoria.h
 #include "../include/ControladorInterrupcoes.h" 	//Depende de: 
 #include "../include/Registrador.h"					//Depende de: Memoria.h
-#include "../include/Contexto.h"					//Depende de: 
+#include "../include/Contexto.h"					//Depende de: Registrador.h
 #include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h, Registrador.h, Contexto.h
 #include "../include/DescritorProcesso.h" 			//Depende de: Contexto.h, Registrador.h
 #include "../include/Disco.h" 						//Depende de: Tela.h, Memoria.h, Processador.h, String.h
