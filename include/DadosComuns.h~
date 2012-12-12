@@ -15,12 +15,14 @@
 #include "../include/Util/FIFO.h" 					//Depende de: 
 #include "../include/Util/String.h" 				//Depende de: 
 #include "../include/Tela.h" 						//Depende de: 
-#include "../include/Memoria.h" 					//Depende de: 
+#include "../include/Memoria.h" 					//Depende de: Tela.h
+#include "../include/MMU.h" 						//Depende de: Memoria.h
 #include "../include/ControladorInterrupcoes.h" 	//Depende de: 
-#include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h
-#include "../include/DescritorProcesso.h" 			//Depende de: Processador.h
+#include "../include/Registrador.h"					//Depende de: Memoria.h
+#include "../include/Processador.h" 				//Depende de: Memoria.h, Tela.h, Registrador.h
+#include "../include/DescritorProcesso.h" 			//Depende de: Processador.h, Registrador.h
 #include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h
-#include "../include/Disco.h" 						//Depende de: Tela.h, Memoria.h, Processador.h
+#include "../include/Disco.h" 						//Depende de: Tela.h, Memoria.h, Processador.h, String.h
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Console.h" 					//Depende de: Tela.h, ControladorInterrupcoes.h
 
@@ -52,5 +54,6 @@ TIMER 						global_timer;
 CONTROLADOR_INTERRUPCOES 	global_controladorInterrupcoes;
 TELA 						global_tela;
 MEMORIA 					global_memoria;
+MMU							global_MMU;
 CONSOLE 					global_console;
 
