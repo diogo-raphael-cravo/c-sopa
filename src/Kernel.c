@@ -105,7 +105,14 @@ int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param,
 	return adicionou;
 }
 
-
+/**
+* Mata o processo que está rodando.
+* @param KERNEL	*kernel_param 	O kernel cujo processo será morto.
+*/
+void privada_matarProcessoRodando(KERNEL *kernel_param){
+	
+	
+}
 
 
 //---------------------------------------------------------------------
@@ -158,6 +165,12 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			privada_mandarProcessoRodandoEsperarDisco(kernel_param);
 			privada_escalonar(kernel_param);
 			disco_executarOperacao(&global_disco, OPERACAO_LEITURA_DISCO, 0, 0);
+			break;
+		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
+			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));
+			privada_matarProcessoRodando(&kernel_param);
+			privada_escalonar(kernel_param);
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);
