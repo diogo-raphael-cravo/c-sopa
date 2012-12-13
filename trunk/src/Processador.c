@@ -70,6 +70,8 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 	char mensagem[200];
 	int enderecoDestino, qualInterrupcao, qualRegistrador, registradorOrigem, registradorDestino;
 	PALAVRA palavraGravada, resultadoOperacao, conteudoOrigem, conteudoDestino, conteudoRegistrador;
+
+controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_DISCO);
 	switch(instrucao_param){
 		case INSTRUCAO_ABSOLUTE_JUMP:
 			enderecoDestino = processador_param->IR.conteudo[3];

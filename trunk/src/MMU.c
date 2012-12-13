@@ -83,7 +83,7 @@ void MMU_sincronizado_escreverFisico(MMU *MMU_param, int endereco_param, PALAVRA
 void MMU_sincronizado_lerLogico(MMU *MMU_param, int endereco_param, PALAVRA *destino_param){
 	sem_wait(&MMU_param->mutexAcessoMMU);
 	if(MMU_param->limite <= endereco_param){
-		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_MEMORIA);
+		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_SEGMENTACAO_MEMORIA);
 		*destino_param = 0;
 	} else {
 		memoria_sincronizado_ler(MMU_param->memoriaGerenciada, MMU_param->base + endereco_param, destino_param);
@@ -100,7 +100,7 @@ void MMU_sincronizado_lerLogico(MMU *MMU_param, int endereco_param, PALAVRA *des
 void MMU_sincronizado_escreverLogico(MMU *MMU_param, int endereco_param, PALAVRA palavraEscrita_param){
 	sem_wait(&MMU_param->mutexAcessoMMU);
 	if(MMU_param->limite <= endereco_param){
-		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_MEMORIA);
+		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_SEGMENTACAO_MEMORIA);
 	} else {
 		memoria_sincronizado_escreverPalavra(MMU_param->memoriaGerenciada, MMU_param->base + endereco_param, palavraEscrita_param);
 	}

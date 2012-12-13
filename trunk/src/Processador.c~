@@ -61,6 +61,8 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 	return instrucaoEncontrada;
 }
 
+/****/
+
 /**
 * Executa uma instrução.
 * @param PROCESSADOR	*processador_param	O processador que está executando a instrução.
@@ -70,6 +72,8 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 	char mensagem[200];
 	int enderecoDestino, qualInterrupcao, qualRegistrador, registradorOrigem, registradorDestino;
 	PALAVRA palavraGravada, resultadoOperacao, conteudoOrigem, conteudoDestino, conteudoRegistrador;
+
+controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_DISCO);
 	switch(instrucao_param){
 		case INSTRUCAO_ABSOLUTE_JUMP:
 			enderecoDestino = processador_param->IR.conteudo[3];
@@ -147,16 +151,16 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 		case INSTRUCAO_JUMP_ON_EQUAL:
 			qualRegistrador = processador_param->IR.conteudo[3];
 			conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador));
-			sprintf(mensagem, "JPZ %d", qualRegistrador);
-			if(processador_param->Z == 1){
+			sprintf(mensagem, "JPE %d", qualRegistrador);
+			if(processador_param->E == 1){
 				contexto_setPC(&processador_param->contextoProcessador, conteudoRegistrador);
 			}
 			break;
 		case INSTRUCAO_JUMP_ON_LESS:
 			qualRegistrador = processador_param->IR.conteudo[3];
 			conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador));
-			sprintf(mensagem, "JPZ %d", qualRegistrador);
-			if(processador_param->Z == 1){
+			sprintf(mensagem, "JPL %d", qualRegistrador);
+			if(processador_param->L == 1){
 				contexto_setPC(&processador_param->contextoProcessador, conteudoRegistrador);
 			}
 			break;
