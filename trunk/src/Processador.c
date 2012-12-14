@@ -12,12 +12,12 @@
 /**
 * Busca uma instrução na memória, a próxima a ser executada.
 * @param PROCESSADOR	*processador_param	O processador que está realizando a busca.
-* @param MEMORIA		*memoria_param		A memória em que a busca é feita.
+* @param MMU			*MMU_param			A memória em que a busca é feita.
 * @return PALAVRA	A instrução encontrada.
 */
-PALAVRA privada_buscaInstrucao(PROCESSADOR *processador_param, MEMORIA *memoria_param){
+PALAVRA privada_buscaInstrucao(PROCESSADOR *processador_param, MMU *MMU_param){
 	PALAVRA palavraLida;
-	memoria_sincronizado_ler(memoria_param, contexto_getPC(&processador_param->contextoProcessador), &palavraLida);
+	MMU_sincronizado_lerLogico(MMU_param, contexto_getPC(&processador_param->contextoProcessador), &palavraLida);
 	return palavraLida;
 }
 
@@ -71,7 +71,6 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 	int enderecoDestino, qualInterrupcao, qualRegistrador, registradorOrigem, registradorDestino;
 	PALAVRA palavraGravada, resultadoOperacao, conteudoOrigem, conteudoDestino, conteudoRegistrador;
 
-controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_DISCO);
 	switch(instrucao_param){
 		case INSTRUCAO_ABSOLUTE_JUMP:
 			enderecoDestino = processador_param->IR.conteudo[3];
@@ -200,7 +199,7 @@ void processador_rodar(PROCESSADOR *processador_param){
 			processador_param->IR.conteudo[3]);
 		tela_escreverNaColuna(&global_tela, mensagem, 1);
 
-		instrucaoLida = privada_buscaInstrucao(processador_param, &global_memoria);
+		instrucaoLida = privada_buscaInstrucao(processador_param, &global_MMU);
 		contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 		registrador_carregarPalavra(&processador_param->IR, instrucaoLida);
 		instrucaoBuscada = privada_decodificaInstrucao(processador_param);

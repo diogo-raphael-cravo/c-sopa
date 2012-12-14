@@ -177,10 +177,11 @@ void disco_carregar(DISCO *disco_param, char *caminhoArquivo_param){
 			palavra[1] = string_paraInt(palavraBytes[1]);
 			palavra[2] = string_paraInt(palavraBytes[2]);
 			palavra[3] = string_paraInt(palavraBytes[3]);
-			tela_escreverNaColuna(&global_tela, mensagem, 4);
 			privada_escreverNaProximaPalavraLivre(disco_param, palavra[0], palavra[1], palavra[2], palavra[3]);
-			sprintf(mensagem, "Lido '%s %s %s %s', gravado '%d'.", 
-				palavraBytes[0], palavraBytes[1], palavraBytes[2], palavraBytes[3], disco_param->conteudo[posicaoEscrita]);
+			sprintf(mensagem, "Lido '%s %s %s %s'", palavraBytes[0], palavraBytes[1], palavraBytes[2], palavraBytes[3]);
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
+			sprintf(mensagem, "Gravado '%d'", disco_param->conteudo[posicaoEscrita]);
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
 			posicaoEscrita++;
 		}
 	}

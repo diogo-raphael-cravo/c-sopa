@@ -32,6 +32,7 @@ void controladorInterrupcoes_inicializar(CONTROLADOR_INTERRUPCOES *controladorIn
 */
 void controladorInterrupcoes_set(CONTROLADOR_INTERRUPCOES *controladorInterrupcoes_param, INTERRUPCAO interrupcao_param){
 	sem_wait(&controladorInterrupcoes_param->mutexAcesso);
+
 	if(interrupcao_param == INTERRUPCAO_SEGMENTACAO_MEMORIA){
 		controladorInterrupcoes_param->haInterrupcaoMemoria = 1;
 	} else {

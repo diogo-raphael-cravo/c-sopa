@@ -110,8 +110,8 @@ int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param,
 * @param KERNEL	*kernel_param 	O kernel cujo processo será morto.
 */
 void privada_matarProcessoRodando(KERNEL *kernel_param){
-	
-	
+	mapaAlocacoesMemoria_liberar(&kernel_param->mapaMemoriaAlocada, descritorProcesso_getEnderecoInicio(*kernel_param->processoRodando));
+	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
 }
 
 
@@ -131,7 +131,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 	//Cuidado com a avaliação curto-circuito abaixo!
 	int adicionou = privada_adicionarProcesso(kernel_param, 456, 0, 100);
 	adicionou = privada_adicionarProcesso(kernel_param, 457, 30, 100) || adicionou;
-	adicionou = privada_adicionarProcesso(kernel_param, 458, 30, 100) || adicionou;
+	adicionou = privada_adicionarProcesso(kernel_param, 458, 100, 100) || adicionou;
 
 	if(adicionou){
 		privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
@@ -159,7 +159,9 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			privada_escalonar(kernel_param);
 			break;
 		case INTERRUPCAO_DISCO:
-			FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueados));
+			if(!FIFO_vazia(&kernel_param->filaProcessosBloqueados)){
+				FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueados));
+			}
 			break;
 		case INTERRUPCAO_SOFTWARE_PARA_DISCO:
 			privada_mandarProcessoRodandoEsperarDisco(kernel_param);
@@ -168,7 +170,7 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			break;
 		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
 			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));
-			privada_matarProcessoRodando(&kernel_param);
+			privada_matarProcessoRodando(kernel_param);
 			privada_escalonar(kernel_param);
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			break;
