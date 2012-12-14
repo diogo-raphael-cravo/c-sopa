@@ -76,7 +76,7 @@ void privada_executar(DISCO *disco_param, OPERACAO_DISCO operacao_param, int end
 				tela_escreverNaColuna(&global_tela, "A carga nao foi implementada.",4);
 				break;
 			case OPERACAO_NENHUMA_DISCO:
-				tela_escreverNaColuna(&global_tela, "ERRO: A operacao especificada para o disco nao existe.",4);
+				tela_escreverNaColuna(&global_tela, "ERRO: A operacao especificada nao existe.",4);
 		}
 	}
 }
@@ -111,7 +111,7 @@ void disco_rodar(DISCO *disco_param){
 		privada_executar(disco_param, disco_param->proximaOperacao, 
 			disco_param->enderecoProximaOperacao, disco_param->dadosProximaEscrita);
 
-		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_DISCO);
+		//controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_DISCO);
 	}
 }
 
@@ -177,10 +177,11 @@ void disco_carregar(DISCO *disco_param, char *caminhoArquivo_param){
 			palavra[1] = string_paraInt(palavraBytes[1]);
 			palavra[2] = string_paraInt(palavraBytes[2]);
 			palavra[3] = string_paraInt(palavraBytes[3]);
-			tela_escreverNaColuna(&global_tela, mensagem, 4);
 			privada_escreverNaProximaPalavraLivre(disco_param, palavra[0], palavra[1], palavra[2], palavra[3]);
-			sprintf(mensagem, "Lido '%s %s %s %s', gravado '%d'.", 
-				palavraBytes[0], palavraBytes[1], palavraBytes[2], palavraBytes[3], disco_param->conteudo[posicaoEscrita]);
+			sprintf(mensagem, "Lido '%s %s %s %s'", palavraBytes[0], palavraBytes[1], palavraBytes[2], palavraBytes[3]);
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
+			sprintf(mensagem, "Gravado '%d'", disco_param->conteudo[posicaoEscrita]);
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
 			posicaoEscrita++;
 		}
 	}

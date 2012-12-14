@@ -72,6 +72,7 @@ void memoria_sincronizado_inicializar(MEMORIA *memoria_param){
 	privada_escreverBytes(memoria_param, 31, 'L', 'D',  0,  10);
 	privada_escreverBytes(memoria_param, 32, 'I', 'N', 'T', 36);
 	privada_escreverBytes(memoria_param, 33, 'J', 'P', 'A', 30);
+	privada_escreverBytes(memoria_param, 100, 'J', 'P', 'A', 200);
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
 
