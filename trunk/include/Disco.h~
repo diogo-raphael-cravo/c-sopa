@@ -8,6 +8,7 @@
 //Constantes
 #define CAMINHO_ARQUIVO_BASE_DISCO "dados/disco.txt"
 #define TAMANHO_DISCO_PALAVRAS 1024
+#define TAMANHO_BLOCO TAMANHO_DISCO_PALAVRAS/32
 #define POSICAO_VAZIA -99999
 
 enum enum_operacaoDisco{
