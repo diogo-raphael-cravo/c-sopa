@@ -41,6 +41,7 @@ int main(void){
 	console_inicializar(&global_console);
 	memoria_sincronizado_inicializar(&global_memoria);
 	MMU_sincronizado_inicializar(&global_MMU, &global_memoria);
+	disco_inicializar(&global_disco);
 	kernel_inicializar(&global_kernel);
 	controladorInterrupcoes_inicializar(&global_controladorInterrupcoes);
 

@@ -6,11 +6,11 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define CAMINHO_ARQUIVO_BASE_DISCO "dados/disco.txt"
 #define TAMANHO_DISCO_PALAVRAS 1024
 #define QUANTIDADE_BLOCOS_DISCO 32
 #define TAMANHO_BLOCO TAMANHO_DISCO_PALAVRAS/QUANTIDADE_BLOCOS_DISCO
 #define POSICAO_VAZIA -99999
+#define DADO_NENHUM NULL
 
 enum enum_operacaoDisco{
 	OPERACAO_LEITURA_DISCO,
@@ -35,7 +35,8 @@ struct str_disco{
 	int tamanhoUltimaLeitura; //A quantidade de palavras lidas na última leitura.
 	PALAVRA* dadosUltimaLeitura; //Os dados lidos na última leitura.
 	OPERACAO_DISCO proximaOperacao; //Próxima operação que deve ser executada pelo disco.
-	PALAVRA dadosProximaEscrita; //Dados que serão escritos na próxima escrita.
+	PALAVRA* dadosProximaEscrita; //Dados que serão escritos na próxima escrita.
+	int tamanhoPalavrasProximaEscrita; //Para uma escrita, a quantidade de palavras que serão escritas.
 	int enderecoProximaOperacao; //Endereço em que a próxima operação será realizada.
 };
 
@@ -45,6 +46,11 @@ typedef struct str_disco DISCO;
 //			FUNÇÕES						
 //---------------------------------------------------------------------
 /**
+* @param DISCO	*disco_param	Inicializa o disco.
+*/
+void disco_inicializar(DISCO *disco_param);
+
+/**
 * Inicia thread do disco.
 * @param DISCO	*disco_param	O disco que irá 'rodar'.
 */
@@ -52,24 +58,14 @@ void disco_rodar(DISCO *disco_param);
 
 /**
 * Libera o disco para executar uma operação.
-* @param DISCO				*disco_param	O disco em que a operação será realizada.
-* @param OPERACAO_DISCO 	operacao_param	A operação que será realizada.s
-* @param int				endereco_param	Para operações sobre um endereço, o próprio.
-* @param int				dados_param		Para uma escrita, os dados que serão escritos.
+* @param DISCO				*disco_param			O disco em que a operação será realizada.
+* @param OPERACAO_DISCO 	operacao_param			A operação que será realizada.s
+* @param int				enderecoOuBloco_param	Para operações sobre um endereço, o próprio. Para carga, o bloco que será carregado.
+* @param PALAVRA			*dados_param			Para uma escrita, os dados que serão escritos.
+* @param int				tamanhoDados_param		Para uma escrita, a quantidade de palavras que serão escritas.
 * ATENÇÃO: A operação não é executada de imediato, mas algum tempo depois.
 */
-void disco_executarOperacao(DISCO *disco_param, OPERACAO_DISCO operacao_param, int endereco_param, PALAVRA dados_param);
-
-/**
-* Carrega os dados do arquivo, juntando-os aos dados que estão no disco.
-* Os dados são colocados à partir da primeira posição livre neste disco.
-* @param DISCO	*disco_param			O disco em que a operação será realizada.
-* @param char*	*caminhoArquivo_param	Arquivo que contém os dados, formatados da seguinte forma:
-*										J P A 0
-*										255 255 255 255
-*										0 0 0 0
-*/
-void disco_carregar(DISCO *disco_param, char *caminhoArquivo_param);
+void disco_executarOperacao(DISCO *disco_param, OPERACAO_DISCO operacao_param, int enderecoOuBloco_param, PALAVRA *dados_param, int tamanhoDados_param);
 
 /**
 * @param DISCO	*disco_param			O disco em que a operação será realizada.
@@ -90,6 +86,18 @@ int disco_tamanhoPalavrasUltimaLeitura(DISCO *disco_param);
 */
 PALAVRA disco_palavrasUltimaLeituraPosicao(DISCO *disco_param, int posicaoBuffer_param);
 
+/*
+* Escreve imediatamente os bytes na posição dada livre do disco.
+* Corre o risco de não escrever os dados em posições contíguas quando chamada sucessivamente.
+* @param DISCO		*disco_param		O disco em que será gravado.
+* @param int		posicao_param		A posição do disco em que será gravado.
+* @param BYTE		byte0_param			O byte que ficará na posição 0 da palavra, que conterá o bit mais significativo da palavra.
+* @param BYTE		byte1_param			O byte que ficará na posição 1 da palavra.
+* @param BYTE		byte2_param			O byte que ficará na posição 2 da palavra.
+* @param BYTE		byte3_param			O byte que ficará na posição 3 da palavra.
+* ATENÇÃO: esta função serve somente para a inicialização do disco, de forma que dê a impressão de ser persistente.
+*/
+void disco_inicializarPosicao(DISCO *disco_param, int posicao_param, BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param);
 
 
 

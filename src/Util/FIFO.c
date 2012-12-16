@@ -106,9 +106,10 @@ void* FIFO_remover(FIFO *fifo_param){
 	void* elemento;
 	if(!FIFO_vazia(fifo_param)){
 		elemento = fifo_param->conteudo[0];
-		for(indice=0; indice<fifo_param->tamanho-1; indice++){		
+		for(indice=0; indice<fifo_param->tamanho-1; indice++){
 			fifo_param->conteudo[indice] = fifo_param->conteudo[indice+1];
 		}
+		fifo_param->conteudo[FIFO_quantidadeElementos(fifo_param)] = FIFO_ELEMENTO_INEXISTENTE;
 	} else {
 		elemento = FIFO_ELEMENTO_INEXISTENTE;
 	}
@@ -149,6 +150,7 @@ void FIFO_copiar(FIFO *fifoDestino_param, FIFO *fifoOrigem_param){
 
 	FIFO_inicializar(&copiaTemporaria, fifoOrigem_param->tamanho);
 	FIFO_esvaziar(fifoDestino_param);
+
 	while(!FIFO_vazia(fifoOrigem_param)){
 		FIFO_inserir(&copiaTemporaria, FIFO_espiar(fifoOrigem_param));
 		FIFO_inserir(fifoDestino_param, FIFO_remover(fifoOrigem_param));

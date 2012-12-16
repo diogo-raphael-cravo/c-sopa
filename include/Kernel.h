@@ -9,14 +9,26 @@
 #define MAXIMO_PROCESSOS_KERNEL 10
 #define DESCRITOR_PROCESSO_INEXISTENTE NULL
 
+enum enum_comandosUsuario{
+	COMANDO_NENHUM,
+	COMANDO_EXECUCAO_PROGRAMA
+};
+
+typedef enum enum_comandosUsuario COMANDO_USUARIO;
+
 struct str_kernel{
 	FIFO filaProcessosBloqueados; //Indica os índices de descritoresProcessos que contém processos bloqueados.
 									//Os processos são ordenados em uma fila por ordem de "chegada".
 	FIFO filaProcessosProntos; //Indica os índices de descritoresProcessos que contém processos prontos para rodar.
 								//Os processos são ordenados em uma fila por ordem de "chegada".
 	MAPA_ALOCACOES_MEMORIA mapaMemoriaAlocada; //Representa o que foi alocado de memória, permitindo controle de endereçamento lógico.
+	SISTEMA_ARQUIVOS sistemaDeArquivos; //O sistema de arquivos, com todos os arquivos em todos os discos!
 	DESCRITOR_PROCESSO** processoRodando; //Ponteiro para o processo que está rodando.
+	ARQUIVO *arquivoTransferido; //Arquivo que está sendo transferido para a memória.
 	int quantidadeProcessos; //A quantidade de processos no momento.
+	int fazendoTransferenciaDiscoMemoria; //Indica se o kernel está realizando uma transferência do disco para a memória.
+	int criandoProcesso; //Indica se o kernel está criando um processo.
+	int ultimoPIDUsado; //Último PID utilizado para um processo deste kernel.
 };
 
 typedef struct str_kernel KERNEL;

@@ -64,15 +64,14 @@ void memoria_sincronizado_inicializar(MEMORIA *memoria_param){
 	sem_wait(&memoria_param->mutexAcessoMemoria);
 	privada_limpar(memoria_param);
 
-	privada_escreverBytes(memoria_param, 0,  'X', 'M',  0,  10);
+	/*privada_escreverBytes(memoria_param, 0,  'X', 'M',  0,  10);
 	privada_escreverBytes(memoria_param, 1,  'X', 'D',  0,  10);
 	privada_escreverBytes(memoria_param, 2,  'S', 'M',  0,  10);
 	privada_escreverBytes(memoria_param, 3,  'J', 'P', 'A', 0);
 	privada_escreverBytes(memoria_param, 30, 'L', 'D',  0,  10);
 	privada_escreverBytes(memoria_param, 31, 'L', 'D',  0,  10);
 	privada_escreverBytes(memoria_param, 32, 'I', 'N', 'T', 36);
-	privada_escreverBytes(memoria_param, 33, 'J', 'P', 'A', 30);
-	privada_escreverBytes(memoria_param, 100, 'J', 'P', 'A', 200);
+	privada_escreverBytes(memoria_param, 33, 'J', 'P', 'A', 30);*/
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
 
@@ -132,5 +131,29 @@ void memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param, PALAVR
 	*destino_param = dadosLidos;
 	sem_post(&memoria_param->mutexAcessoMemoria);
 }
+
+/**
+* Imprimir toda memória, para fins de debug.
+* @param MEMORIA	*memoria_param			A memória em que a leitura será feita.
+*/
+void memoria_imprimir(MEMORIA *memoria_param){
+	int palavra = 0;
+	char mensagem[200];
+	tela_escreverNaColuna(&global_tela, "Imprimindo memoria.", 5);
+	for(; palavra<QUANTIDADE_PALAVRAS_MEMORIA; palavra++){
+		if(2*palavra != memoria_param->palavras[palavra]){
+			sprintf(mensagem, "*(%d)=%d=", palavra, memoria_param->palavras[palavra]);
+			tela_escreverNaColuna(&global_tela, mensagem, 5);
+			sprintf(mensagem, "%d %d %d %d", 
+				(((memoria_param->palavras[palavra] & 0xFF000000)/256)/256)/256,
+				((memoria_param->palavras[palavra] & 0x00FF0000)/256)/256,
+				(memoria_param->palavras[palavra] & 0x0000FF00)/256,
+				memoria_param->palavras[palavra] & 0x000000FF);
+			tela_escreverNaColuna(&global_tela, mensagem, 5);
+		}
+	}
+}
+
+
 
 
