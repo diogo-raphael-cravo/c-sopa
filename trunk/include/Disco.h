@@ -99,6 +99,11 @@ PALAVRA disco_palavrasUltimaLeituraPosicao(DISCO *disco_param, int posicaoBuffer
 */
 void disco_inicializarPosicao(DISCO *disco_param, int posicao_param, BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param);
 
+/**
+* Imprimir todo disco, para fins de debug.
+* @param DISCO	*disco_param			O disco em que a leitura será feita.
+*/
+void disco_imprimir(DISCO *disco_param);
 
 
 

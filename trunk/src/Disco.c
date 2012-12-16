@@ -91,6 +91,7 @@ void privada_executar(DISCO *disco_param, OPERACAO_DISCO operacao_param, int end
 				for(palavraLida=0; palavraLida<TAMANHO_BLOCO; palavraLida++){
 					disco_param->dadosUltimaLeitura[bloco_param*TAMANHO_BLOCO+palavraLida] = disco_param->conteudo[bloco_param*TAMANHO_BLOCO+palavraLida];
 				}
+disco_imprimir(disco_param);
 				break;
 			case OPERACAO_NENHUMA_DISCO:
 				tela_escreverNaColuna(&global_tela, "ERRO: A operacao especificada nao existe.",4);
@@ -216,5 +217,25 @@ void disco_inicializarPosicao(DISCO *disco_param, int posicao_param, BYTE byte0_
 		| (byte3_param & 0x000000FF);
 }
 
-
+/**
+* Imprimir todo disco, para fins de debug.
+* @param DISCO	*disco_param			O disco em que a leitura será feita.
+*/
+void disco_imprimir(DISCO *disco_param){
+	int palavra = 0;
+	char mensagem[200];
+	tela_escreverNaColuna(&global_tela, "Imprimindo disco.", 5);
+	for(; palavra<TAMANHO_DISCO_PALAVRAS; palavra++){
+		if(disco_param->conteudo[palavra] != POSICAO_VAZIA){
+			sprintf(mensagem, "*(%d)=%d=", palavra, disco_param->conteudo[palavra]);
+			tela_escreverNaColuna(&global_tela, mensagem, 5);
+			sprintf(mensagem, "%d %d %d %d", 
+				(((disco_param->conteudo[palavra] & 0xFF000000)/256)/256)/256,
+				((disco_param->conteudo[palavra] & 0x00FF0000)/256)/256,
+				(disco_param->conteudo[palavra] & 0x0000FF00)/256,
+				disco_param->conteudo[palavra] & 0x000000FF);
+			tela_escreverNaColuna(&global_tela, mensagem, 5);
+		}
+	}
+}
 

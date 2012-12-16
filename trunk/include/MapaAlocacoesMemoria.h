@@ -58,4 +58,3 @@ void mapaAlocacoesMemoria_liberar(MAPA_ALOCACOES_MEMORIA *mapa_param, int endere
 
 
 
-

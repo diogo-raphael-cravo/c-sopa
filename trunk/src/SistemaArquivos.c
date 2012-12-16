@@ -44,12 +44,13 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 				&& dir->d_name[5] == 'V'
 				&& dir->d_name[6] == 'O'
 				&& dir->d_name[7] == '_'){
-					caminhoArquivo[0] = '\0';
+					memset(caminhoArquivo, '\0', 200);
 					strcat(caminhoArquivo, DIRETORIO_DADOS_DISCO);
 					strcat(caminhoArquivo, "/");
 					strcat(caminhoArquivo, dir->d_name);
 					*arquivoLido = (ARQUIVO*) malloc(sizeof(ARQUIVO));
 
+					memset(nomeArquivo, '\0', 200);
 					for(caractere=0; caractere<strlen(dir->d_name)-8; caractere++){
 						nomeArquivo[caractere] = dir->d_name[caractere+8];
 					}

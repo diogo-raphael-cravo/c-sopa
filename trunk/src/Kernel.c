@@ -82,9 +82,11 @@ void privada_escalonar(KERNEL *kernel_param){
 * @param int					PID_param						PID do descritor do processo que será adicionado.
 * @param int					PC_param						PC do descritor do processo que será adicionado.
 * @param int					tamanhoMemoriaPalavras_param	Tamanho da região de memória do processo, quando criado.
+* @param int					enderecoMemoria_param			Caso o processo esteja na memória. 
+*																Caso contrário, deverá conter MEMORIA_ENDERECO_INEXISTENTE.
 * @return int	Indica se conseguiu adicionar o processo.
 */
-int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param, int tamanhoMemoriaPalavras_param){
+int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param, int tamanhoMemoriaPalavras_param, int enderecoMemoria_param){
 	int adicionou = 0;
 	int alocouMemoria;
 	int enderecoAlocado;
@@ -92,7 +94,11 @@ int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param,
 	*novoProcesso = (DESCRITOR_PROCESSO*) malloc(sizeof(DESCRITOR_PROCESSO));
 	
 	if(kernel_param->quantidadeProcessos < MAXIMO_PROCESSOS_KERNEL){
-		enderecoAlocado = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada, tamanhoMemoriaPalavras_param);
+		if(enderecoMemoria_param == MEMORIA_ENDERECO_INEXISTENTE){
+			enderecoAlocado = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada, tamanhoMemoriaPalavras_param);
+		} else {
+			enderecoAlocado = enderecoMemoria_param;
+		}
 		alocouMemoria = (enderecoAlocado != MEMORIA_ENDERECO_INEXISTENTE);
 
 		if(alocouMemoria){
@@ -128,22 +134,28 @@ void privada_matarProcessoRodando(KERNEL *kernel_param){
 * Inicia a criação de um processo.
 * @param KERNEL	*kernel_param		O kernel que criará o processo.
 * @param char*	nomeArquivo_param	Nome do arquivo que contém o processo.
-* @return int	Indica se foi possível criar.
+* @return ERRO_KERNEL	Indica o erro que aconteceu, caso algum erro tenha acontecido.
 * ATENÇÃO: se o disco não estiver rodando, vai travar a thread até que o disco rode!
 */
 int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
-	int conseguiu=0;
+	int erro=0;
 	ARQUIVO *arquivoTransferido;
 	if(!kernel_param->criandoProcesso){
 		kernel_param->criandoProcesso = 1;
 		arquivoTransferido = sistemaArquivos_buscaPorNome(&kernel_param->sistemaDeArquivos, nomeArquivo_param);
 		if(arquivoTransferido != NULL){
-			conseguiu = 1;
+			erro = KERNEL_ERRO_NENHUM;
 			kernel_param->arquivoTransferido = arquivoTransferido;
 			disco_executarOperacao(&global_disco, OPERACAO_CARGA_DISCO, arquivoTransferido->blocoInicioDisco, 0, 0);
+		} else {
+			kernel_param->criandoProcesso = 0;
+			erro = KERNEL_ERRO_ARQUIVO_INEXISTENTE;
 		}
+	} else {
+		kernel_param->criandoProcesso = 0;
+		erro = KERNEL_ERRO_CRIANDO_PROCESSO;
 	}
-	return conseguiu;
+	return erro;
 }
 
 /**
@@ -170,7 +182,7 @@ COMANDO_USUARIO privada_getComandoUsuario(KERNEL *kernel_param, char* comando_pa
 *													n-ésimo parâmetro do comando do usuário. NULL, caso não haja.
 * @param int				ordemParametro_param	Valor de 'n'.
 */
-char* privada_getParametroComandoUsuario(KERNEL *kernel_param, char* comando_param, char* destinoParametro_param, int ordemParametro_param){
+void privada_getParametroComandoUsuario(KERNEL *kernel_param, char* comando_param, char* destinoParametro_param, int ordemParametro_param){
 	char parametro[200];
 	char* palavra=strtok(comando_param, " ");
 	int posicaoPalavra = 0;
@@ -210,18 +222,22 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 	COMANDO_USUARIO comandoExecutado = privada_getComandoUsuario(kernel_param, comando_param);
 	char mensagem[200];
 	char parametro[200];
-	int conseguiu=0;
+	int erro=0;
 
 	switch(comandoExecutado){
 		case COMANDO_EXECUCAO_PROGRAMA:
 				privada_getParametroComandoUsuario(kernel_param, comando_param, parametro, 1);
-				conseguiu = privada_criarProcesso(kernel_param, parametro);
-				if(conseguiu){
+				erro = privada_criarProcesso(kernel_param, parametro);
+				if(erro == KERNEL_ERRO_NENHUM){
 					sprintf(mensagem, "Executando programa %s", parametro);
 					tela_escreverNaColuna(&global_tela, mensagem, 3);
-				} else {
+				} else if(erro == KERNEL_ERRO_ARQUIVO_INEXISTENTE){
 					sprintf(mensagem, "O programa %s nao foi encontrado.", parametro);
 					tela_escreverNaColuna(&global_tela, mensagem, 3);
+				} else if(erro == KERNEL_ERRO_CRIANDO_PROCESSO){
+					tela_escreverNaColuna(&global_tela, "O kernel jah estah criando um processo. Por favor, aguarde.", 3);
+				} else {
+					tela_escreverNaColuna(&global_tela, "O programa nao foi criado por causa de um erro desconhecido.", 3);
 				}
 			break;
 		default:
@@ -248,7 +264,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 	mapaAlocacoesMemoria_inicializar(&kernel_param->mapaMemoriaAlocada, &global_MMU, MAXIMO_PROCESSOS_KERNEL);
 
 	memoria_sincronizado_escreverBytes(&global_memoria, 0, 'J', 'P', 'A', 0);
-	int adicionou = privada_adicionarProcesso(kernel_param, privada_getPIDNaoUsado(kernel_param), 0, 1);
+	int adicionou = privada_adicionarProcesso(kernel_param, privada_getPIDNaoUsado(kernel_param), 0, 1, MEMORIA_ENDERECO_INEXISTENTE);
 
 	if(adicionou){
 		privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
@@ -281,17 +297,24 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			break;
 		case INTERRUPCAO_DISCO:
 			if(kernel_param->criandoProcesso){
-				int enderecoMemoria = 1;
+				int enderecoMemoria = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada, 
+					arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
 				int adicionouProcesso = 0;
+				int faltouMemoria = (enderecoMemoria == MEMORIA_ENDERECO_INEXISTENTE);
 				int PID = privada_getPIDNaoUsado(kernel_param);
 				arquivo_transferirParaMemoria(kernel_param->arquivoTransferido, &global_MMU, enderecoMemoria);
 				adicionouProcesso = privada_adicionarProcesso(kernel_param, PID, 0, 
-					arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
-				if(!adicionouProcesso){
-					sprintf(mensagem, "O kernel nao conseguiu criar o processo %d com tamanho %d.", 
+					arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido), enderecoMemoria);
+				if(!adicionouProcesso && !faltouMemoria){
+					sprintf(mensagem, "O kernel nao conseguiu criar o processo %d com tamanho %d. O motivo eh desconhecido.", 
+						PID, arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
+					tela_imprimirTelaAzulDaMorte(&global_tela, mensagem);
+				} else if(!adicionouProcesso && faltouMemoria){
+					sprintf(mensagem, "O kernel nao conseguiu criar o processo %d com tamanho %d, pois faltou memoria.", 
 						PID, arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
 					tela_imprimirTelaAzulDaMorte(&global_tela, mensagem);
 				}
+				kernel_param->criandoProcesso = 0;
 			} else if(kernel_param->fazendoTransferenciaDiscoMemoria){
 				tela_imprimirTelaAzulDaMorte(&global_tela, "KERNEL: a transferencia DISCO>MEMORIA nao foi implementada ainda.");
 			} else {
