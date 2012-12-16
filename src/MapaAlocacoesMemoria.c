@@ -100,8 +100,9 @@ int mapaAlocacoesMemoria_alocar(MAPA_ALOCACOES_MEMORIA *mapa_param, int tamanhoA
 		free(*alocacaoNova);
 		free(alocacaoNova);
 	}
-	free(alocacao);
+	//free(alocacao); //Não dê free neste aqui, ou vai dar free no próprio elemento do filaMemoriaAlocada.
 	free(alocacaoContigua);
+
 	return enderecoLivre;
 }
 
@@ -110,7 +111,24 @@ int mapaAlocacoesMemoria_alocar(MAPA_ALOCACOES_MEMORIA *mapa_param, int tamanhoA
 * @param int					enderecoInicial_param	O endereço que inicia o bloco que será liberado.
 */
 void mapaAlocacoesMemoria_liberar(MAPA_ALOCACOES_MEMORIA *mapa_param, int enderecoInicial_param){
-	
+	FIFO copiaTemporaria;
+	ALOCACAO_MEMORIA** alocacaoDeletada;
+	ALOCACAO_MEMORIA **alocacao = (ALOCACAO_MEMORIA**)malloc(sizeof(ALOCACAO_MEMORIA*));
+	FIFO_inicializar(&copiaTemporaria, FIFO_quantidadeElementos(&mapa_param->filaMemoriaAlocada));
+	while(!FIFO_vazia(&mapa_param->filaMemoriaAlocada)){
+		*alocacao = * (ALOCACAO_MEMORIA**) FIFO_espiar(&mapa_param->filaMemoriaAlocada);
+		if((*alocacao)->enderecoInicio == enderecoInicial_param){
+			alocacaoDeletada = (ALOCACAO_MEMORIA**) FIFO_remover(&mapa_param->filaMemoriaAlocada);
+			free(*alocacaoDeletada);
+			free(alocacaoDeletada);
+		} else {
+			FIFO_inserir(&copiaTemporaria, FIFO_remover(&mapa_param->filaMemoriaAlocada));
+		}
+	}
+	FIFO_copiar(&mapa_param->filaMemoriaAlocada, &copiaTemporaria);
+	FIFO_destruir(&copiaTemporaria);
+
+	free(alocacao);
 }
 
 
