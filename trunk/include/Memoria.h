@@ -53,3 +53,14 @@ void memoria_sincronizado_escreverBytes(MEMORIA *memoria_param, int endereco_par
 * @return PALAVRA	Conteúdo da memória no endereço dado.
 */
 void memoria_sincronizado_ler(MEMORIA *memoria_param, int endereco_param, PALAVRA *destino_param);
+
+/**
+* Imprimir toda memória, para fins de debug.
+* @param MEMORIA	*memoria_param			A memória em que a leitura será feita.
+*/
+void memoria_imprimir(MEMORIA *memoria_param);
+
+
+
+
+

@@ -89,7 +89,7 @@ PALAVRA registrador_lerPalavra(REGISTRADOR *registrador_param){
 *		exemplo: registrador_contem('*', 'A', 'Y', 'P'); Considerará somente os bytes 1, 2 e 3.
 */
 int registrador_contem(REGISTRADOR *registrador_param, BYTE byte0_param, BYTE byte1_param, BYTE byte2_param, BYTE byte3_param){
-	int contem=1;	
+	int contem=1;
 	if(byte0_param != BYTE_QUALQUER && registrador_param->conteudo[0] != byte0_param){ contem = 0; }
 	if(byte1_param != BYTE_QUALQUER && registrador_param->conteudo[1] != byte1_param){ contem = 0; }
 	if(byte2_param != BYTE_QUALQUER && registrador_param->conteudo[2] != byte2_param){ contem = 0; }

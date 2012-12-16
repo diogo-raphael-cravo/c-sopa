@@ -11,6 +11,7 @@
 #include <semaphore.h>
 #include <stdlib.h>
 #include <curses.h>
+#include <dirent.h>
 	//Aplicação. Dependências devem ser anotadas em forma de comentários.
 #include "../include/Util/FIFO.h" 					//Depende de: 
 #include "../include/Util/String.h" 				//Depende de: 
@@ -24,7 +25,9 @@
 #include "../include/DescritorProcesso.h" 			//Depende de: Contexto.h, Registrador.h
 #include "../include/Disco.h" 						//Depende de: Tela.h, Memoria.h, Processador.h, String.h
 #include "../include/MapaAlocacoesMemoria.h" 		//Depende de: Memoria.h
-#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h, MMU.h, MapaMemoria.h
+#include "../include/Arquivo.h" 					//Depende de: Disco.h, MMU.h
+#include "../include/SistemaArquivos.h" 			//Depende de: Arquivo.h
+#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h, MMU.h, MapaMemoria.h, Arquivo.h, SistemaArquivos.h
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Console.h" 					//Depende de: Tela.h, ControladorInterrupcoes.h
 
