@@ -15,7 +15,7 @@
 void privada_limpar(MEMORIA *memoria_param){
 	int palavra=0;
 	for(; palavra<QUANTIDADE_PALAVRAS_MEMORIA; palavra++){
-		memoria_param->palavras[palavra] = 2*palavra;
+		memoria_param->palavras[palavra] = MEMORIA_POSICAO_VAZIA;
 	}
 }
 
@@ -141,7 +141,7 @@ void memoria_imprimir(MEMORIA *memoria_param){
 	char mensagem[200];
 	tela_escreverNaColuna(&global_tela, "Imprimindo memoria.", 5);
 	for(; palavra<QUANTIDADE_PALAVRAS_MEMORIA; palavra++){
-		if(2*palavra != memoria_param->palavras[palavra]){
+		if(memoria_param->palavras[palavra] != MEMORIA_POSICAO_VAZIA){
 			sprintf(mensagem, "*(%d)=%d=", palavra, memoria_param->palavras[palavra]);
 			tela_escreverNaColuna(&global_tela, mensagem, 5);
 			sprintf(mensagem, "%d %d %d %d", 
