@@ -8,6 +8,7 @@
 //Constantes
 #define QUANTIDADE_PALAVRAS_MEMORIA 1024
 #define MEMORIA_ENDERECO_INEXISTENTE -1
+#define MEMORIA_POSICAO_VAZIA -99999
 
 typedef int PALAVRA;
 typedef int BYTE;

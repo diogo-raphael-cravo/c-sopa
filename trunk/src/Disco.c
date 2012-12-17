@@ -80,7 +80,7 @@ void privada_executar(DISCO *disco_param, OPERACAO_DISCO operacao_param, int end
 				free(dados_param);
 				break;
 			case OPERACAO_CARGA_DISCO:
-				sprintf(mensagem, "Carregar %d", bloco_param);
+				sprintf(mensagem, "Carregar bloco %d", bloco_param);
 				tela_escreverNaColuna(&global_tela, mensagem, 4);
 				disco_param->tamanhoUltimaLeitura = TAMANHO_BLOCO;
 				if(disco_param->dadosUltimaLeitura != NULL){
@@ -88,8 +88,8 @@ void privada_executar(DISCO *disco_param, OPERACAO_DISCO operacao_param, int end
 				}
 				disco_param->dadosUltimaLeitura = (PALAVRA*) malloc(disco_param->tamanhoUltimaLeitura*sizeof(PALAVRA));
 				int palavraLida;
-				for(palavraLida=0; palavraLida<TAMANHO_BLOCO; palavraLida++){
-					disco_param->dadosUltimaLeitura[bloco_param*TAMANHO_BLOCO+palavraLida] = disco_param->conteudo[bloco_param*TAMANHO_BLOCO+palavraLida];
+				for(palavraLida=0; palavraLida<tamanhoDados_param; palavraLida++){
+					disco_param->dadosUltimaLeitura[palavraLida] = disco_param->conteudo[bloco_param*TAMANHO_BLOCO+palavraLida];
 				}
 disco_imprimir(disco_param);
 				break;
@@ -163,6 +163,8 @@ void disco_executarOperacao(DISCO *disco_param, OPERACAO_DISCO operacao_param, i
 		disco_param->proximaOperacao = OPERACAO_NENHUMA_DISCO;
 	} else if(operacao_param == OPERACAO_ESCRITA_DISCO){
 		disco_param->dadosProximaEscrita = dados_param;
+		disco_param->tamanhoPalavrasProximaEscrita = tamanhoDados_param;
+	} else if(operacao_param == OPERACAO_CARGA_DISCO){
 		disco_param->tamanhoPalavrasProximaEscrita = tamanhoDados_param;
 	}
 	sem_post(&disco_param->mutexAcessoDisco);

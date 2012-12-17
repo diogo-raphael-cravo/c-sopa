@@ -19,7 +19,9 @@ typedef enum enum_errosKernel ERRO_KERNEL;
 
 enum enum_comandosUsuario{
 	COMANDO_NENHUM,
-	COMANDO_EXECUCAO_PROGRAMA
+	COMANDO_EXECUCAO_PROGRAMA,
+	COMANDO_IMPRIMIR,
+	COMANDO_AJUDA
 };
 
 typedef enum enum_comandosUsuario COMANDO_USUARIO;

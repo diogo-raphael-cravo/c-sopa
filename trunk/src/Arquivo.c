@@ -139,6 +139,7 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 */
 int arquivo_transferirParaMemoria(ARQUIVO *arquivo_param, MMU *MMU_param, int enderecoFisicoInicio_param){
 	int transferiu = 0;
+	char mensagem[200];
 
 	if(arquivo_param->discoSalvo != NULL && disco_erroUltimaOperacao(arquivo_param->discoSalvo) == SEM_ERRO_DISCO){
 		transferiu = 1;
@@ -150,6 +151,17 @@ int arquivo_transferirParaMemoria(ARQUIVO *arquivo_param, MMU *MMU_param, int en
 		for(; palavra<disco_tamanhoPalavrasUltimaLeitura(arquivo_param->discoSalvo); palavra++){
 			MMU_sincronizado_escreverFisico(MMU_param, enderecoFisicoInicio_param+palavra, 
 					disco_palavrasUltimaLeituraPosicao(arquivo_param->discoSalvo, palavra));
+			sprintf(mensagem, "*(%d)=%d=", enderecoFisicoInicio_param+palavra, 
+				disco_palavrasUltimaLeituraPosicao(arquivo_param->discoSalvo, palavra));
+			tela_escreverNaColuna(&global_tela, mensagem, 5);
+			sprintf(mensagem, "%d %d %d %d", 
+				(((disco_palavrasUltimaLeituraPosicao(arquivo_param->discoSalvo, palavra) & 0xFF000000)/256)/256)/256,
+				((disco_palavrasUltimaLeituraPosicao(arquivo_param->discoSalvo, palavra) & 0x00FF0000)/256)/256,
+				(disco_palavrasUltimaLeituraPosicao(arquivo_param->discoSalvo, palavra) & 0x0000FF00)/256,
+				disco_palavrasUltimaLeituraPosicao(arquivo_param->discoSalvo, palavra) & 0x000000FF);
+			tela_escreverNaColuna(&global_tela, mensagem, 5);
+
+			
 		}
 	}
 	return transferiu;

@@ -146,7 +146,8 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 		if(arquivoTransferido != NULL){
 			erro = KERNEL_ERRO_NENHUM;
 			kernel_param->arquivoTransferido = arquivoTransferido;
-			disco_executarOperacao(&global_disco, OPERACAO_CARGA_DISCO, arquivoTransferido->blocoInicioDisco, 0, 0);
+			disco_executarOperacao(&global_disco, OPERACAO_CARGA_DISCO, arquivoTransferido->blocoInicioDisco, 
+				0, arquivo_getTamanhoEmBlocos(arquivoTransferido));
 		} else {
 			kernel_param->criandoProcesso = 0;
 			erro = KERNEL_ERRO_ARQUIVO_INEXISTENTE;
@@ -169,6 +170,15 @@ COMANDO_USUARIO privada_getComandoUsuario(KERNEL *kernel_param, char* comando_pa
 
 	if(2 < strlen(comando_param) && comando_param[0] == '.' && comando_param[1] == '/'){
 		comandoDigitado = COMANDO_EXECUCAO_PROGRAMA;
+	} else if(8 <= strlen(comando_param)
+				&& comando_param[0] == 'i' && comando_param[1] == 'm' && comando_param[2] == 'p'
+				&& comando_param[3] == 'r' && comando_param[4] == 'i' && comando_param[5] == 'm'
+				&& comando_param[6] == 'i' && comando_param[7] == 'r'){
+		comandoDigitado = COMANDO_IMPRIMIR;
+	} else if(5 <= strlen(comando_param)
+				&& comando_param[0] == 'a' && comando_param[1] == 'j' && comando_param[2] == 'u'
+				&& comando_param[3] == 'd' && comando_param[4] == 'a'){
+		comandoDigitado = COMANDO_AJUDA;
 	}
 
 	return comandoDigitado;
@@ -240,6 +250,26 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 					tela_escreverNaColuna(&global_tela, "O programa nao foi criado por causa de um erro desconhecido.", 3);
 				}
 			break;
+		case COMANDO_IMPRIMIR:
+				privada_getParametroComandoUsuario(kernel_param, comando_param, parametro, 2);
+				if(strcmp(parametro, "disco") == 0){
+					disco_imprimir(&global_disco);
+				} else if(strcmp(parametro, "memoria") == 0){
+					memoria_imprimir(&global_memoria);
+				} else {
+					sprintf(mensagem, "Dispositivo %s nao encontrado.", parametro);
+					tela_escreverNaColuna(&global_tela, mensagem, 5);
+				}
+			break;
+		case COMANDO_AJUDA:
+			tela_escreverNaColuna(&global_tela, "Listando comandos:", 5);
+			tela_escreverNaColuna(&global_tela, " ajuda", 5);
+			tela_escreverNaColuna(&global_tela, "Mostra todos comandos.", 5);
+			tela_escreverNaColuna(&global_tela, " ./<nomeArquivo>", 5);
+			tela_escreverNaColuna(&global_tela, "Executa o arquivo com nome especificado.", 5);
+			tela_escreverNaColuna(&global_tela, " imprimir <nomeDispositivo>", 5);
+			tela_escreverNaColuna(&global_tela, "Imprime todas as celulas de memoria do dispositivo, como memoria, disco, etc.", 5);
+			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Comando desconhecido.", 3);
 	}
@@ -302,6 +332,8 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 				int adicionouProcesso = 0;
 				int faltouMemoria = (enderecoMemoria == MEMORIA_ENDERECO_INEXISTENTE);
 				int PID = privada_getPIDNaoUsado(kernel_param);
+				sprintf(mensagem, "Memoria alocada em %d.", enderecoMemoria);
+				tela_escreverNaColuna(&global_tela, mensagem, 5);
 				arquivo_transferirParaMemoria(kernel_param->arquivoTransferido, &global_MMU, enderecoMemoria);
 				adicionouProcesso = privada_adicionarProcesso(kernel_param, PID, 0, 
 					arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido), enderecoMemoria);
