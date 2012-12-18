@@ -12,6 +12,12 @@
 #include <stdlib.h>
 #include <curses.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <time.h>
+#include <unistd.h>
 	//Aplicação. Dependências devem ser anotadas em forma de comentários.
 #include "../include/Util/FIFO.h" 					//Depende de: 
 #include "../include/Util/String.h" 				//Depende de: 
@@ -27,7 +33,8 @@
 #include "../include/MapaAlocacoesMemoria.h" 		//Depende de: Memoria.h
 #include "../include/Arquivo.h" 					//Depende de: Disco.h, MMU.h
 #include "../include/SistemaArquivos.h" 			//Depende de: Arquivo.h
-#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h, MMU.h, MapaMemoria.h, Arquivo.h, SistemaArquivos.h
+#include "../include/RPC.h" 						//Depende de: 
+#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h, MMU.h, MapaMemoria.h, Arquivo.h, SistemaArquivos.h, RPC.h
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Console.h" 					//Depende de: Tela.h, ControladorInterrupcoes.h
 
