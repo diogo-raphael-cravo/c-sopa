@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define MAXIMO_PROCESSOS_KERNEL 10
+#define MAXIMO_PROCESSOS_KERNEL 30
 #define DESCRITOR_PROCESSO_INEXISTENTE NULL
 
 enum enum_errosKernel{
@@ -26,11 +26,19 @@ enum enum_comandosUsuario{
 
 typedef enum enum_comandosUsuario COMANDO_USUARIO;
 
+struct str_processoEsperandoDisco{ //Relaciona um processo que está esperando com o motivo pelo qual ele está esperando.
+	DESCRITOR_PROCESSO** processoEsperando;
+	OPERACAO_DISCO motivoEspera; //Operação que será feita pelo disco.
+};
+
+typedef struct str_processoEsperandoDisco PROCESSO_ESPERANDO;
+
 struct str_kernel{
 	FIFO filaProcessosBloqueados; //Indica os índices de descritoresProcessos que contém processos bloqueados.
 									//Os processos são ordenados em uma fila por ordem de "chegada".
 	FIFO filaProcessosProntos; //Indica os índices de descritoresProcessos que contém processos prontos para rodar.
 								//Os processos são ordenados em uma fila por ordem de "chegada".
+	FIFO filaProcessosRequisicaoDisco; //Os processos que estão esperando para fazer requisição ao disco.
 	MAPA_ALOCACOES_MEMORIA mapaMemoriaAlocada; //Representa o que foi alocado de memória, permitindo controle de endereçamento lógico.
 	SISTEMA_ARQUIVOS sistemaDeArquivos; //O sistema de arquivos, com todos os arquivos em todos os discos!
 	DESCRITOR_PROCESSO** processoRodando; //Ponteiro para o processo que está rodando.

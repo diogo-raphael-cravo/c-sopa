@@ -48,7 +48,7 @@ PALAVRA* privada_lerDaMemoria(ARQUIVO *arquivo_param){
 * @param int		tamanhoEmPalavras_param		Tamanho do arquivo em palavras da memória.
 * @param char*		nome_param					O nome que o arquivo terá.
 */
-void arquivo_criar(ARQUIVO *arquivo_param, MMU *MMU_param, int enderecoFisicoInicio_param, int tamanhoEmPalavras_param, char* nome_param){
+/*void arquivo_criar(ARQUIVO *arquivo_param, MMU *MMU_param, int enderecoFisicoInicio_param, int tamanhoEmPalavras_param, char* nome_param){
 	arquivo_param->memoriaSalvo = MMU_param;
 	arquivo_param->enderecoInicioMemoria = enderecoFisicoInicio_param;
 	arquivo_param->tamanhoEmPalavras = tamanhoEmPalavras_param;
@@ -57,7 +57,9 @@ void arquivo_criar(ARQUIVO *arquivo_param, MMU *MMU_param, int enderecoFisicoIni
 	arquivo_param->blocoInicioDisco = -1;
 	arquivo_param->tamanhoEmBlocos = -1;
 	arquivo_param->discoSalvo = NULL;
-}
+
+	arquivo_param->podeSerAberto = 1;
+}*/
 
 /**
 * Cria um arquivo à partir de um arquivo existente e salvo na máquina hospedeira.
@@ -124,6 +126,8 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 		arquivo_param->tamanhoEmBlocos = posicaoEscrita/TAMANHO_BLOCO + 1;
 		arquivo_param->discoSalvo = disco_param;
 	}
+
+	arquivo_param->podeSerAberto = 1;
 
 	return conseguiuLer;
 }
@@ -217,5 +221,11 @@ int arquivo_getTamanhoEmBlocos(ARQUIVO *arquivo_param){
 	}
 }
 
-
+/**
+* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
+* @return int	Indica se o arquivo pode ser aberto.
+*/
+int arquivo_podeSerAberto(ARQUIVO *arquivo_param){
+	return arquivo_param->podeSerAberto;
+}
 

@@ -275,6 +275,50 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 	}
 }
 
+/**
+* Põe o processo que está rodando a esperar pelo disco.
+* @param KERNEL 			*kernel_param 			O kernel que irá fazer a operação.
+* @param OPERACAO_DISCO		operacao_param			A operação do disco que será executada.
+*/
+void privada_requisitaOperacaoDisco(KERNEL *kernel_param, OPERACAO_DISCO operacao_param){
+	PROCESSO_ESPERANDO **esperaProcesso = (**PROCESSO_ESPERANDO) malloc(sizeof(*PROCESSO_ESPERANDO));
+	*esperaProcesso = (*PROCESSO_ESPERANDO) malloc(sizeof(PROCESSO_ESPERANDO));
+
+	(*esperaProcesso)->processoEsperando = kernel_param->processoRodando;
+	(*esperaProcesso)->motivoEspera = operacao_param;
+
+	if(FIFO_vazia(&kernel_param->filaProcessosRequisicaoDisco)){
+		privada_realizaProximaOperacaoDisco(kernel_param);
+	}
+	FIFO_inserir(&kernel_param->filaProcessosRequisicaoDisco, esperaProcesso);
+}
+
+/**
+* 
+* @param KERNEL 			*kernel_param 			O kernel que irá fazer a operação.
+* ATENÇÃO: se não existir processo esperando, não fará nada.
+*/
+void privada_realizaProximaOperacaoDisco(KERNEL *kernel_param){
+/*
+	DEIXA NA FILA
+*/
+	PROCESSO_ESPERANDO **esperaProcesso = (**PROCESSO_ESPERANDO) FIFO_espiar(&kernel_param->filaProcessosRequisicaoDisco);
+
+
+
+	if((*esperaProcesso)->motivoEspera == OPERACAO_LEITURA_DISCO){
+		disco_executarOperacao(&global_disco, OPERACAO_LEITURA_DISCO, 
+			(*esperaProcesso)->processoEsperando, 0, 0);	
+	} else if((*esperaProcesso)->motivoEspera == OPERACAO_ESCRITA_DISCO){
+		disco_executarOperacao(&global_disco, OPERACAO_ESCRITA_DISCO, posicao, dados, 0);	
+	}
+}
+
+void privada_recebeResultadoOperacaoDisco(){
+/*
+	REMOVE
+*/
+}
 
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
@@ -289,6 +333,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 	kernel_param->ultimoPIDUsado = -1;
 	FIFO_inicializar(&kernel_param->filaProcessosProntos, MAXIMO_PROCESSOS_KERNEL);
 	FIFO_inicializar(&kernel_param->filaProcessosBloqueados, MAXIMO_PROCESSOS_KERNEL);
+	FIFO_inicializar(&kernel_param->filaProcessosRequisicaoDisco, MAXIMO_PROCESSOS_KERNEL);
 
 	sistemaArquivos_inicializarComArquivosDoHospedeiro(&kernel_param->sistemaDeArquivos, &global_disco);
 	mapaAlocacoesMemoria_inicializar(&kernel_param->mapaMemoriaAlocada, &global_MMU, MAXIMO_PROCESSOS_KERNEL);
@@ -356,9 +401,7 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			}
 			break;
 		case INTERRUPCAO_SOFTWARE_PARA_DISCO:
-			privada_mandarProcessoRodandoEsperarDisco(kernel_param);
-			privada_escalonar(kernel_param);
-			disco_executarOperacao(&global_disco, OPERACAO_LEITURA_DISCO, 0, 0, 0);
+ 			privada_requisitaOperacaoDisco(kernel_param, OPERACAO_LEITURA_DISCO);
 			break;
 		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
 			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));

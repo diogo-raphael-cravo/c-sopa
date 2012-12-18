@@ -29,5 +29,9 @@ typedef struct str_RPC RPC;
 //			FUNÇÕES						
 //---------------------------------------------------------------------
 /**
-*
+* Envia requisição RPC ao IP e porta fornecidos.
+* @param OPERACAO_RPC	operacao_param		A operação desejada.
+* @param int			ipDestino_param		O id do 'servidor' ao qual a requisição será feita.
+* @param int			portaDestino_param	A porta do 'servidor' ao qual a requisição será feita.
+* @param void*			parametros_param	Os parâmetros enviados.
 */
