@@ -100,7 +100,18 @@ ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, c
 	return arquivoEncontrado;
 }
 
+/**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param int				celula_param			A célula do disco na qual o arquivo será procurado.
+*/
+ARQUIVO* sistemaArquivos_buscaPorPosicao(SISTEMA_ARQUIVOS *sistemaArquivos_param, int celula_param){
+	
 
+
+
+
+
+}
 
 
 

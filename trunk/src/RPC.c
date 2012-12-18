@@ -24,15 +24,6 @@ int main(int argc, char* argv[])
   struct sockaddr_in  addr_serv, addr_cli;
   int addr_cli_len=sizeof(addr_cli);
 
-#ifdef _WIN32
-	 WSADATA wsaData;
-  
-	if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
-		TrataErro(s, WSTARTUP);
-		exit(1);
-		}
-#endif
-
   char recvbuf[MAX_PACKET];
 
   // Cria o socket na familia AF_INET (Internet) e do tipo TCP (SOCK_STREAM)

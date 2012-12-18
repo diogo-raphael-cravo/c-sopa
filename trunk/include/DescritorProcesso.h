@@ -85,3 +85,5 @@ int descritorProcesso_getTamanhoAreaMemoriaPalavras(DESCRITOR_PROCESSO *descrito
 
 
 
+
+

@@ -26,9 +26,13 @@ struct str_arquivo{
 
 		//No kernel
 	char* nome; //Nome amigável ao usuário, atribuído ao arquivo.
+	int	processoQueAbriu; //
 };
 
 typedef struct str_arquivo ARQUIVO;
+
+open/close -> sistemaArquivos.c
+lock/unlock -> Arquivo.c
 
 //---------------------------------------------------------------------
 //			FUNÇÕES
@@ -90,6 +94,16 @@ int arquivo_getTamanhoEmPalavras(ARQUIVO *arquivo_param);
 * @return int	O tamanho do arquivo em blocos. Retornará -1 caso o arquivo não esteja salvo nem no disco, nem na memória.
 */
 int arquivo_getTamanhoEmBlocos(ARQUIVO *arquivo_param);
+
+/**
+* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
+* @return int	Indica se o arquivo pode ser aberto.
+*/
+int arquivo_podeSerAberto(ARQUIVO *arquivo_param);
+
+
+
+
 
 
 
