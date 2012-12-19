@@ -1,0 +1,166 @@
+Intrudução
+----------
+
+Este arquivo descreve testes, explicando o que eles fazem e o resultado esperado.
+Testes devem ser escritos no formato:
+
+=====================================================
+<número-do-teste>)					 <nome-do-teste>
+Nome do Arquivo:					 <texto>
+Resultado Esperado:					 <enumeração-de-resultados>
+Última revisão em que esteve OK:	 <número-da-revisão>
+Dependências:						 <números-de-outros-testes>
+=====================================================
+
+Testes
+------
+
+=====================================================
+1)									 Loop Infinito
+Nome do Arquivo:					 ARQUIVO_loopInfinito
+Resultado Esperado:					 *rodar para sempre
+Última revisão em que esteve OK:	 -
+Dependências:						 -
+=====================================================
+
+=====================================================
+2)									 Falha de Segmentação
+Nome do Arquivo:					 ARQUIVO_falhaSegmentacao
+Resultado Esperado:					 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 -
+=====================================================
+
+=====================================================
+3)									 Load Register from Constant
+Nome do Arquivo:					 ARQUIVO_LC
+Resultado Esperado:					 *número 1 em todos registradores
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 -
+=====================================================
+
+=====================================================
+4)									 Write Register in Memory
+Nome do Arquivo:					 ARQUIVO_WM
+Resultado Esperado:					 *número 1 em sua posição 0 de memória
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+=====================================================
+5)									 Load Register from Memory
+Nome do Arquivo:					 ARQUIVO_LM
+Resultado Esperado:					 *número 1 no registrador 0
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 4
+=====================================================
+
+=====================================================
+6)									 Subtract Registers
+Nome do Arquivo:					 ARQUIVO_SU
+Resultado Esperado:					 *número 3 no registrador 0
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+=====================================================
+7)									 Add Registers
+Nome do Arquivo:					 ARQUIVO_AD
+Resultado Esperado:					 *número 3 no registrador 0
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+=====================================================
+8)									 Decrement Register
+Nome do Arquivo:					 ARQUIVO_DEC
+Resultado Esperado:					 *número 999999 no registrador 0
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+=====================================================
+9)									 Increment Register
+Nome do Arquivo:					 ARQUIVO_DEC
+Resultado Esperado:					 *número 1000001 no registrador 0
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+=====================================================
+10)									 Compare Registers Z
+Nome do Arquivo:					 ARQUIVO_CPZ
+Resultado Esperado:					 *flags do processador Z=1, E=0, L=0
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+=====================================================
+11)									 Compare Registers E
+Nome do Arquivo:					 ARQUIVO_CPE
+Resultado Esperado:					 *flags do processador Z=0, E=1, L=0
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+=====================================================
+12)									 Compare Registers L
+Nome do Arquivo:					 ARQUIVO_CPL
+Resultado Esperado:					 *flags do processador Z=0, E=0, L=1
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+=====================================================
+13)									 Jump on Zero
+Nome do Arquivo:					 ARQUIVO_JZ
+Resultado Esperado:					 *PC incrementa até 6
+									 *quando PC=6, PC <- 60
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 8
+=====================================================
+
+=====================================================
+14)									 Jump on Equal
+Nome do Arquivo:					 ARQUIVO_JE
+Resultado Esperado:					 *PC incrementa até 7
+									 *quando PC=7, PC <- 70
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 9
+=====================================================
+
+=====================================================
+15)									 Jump on Less
+Nome do Arquivo:					 ARQUIVO_JL
+Resultado Esperado:					 *PC incrementa até 6
+									 *quando PC=6, PC <- 60
+									 *jogar falha de segmentação
+Última revisão em que esteve OK:	 -
+Dependências:						 3
+=====================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
