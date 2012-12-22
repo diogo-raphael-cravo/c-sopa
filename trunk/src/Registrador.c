@@ -133,7 +133,19 @@ void registrador_somar(REGISTRADOR *registrador_param, int parcela_param){
 	}
 }
 
-
+/**
+* Imprime o registrador na coluna fornecida da tela.
+* @param REGISTRADOR	*registrador_param	O registrador que será impresso.
+* @param int			coluna_param		A coluna em que o registrador será impresso.
+*/
+void registrador_imprimir(REGISTRADOR *registrador_param, int coluna_param){
+	char mensagem[200];
+	sprintf(mensagem, " =%d", registrador_lerPalavra(registrador_param));
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	sprintf(mensagem, " =%d %d %d %d", registrador_param->conteudo[0],
+		registrador_param->conteudo[1], registrador_param->conteudo[2], registrador_param->conteudo[3]);
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+}
 
 
 

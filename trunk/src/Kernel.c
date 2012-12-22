@@ -11,6 +11,46 @@
 //---------------------------------------------------------------------
 
 /**
+* @param KERNEL		*kernel_param	O kernel em que o processo será procurado.
+* @param int		PID_param		PID do processo procurado.
+* @return DESCRITOR_PROCESSO* 	O processo que tem o PID solicitado. Caso não exista neste kernel, retornará NULL.
+*/
+DESCRITOR_PROCESSO* privada_buscaProcessoComPID(KERNEL *kernel_param, int PID_param){
+	int posicaoTestada;
+	DESCRITOR_PROCESSO* processoTestado;
+	DESCRITOR_PROCESSO* processoEncontrado;
+
+	processoEncontrado = NULL;
+
+	if(descritorProcesso_getPID(*kernel_param->processoRodando) == PID_param){
+		processoEncontrado = *kernel_param->processoRodando;
+	}
+	for(posicaoTestada=0; posicaoTestada<
+			FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueados); posicaoTestada++){
+		processoTestado = * (DESCRITOR_PROCESSO**) FIFO_espiarPosicao(&kernel_param->filaProcessosBloqueados, posicaoTestada);
+		if(descritorProcesso_getPID(processoTestado) == PID_param){
+			processoEncontrado = processoTestado;
+		}
+	}
+	for(posicaoTestada=0; posicaoTestada<
+			FIFO_quantidadeElementos(&kernel_param->filaProcessosProntos); posicaoTestada++){
+		processoTestado = * (DESCRITOR_PROCESSO**) FIFO_espiarPosicao(&kernel_param->filaProcessosProntos, posicaoTestada);
+		if(descritorProcesso_getPID(processoTestado) == PID_param){
+			processoEncontrado = processoTestado;
+		}
+	}
+	for(posicaoTestada=0; posicaoTestada<
+			FIFO_quantidadeElementos(&kernel_param->filaProcessosRequisicaoDisco); posicaoTestada++){
+		processoTestado = * (DESCRITOR_PROCESSO**) FIFO_espiarPosicao(&kernel_param->filaProcessosRequisicaoDisco, posicaoTestada);
+		if(descritorProcesso_getPID(processoTestado) == PID_param){
+			processoEncontrado = processoTestado;
+		}
+	}
+
+	return processoEncontrado;
+}
+
+/**
 * @param KERNEL	*kernel_param 	Kernel em que a operação será realizada.
 * @return int	Um PID ainda não usado por processos deste kernel.
 */
@@ -132,30 +172,59 @@ void privada_matarProcessoRodando(KERNEL *kernel_param){
 
 /**
 * Inicia a criação de um processo.
-* @param KERNEL	*kernel_param		O kernel que criará o processo.
-* @param char*	nomeArquivo_param	Nome do arquivo que contém o processo.
+* @param KERNEL	*kernel_param			O kernel que criará o processo.
+* @param char*	nomeArquivo_param		Nome do arquivo que contém o processo.
 * @return ERRO_KERNEL	Indica o erro que aconteceu, caso algum erro tenha acontecido.
 * ATENÇÃO: se o disco não estiver rodando, vai travar a thread até que o disco rode!
 */
 int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
-	int erro=0;
+	int PID, enderecoMemoria;
+	int erro = KERNEL_ERRO_NENHUM;
 	ARQUIVO *arquivoTransferido;
-	if(!kernel_param->criandoProcesso){
-		kernel_param->criandoProcesso = 1;
+
+	if(kernel_param->criandoProcesso){
+		erro = KERNEL_ERRO_CRIANDO_PROCESSO;
+	} else if(kernel_param->quantidadeProcessos+1 == MAXIMO_PROCESSOS_KERNEL){
+		erro = KERNEL_ERRO_MAXIMO_PROCESSOS_ATINGIDO;
+	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+		PID = privada_getPIDNaoUsado(kernel_param);
 		arquivoTransferido = sistemaArquivos_buscaPorNome(&kernel_param->sistemaDeArquivos, nomeArquivo_param);
-		if(arquivoTransferido != NULL){
-			erro = KERNEL_ERRO_NENHUM;
-			kernel_param->arquivoTransferido = arquivoTransferido;
-			disco_executarOperacao(&global_disco, OPERACAO_CARGA_DISCO, arquivoTransferido->blocoInicioDisco, 
-				0, arquivo_getTamanhoEmBlocos(arquivoTransferido));
-		} else {
-			kernel_param->criandoProcesso = 0;
+		if(arquivoTransferido == NULL){
 			erro = KERNEL_ERRO_ARQUIVO_INEXISTENTE;
 		}
-	} else {
-		kernel_param->criandoProcesso = 0;
-		erro = KERNEL_ERRO_CRIANDO_PROCESSO;
 	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+		enderecoMemoria = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada,
+			arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
+
+		int faltouMemoria = (enderecoMemoria == MEMORIA_ENDERECO_INEXISTENTE);
+		if(faltouMemoria){
+			erro = KERNEL_ERRO_MEMORIA_INSUFICIENTE;
+		}
+	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+		DESCRITOR_PROCESSO **novoProcesso = (DESCRITOR_PROCESSO**) malloc(sizeof(DESCRITOR_PROCESSO*));
+		*novoProcesso = (DESCRITOR_PROCESSO*) malloc(sizeof(DESCRITOR_PROCESSO));
+		descritorProcesso_inicializar(*novoProcesso, PID, enderecoMemoria, arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
+		contexto_setPC(descritorProcesso_getContexto(*novoProcesso), 0);
+		descritorProcesso_setStatus(*novoProcesso, STATUS_PROCESSO_PRONTO);
+		kernel_param->quantidadeProcessos++;
+
+		kernel_param->arquivoTransferido = arquivoTransferido;
+
+		if(FIFO_vazia(&kernel_param->filaProcessosDMA)){
+			disco_transferirParaMemoria(&global_disco, enderecoMemoria,
+				arquivoTransferido->enderecoInicioDisco, arquivo_getTamanhoEmPalavras(arquivoTransferido));
+		} else {
+			FIFO_inserir(&kernel_param->filaProcessosDMA, novoProcesso);
+			erro = KERNEL_ERRO_DISCO_OCUPADO;
+		}
+	}
+
 	return erro;
 }
 
@@ -194,9 +263,13 @@ COMANDO_USUARIO privada_getComandoUsuario(KERNEL *kernel_param, char* comando_pa
 */
 void privada_getParametroComandoUsuario(KERNEL *kernel_param, char* comando_param, char* destinoParametro_param, int ordemParametro_param){
 	char parametro[200];
-	char* palavra=strtok(comando_param, " ");
+	char* copiaComandoUsuario = (char*) malloc(strlen(comando_param)*sizeof(char));
+	char* palavra;
 	int posicaoPalavra = 0;
 	int haParametro = 0;
+
+	strcpy(copiaComandoUsuario, comando_param);
+	palavra=strtok(copiaComandoUsuario, " ");
 
 	if(privada_getComandoUsuario(kernel_param, comando_param) == COMANDO_EXECUCAO_PROGRAMA && ordemParametro_param==1){
 		haParametro = 1;
@@ -221,6 +294,8 @@ void privada_getParametroComandoUsuario(KERNEL *kernel_param, char* comando_para
 	} else {
 		destinoParametro_param = NULL;
 	}
+
+	//free(copiaComandoUsuario);
 }
 
 /**
@@ -246,6 +321,10 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 					tela_escreverNaColuna(&global_tela, mensagem, 3);
 				} else if(erro == KERNEL_ERRO_CRIANDO_PROCESSO){
 					tela_escreverNaColuna(&global_tela, "O kernel jah estah criando um processo. Por favor, aguarde.", 3);
+				} else if(erro == KERNEL_ERRO_DISCO_OCUPADO){
+					tela_escreverNaColuna(&global_tela, "A criacao do processo foi agendada, jah que o disco estah ocupado.", 3);
+				} else if(erro == KERNEL_ERRO_MEMORIA_INSUFICIENTE){
+					tela_escreverNaColuna(&global_tela, "O programa nao foi criado por falta de memoria.", 3);
 				} else {
 					tela_escreverNaColuna(&global_tela, "O programa nao foi criado por causa de um erro desconhecido.", 3);
 				}
@@ -256,6 +335,26 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 					disco_imprimir(&global_disco);
 				} else if(strcmp(parametro, "memoria") == 0){
 					memoria_imprimir(&global_memoria);
+				} else if(strcmp(parametro, "registradores") == 0){
+					memset(parametro, '\0', 200);
+					privada_getParametroComandoUsuario(kernel_param, comando_param, parametro, 3);
+					if(parametro[0] != '\0'){
+						int processoExiste = (privada_buscaProcessoComPID(kernel_param, string_paraInt(parametro)) != NULL);
+						if(processoExiste){
+							sprintf(mensagem, "Registradores do processo %d.", string_paraInt(parametro));
+							tela_escreverNaColuna(&global_tela, mensagem, 5);
+							contexto_imprimirRegistradores(
+								descritorProcesso_getContexto(
+									privada_buscaProcessoComPID(kernel_param, string_paraInt(parametro))), 5);
+						} else {
+							sprintf(mensagem, "Processo com PID %d nao encontrado.", string_paraInt(parametro));
+							tela_escreverNaColuna(&global_tela, mensagem, 5);
+						}
+					} else {
+						sprintf(mensagem, "Registradores do processador.");
+						tela_escreverNaColuna(&global_tela, mensagem, 5);
+						contexto_imprimirRegistradores(processador_getContexto(&global_processador), 5);
+					}
 				} else {
 					sprintf(mensagem, "Dispositivo %s nao encontrado.", parametro);
 					tela_escreverNaColuna(&global_tela, mensagem, 5);
@@ -268,10 +367,35 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 			tela_escreverNaColuna(&global_tela, " ./<nomeArquivo>", 5);
 			tela_escreverNaColuna(&global_tela, "Executa o arquivo com nome especificado.", 5);
 			tela_escreverNaColuna(&global_tela, " imprimir <nomeDispositivo>", 5);
-			tela_escreverNaColuna(&global_tela, "Imprime todas as celulas de memoria do dispositivo, como memoria, disco, etc.", 5);
+			tela_escreverNaColuna(&global_tela, "Imprime todas as celulas de memoria do dispositivo. Os parametros aceitos sao:", 5);
+			tela_escreverNaColuna(&global_tela, " disco", 5);
+			tela_escreverNaColuna(&global_tela, " memoria", 5);
+			tela_escreverNaColuna(&global_tela, " registradores //do processador", 5);
+			tela_escreverNaColuna(&global_tela, " registradores <PID-do-processo>", 5);
 			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Comando desconhecido.", 3);
+	}
+}
+
+/**
+* @param KERNEL 			*kernel_param 			O kernel que irá fazer a operação.
+* ATENÇÃO: se não existir processo esperando, não fará nada.
+* ATENÇÃO: considera-se que os registradores do contexto do processo contém dados da operação!
+*/
+void privada_realizaProximaOperacaoDisco(KERNEL *kernel_param){
+/*
+	DEIXA NA FILA
+*/
+	PROCESSO_ESPERANDO **esperaProcesso = (PROCESSO_ESPERANDO**) FIFO_espiar(&kernel_param->filaProcessosRequisicaoDisco);
+
+	if((*esperaProcesso)->motivoEspera == OPERACAO_LEITURA_DISCO){
+		int posicaoLeitura = 1;//(*esperaProcesso)->processoEsperando
+		disco_executarOperacao(&global_disco, OPERACAO_LEITURA_DISCO, posicaoLeitura, 0, 0);
+	} else if((*esperaProcesso)->motivoEspera == OPERACAO_ESCRITA_DISCO){
+		int posicaoEscrita = 1;
+		PALAVRA* dadosEscrita = NULL;
+		disco_executarOperacao(&global_disco, OPERACAO_ESCRITA_DISCO, posicaoEscrita, dadosEscrita, 0);
 	}
 }
 
@@ -281,8 +405,8 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 * @param OPERACAO_DISCO		operacao_param			A operação do disco que será executada.
 */
 void privada_requisitaOperacaoDisco(KERNEL *kernel_param, OPERACAO_DISCO operacao_param){
-	PROCESSO_ESPERANDO **esperaProcesso = (**PROCESSO_ESPERANDO) malloc(sizeof(*PROCESSO_ESPERANDO));
-	*esperaProcesso = (*PROCESSO_ESPERANDO) malloc(sizeof(PROCESSO_ESPERANDO));
+	PROCESSO_ESPERANDO **esperaProcesso = (PROCESSO_ESPERANDO**) malloc(sizeof(PROCESSO_ESPERANDO*));
+	*esperaProcesso = (PROCESSO_ESPERANDO*) malloc(sizeof(PROCESSO_ESPERANDO));
 
 	(*esperaProcesso)->processoEsperando = kernel_param->processoRodando;
 	(*esperaProcesso)->motivoEspera = operacao_param;
@@ -293,26 +417,6 @@ void privada_requisitaOperacaoDisco(KERNEL *kernel_param, OPERACAO_DISCO operaca
 	FIFO_inserir(&kernel_param->filaProcessosRequisicaoDisco, esperaProcesso);
 }
 
-/**
-* 
-* @param KERNEL 			*kernel_param 			O kernel que irá fazer a operação.
-* ATENÇÃO: se não existir processo esperando, não fará nada.
-*/
-void privada_realizaProximaOperacaoDisco(KERNEL *kernel_param){
-/*
-	DEIXA NA FILA
-*/
-	PROCESSO_ESPERANDO **esperaProcesso = (**PROCESSO_ESPERANDO) FIFO_espiar(&kernel_param->filaProcessosRequisicaoDisco);
-
-
-
-	if((*esperaProcesso)->motivoEspera == OPERACAO_LEITURA_DISCO){
-		disco_executarOperacao(&global_disco, OPERACAO_LEITURA_DISCO, 
-			(*esperaProcesso)->processoEsperando, 0, 0);	
-	} else if((*esperaProcesso)->motivoEspera == OPERACAO_ESCRITA_DISCO){
-		disco_executarOperacao(&global_disco, OPERACAO_ESCRITA_DISCO, posicao, dados, 0);	
-	}
-}
 
 void privada_recebeResultadoOperacaoDisco(){
 /*
@@ -328,12 +432,13 @@ void privada_recebeResultadoOperacaoDisco(){
 */
 void kernel_inicializar(KERNEL *kernel_param){
 	kernel_param->quantidadeProcessos = 0;
-	kernel_param->fazendoTransferenciaDiscoMemoria = 0;
 	kernel_param->criandoProcesso = 0;
+	kernel_param->processoCriadoNaMemoria = 0;
 	kernel_param->ultimoPIDUsado = -1;
 	FIFO_inicializar(&kernel_param->filaProcessosProntos, MAXIMO_PROCESSOS_KERNEL);
 	FIFO_inicializar(&kernel_param->filaProcessosBloqueados, MAXIMO_PROCESSOS_KERNEL);
 	FIFO_inicializar(&kernel_param->filaProcessosRequisicaoDisco, MAXIMO_PROCESSOS_KERNEL);
+	FIFO_inicializar(&kernel_param->filaProcessosDMA, MAXIMO_PROCESSOS_KERNEL);
 
 	sistemaArquivos_inicializarComArquivosDoHospedeiro(&kernel_param->sistemaDeArquivos, &global_disco);
 	mapaAlocacoesMemoria_inicializar(&kernel_param->mapaMemoriaAlocada, &global_MMU, MAXIMO_PROCESSOS_KERNEL);
@@ -372,28 +477,8 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			break;
 		case INTERRUPCAO_DISCO:
 			if(kernel_param->criandoProcesso){
-				int enderecoMemoria = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada, 
-					arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
-				int adicionouProcesso = 0;
-				int faltouMemoria = (enderecoMemoria == MEMORIA_ENDERECO_INEXISTENTE);
-				int PID = privada_getPIDNaoUsado(kernel_param);
-				sprintf(mensagem, "Memoria alocada em %d.", enderecoMemoria);
-				tela_escreverNaColuna(&global_tela, mensagem, 5);
-				arquivo_transferirParaMemoria(kernel_param->arquivoTransferido, &global_MMU, enderecoMemoria);
-				adicionouProcesso = privada_adicionarProcesso(kernel_param, PID, 0, 
-					arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido), enderecoMemoria);
-				if(!adicionouProcesso && !faltouMemoria){
-					sprintf(mensagem, "O kernel nao conseguiu criar o processo %d com tamanho %d. O motivo eh desconhecido.", 
-						PID, arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
-					tela_imprimirTelaAzulDaMorte(&global_tela, mensagem);
-				} else if(!adicionouProcesso && faltouMemoria){
-					sprintf(mensagem, "O kernel nao conseguiu criar o processo %d com tamanho %d, pois faltou memoria.", 
-						PID, arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
-					tela_imprimirTelaAzulDaMorte(&global_tela, mensagem);
-				}
+				
 				kernel_param->criandoProcesso = 0;
-			} else if(kernel_param->fazendoTransferenciaDiscoMemoria){
-				tela_imprimirTelaAzulDaMorte(&global_tela, "KERNEL: a transferencia DISCO>MEMORIA nao foi implementada ainda.");
 			} else {
 				if(!FIFO_vazia(&kernel_param->filaProcessosBloqueados)){
 					FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueados));

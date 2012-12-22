@@ -43,7 +43,8 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 				&& dir->d_name[4] == 'I'
 				&& dir->d_name[5] == 'V'
 				&& dir->d_name[6] == 'O'
-				&& dir->d_name[7] == '_'){
+				&& dir->d_name[7] == '_'
+				&& dir->d_name[strlen(dir->d_name)-1] != '~'){
 					memset(caminhoArquivo, '\0', 200);
 					strcat(caminhoArquivo, DIRETORIO_DADOS_DISCO);
 					strcat(caminhoArquivo, "/");
@@ -54,6 +55,8 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 					for(caractere=0; caractere<strlen(dir->d_name)-8; caractere++){
 						nomeArquivo[caractere] = dir->d_name[caractere+8];
 					}
+					sprintf(mensagem, "    ");
+					tela_escreverNaColuna(&global_tela, mensagem, 4);
 					conseguiuLer = arquivo_lerDaMaquinaHospedeira(*arquivoLido, disco_param, nomeArquivo, caminhoArquivo, blocoInicioDoArquivo);
 					if(conseguiuLer){
 						sprintf(mensagem, "Li '%s'", (*arquivoLido)->nome);
@@ -100,18 +103,6 @@ ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, c
 	return arquivoEncontrado;
 }
 
-/**
-* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
-* @param int				celula_param			A célula do disco na qual o arquivo será procurado.
-*/
-ARQUIVO* sistemaArquivos_buscaPorPosicao(SISTEMA_ARQUIVOS *sistemaArquivos_param, int celula_param){
-	
-
-
-
-
-
-}
 
 
 

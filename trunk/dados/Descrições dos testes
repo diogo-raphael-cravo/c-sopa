@@ -19,7 +19,7 @@ Testes
 1)									 Loop Infinito
 Nome do Arquivo:					 ARQUIVO_loopInfinito
 Resultado Esperado:					 *rodar para sempre
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 54
 Dependências:						 -
 =====================================================
 
@@ -27,7 +27,7 @@ Dependências:						 -
 2)									 Falha de Segmentação
 Nome do Arquivo:					 ARQUIVO_falhaSegmentacao
 Resultado Esperado:					 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 54
 Dependências:						 -
 =====================================================
 
