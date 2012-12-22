@@ -66,4 +66,16 @@ void contexto_setRegistrador(CONTEXTO *contexto_param, REGISTRADOR *registrador_
 */
 void contexto_setRegistradorPalavra(CONTEXTO *contexto_param, PALAVRA palavra_param, int indiceRegistrador_param);
 
+/**
+* Imprime os registradores deste contexto na coluna fornecida da tela.
+* @param CONTEXTO	*contexto_param	O contexto cujos registradores serão impressos.
+* @param int		coluna_param	A coluna da tela em que a impressão será feita.
+*/
+void contexto_imprimirRegistradores(CONTEXTO *contexto_param, int coluna_param);
+
+
+
+
+
+
 

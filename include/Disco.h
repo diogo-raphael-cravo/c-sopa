@@ -7,19 +7,17 @@
 
 //Constantes
 #define TAMANHO_DISCO_PALAVRAS 1024
-#define QUANTIDADE_BLOCOS_DISCO 32
-#define TAMANHO_BLOCO TAMANHO_DISCO_PALAVRAS/QUANTIDADE_BLOCOS_DISCO
 #define POSICAO_VAZIA -99999
 #define DADO_NENHUM NULL
 
 enum enum_operacaoDisco{
-	OPERACAO_LEITURA_DISCO,
-	OPERACAO_ESCRITA_DISCO,
-	OPERACAO_CARGA_DISCO,
-	OPERACAO_NENHUMA_DISCO
+	TIPO_OPERACAO_LEITURA_DISCO,
+	TIPO_OPERACAO_ESCRITA_DISCO,
+	TIPO_OPERACAO_CARGA_DMA_DISCO,
+	TIPO_OPERACAO_NENHUMA_DISCO
 };
 
-typedef enum enum_operacaoDisco OPERACAO_DISCO;
+typedef enum enum_operacaoDisco TIPO_OPERACAO_DISCO;
 
 enum enum_erroDisco{
 	SEM_ERRO_DISCO,
@@ -28,16 +26,47 @@ enum enum_erroDisco{
 
 typedef enum enum_erroDisco ERRO_DISCO;
 
+	//Operações do disco.
+struct str_operacaoLeituraDisco{
+	int endereco;
+};
+
+typedef struct str_operacaoLeituraDisco OPERACAO_LEITURA_DISCO;
+
+struct str_operacaoEscritaDisco{
+	int endereco;
+	PALAVRA *dados;
+	int tamanhoDados;
+};
+
+typedef struct str_operacaoEscritaDisco OPERACAO_ESCRITA_DISCO;
+
+struct str_operacaoCargaDMADisco{
+	int enderecoMemoria;
+	int enderecoDisco;
+	int quantidadePalavras;
+};
+
+typedef struct str_operacaoCargaDMADisco OPERACAO_CARGA_DMA_DISCO;
+
+	//Disco
 struct str_disco{
 	sem_t mutexAcessoDisco;
 	PALAVRA conteudo[TAMANHO_DISCO_PALAVRAS];
+	int realizandoOperacao;
+
+		//Última operação realizada
 	ERRO_DISCO erroUltimaOperacao; //Erro que aconteceu na última operação, caso algum tenha acontecido.
 	int tamanhoUltimaLeitura; //A quantidade de palavras lidas na última leitura.
 	PALAVRA* dadosUltimaLeitura; //Os dados lidos na última leitura.
-	OPERACAO_DISCO proximaOperacao; //Próxima operação que deve ser executada pelo disco.
+
+		//Próxima operação
+	TIPO_OPERACAO_DISCO proximaOperacao; //Próxima operação que deve ser executada pelo disco.
+	
 	PALAVRA* dadosProximaEscrita; //Dados que serão escritos na próxima escrita.
 	int tamanhoPalavrasProximaEscrita; //Para uma escrita, a quantidade de palavras que serão escritas.
 	int enderecoProximaOperacao; //Endereço em que a próxima operação será realizada.
+	int enderecoMemoriaProximaOperacao; //Endereço em que a próxima operação será realizada na memória.
 };
 
 typedef struct str_disco DISCO;
@@ -56,16 +85,39 @@ void disco_inicializar(DISCO *disco_param);
 */
 void disco_rodar(DISCO *disco_param);
 
+/***********
+* Estas operações liberam o disco para executar algo.
+* ↓↓↓↓↓↓↓↓↓↓
+************/
+
 /**
-* Libera o disco para executar uma operação.
+* Agenda uma operação para ser executada pelo disco.
 * @param DISCO				*disco_param			O disco em que a operação será realizada.
-* @param OPERACAO_DISCO 	operacao_param			A operação que será realizada.s
-* @param int				enderecoOuBloco_param	Para operações sobre um endereço, o próprio. Para carga, o bloco que será carregado.
-* @param PALAVRA			*dados_param			Para uma escrita, os dados que serão escritos.
-* @param int				tamanhoDados_param		Para uma escrita, a quantidade de palavras que serão escritas.
-* ATENÇÃO: A operação não é executada de imediato, mas algum tempo depois.
+* @param int				endereco_param			O endereço lido.
 */
-void disco_executarOperacao(DISCO *disco_param, OPERACAO_DISCO operacao_param, int enderecoOuBloco_param, PALAVRA *dados_param, int tamanhoDados_param);
+void disco_lerEndereco(DISCO *disco_param, int endereco_param);
+
+/**
+* Agenda uma operação para ser executada pelo disco.
+* @param DISCO				*disco_param			O disco em que a operação será realizada.
+* @param int				endereco_param			O endereço da escrita.
+* @param PALAVRA			*dados_param			Os dados que serão escritos.
+* @param int				tamanhoDados_param		A quantidade de palavras que serão escritas.
+*/
+void disco_escreverEndereco(DISCO *disco_param, int endereco_param, PALAVRA *dados_param, int tamanhoDados_param);
+
+/**
+* Agenda uma operação para ser executada pelo disco.
+* @param DISCO				*disco_param				O disco em que a operação será realizada.
+* @param int				enderecoMemoria_param		Endereço em que a escrita será iniciada na memória.
+* @param int				enderecoDisco_param			O endereço do disco à partir do qual os dados serão transferidos.
+* @param int				quantidadePalavras_param	A quantidade de palavras que serão lidas.
+*/
+void disco_transferirParaMemoria(DISCO *disco_param, int enderecoMemoria_param, int enderecoDisco_param, int quantidadePalavras_param);
+
+/***********
+* Estas operações liberam o disco para executar algo.
+************/
 
 /**
 * @param DISCO	*disco_param			O disco em que a operação será realizada.
@@ -105,7 +157,12 @@ void disco_inicializarPosicao(DISCO *disco_param, int posicao_param, BYTE byte0_
 */
 void disco_imprimir(DISCO *disco_param);
 
-
+/**
+* @param DISCO	*disco_param	O disco cuja informação será consultada.
+* @return int	Indica se o disco está realizando uma operação agora.
+*				Note que, caso ele esteja, não poderá realizar outra até que acabe a que está fazendo.
+*/
+int disco_estahOcupado(DISCO *disco_param);
 
 
 

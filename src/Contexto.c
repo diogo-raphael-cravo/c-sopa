@@ -84,6 +84,20 @@ void contexto_setRegistradorPalavra(CONTEXTO *contexto_param, PALAVRA palavra_pa
 	registrador_carregarPalavra(&contexto_param->registradores[indiceRegistrador_param], palavra_param);
 }
 
+/**
+* Imprime os registradores deste contexto na coluna fornecida da tela.
+* @param CONTEXTO	*contexto_param	O contexto cujos registradores serão impressos.
+* @param int		coluna_param	A coluna da tela em que a impressão será feita.
+*/
+void contexto_imprimirRegistradores(CONTEXTO *contexto_param, int coluna_param){
+	char mensagem[200];
+	int registrador;
 
+	for(registrador=0; registrador<QUANTIDADE_REGISTRADORES_CONTEXTO; registrador++){
+		sprintf(mensagem, "*(%d)=", registrador);
+		tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+		registrador_imprimir(&contexto_param->registradores[registrador], coluna_param);
+	}
+}
 
 

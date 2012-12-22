@@ -79,5 +79,12 @@ void registrador_copiar(REGISTRADOR *registradorDestino_param, REGISTRADOR *regi
 */
 void registrador_somar(REGISTRADOR *registrador_param, int parcela_param);
 
+/**
+* Imprime o registrador na coluna fornecida da tela.
+* @param REGISTRADOR	*registrador_param	O registrador que será impresso.
+* @param int			coluna_param		A coluna em que o registrador será impresso.
+*/
+void registrador_imprimir(REGISTRADOR *registrador_param, int coluna_param);
+
 
 

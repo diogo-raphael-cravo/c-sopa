@@ -12,7 +12,10 @@
 enum enum_errosKernel{
 	KERNEL_ERRO_NENHUM,
 	KERNEL_ERRO_ARQUIVO_INEXISTENTE,
-	KERNEL_ERRO_CRIANDO_PROCESSO
+	KERNEL_ERRO_CRIANDO_PROCESSO,
+	KERNEL_ERRO_MEMORIA_INSUFICIENTE,
+	KERNEL_ERRO_MAXIMO_PROCESSOS_ATINGIDO,
+	KERNEL_ERRO_DISCO_OCUPADO
 };
 
 typedef enum enum_errosKernel ERRO_KERNEL;
@@ -34,17 +37,19 @@ struct str_processoEsperandoDisco{ //Relaciona um processo que está esperando c
 typedef struct str_processoEsperandoDisco PROCESSO_ESPERANDO;
 
 struct str_kernel{
-	FIFO filaProcessosBloqueados; //Indica os índices de descritoresProcessos que contém processos bloqueados.
-									//Os processos são ordenados em uma fila por ordem de "chegada".
+		//Espera para escalonamento
+	FIFO filaProcessosBloqueados; //Processos que estão bloqueados, por algum motivo. 
+									//DIFERENTE de filaProcessosRequisicaoDisco.
 	FIFO filaProcessosProntos; //Indica os índices de descritoresProcessos que contém processos prontos para rodar.
 								//Os processos são ordenados em uma fila por ordem de "chegada".
-	FIFO filaProcessosRequisicaoDisco; //Os processos que estão esperando para fazer requisição ao disco.
+
+		//Kernel
 	MAPA_ALOCACOES_MEMORIA mapaMemoriaAlocada; //Representa o que foi alocado de memória, permitindo controle de endereçamento lógico.
 	SISTEMA_ARQUIVOS sistemaDeArquivos; //O sistema de arquivos, com todos os arquivos em todos os discos!
 	DESCRITOR_PROCESSO** processoRodando; //Ponteiro para o processo que está rodando.
 	ARQUIVO *arquivoTransferido; //Arquivo que está sendo transferido para a memória.
+	GERENCIADOR_DISCO gerenciadoAcessoDisco; //Gerencia acesso às operações do disco.
 	int quantidadeProcessos; //A quantidade de processos no momento.
-	int fazendoTransferenciaDiscoMemoria; //Indica se o kernel está realizando uma transferência do disco para a memória.
 	int criandoProcesso; //Indica se o kernel está criando um processo.
 	int ultimoPIDUsado; //Último PID utilizado para um processo deste kernel.
 };
