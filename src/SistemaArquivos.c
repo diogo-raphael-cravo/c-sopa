@@ -154,7 +154,6 @@ void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArqui
 		arquivo_atualizarNaMaquinaHospedeira(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso),
 			 caminhoArquivo);
 	}
-
 }
 
 

@@ -32,7 +32,7 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 		instrucaoEncontrada = INSTRUCAO_ABSOLUTE_JUMP;
 	} else if(registrador_contem(&processador_param->IR, 'I', 'N', 'T', BYTE_QUALQUER)){
 		instrucaoEncontrada = INSTRUCAO_SOFTWARE_INTERRUPT;
-	} else if(registrador_contem(&processador_param->IR, 'L', 'D', BYTE_QUALQUER, BYTE_QUALQUER)){
+	} else if(registrador_contem(&processador_param->IR, 'L', 'M', BYTE_QUALQUER, BYTE_QUALQUER)){
 		instrucaoEncontrada = INSTRUCAO_LOAD_REGISTER_FROM_MEMORY;
 	} else if(registrador_contem(&processador_param->IR, 'L', 'C', BYTE_QUALQUER, BYTE_QUALQUER)){
 		instrucaoEncontrada = INSTRUCAO_LOAD_REGISTER_FROM_CONSTANT;
@@ -138,27 +138,24 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 			processador_param->L = (conteudoOrigem<conteudoDestino		 ? 1 : 0);
 			break;
 		case INSTRUCAO_JUMP_ON_ZERO:
-			qualRegistrador = processador_param->IR.conteudo[3];
-			conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador));
-			sprintf(mensagem, "JPZ %d", qualRegistrador);
+			enderecoDestino = processador_param->IR.conteudo[3];
+			sprintf(mensagem, "JPZ %d", enderecoDestino);
 			if(processador_param->Z == 1){
-				contexto_setPC(&processador_param->contextoProcessador, conteudoRegistrador);
+				contexto_setPC(&processador_param->contextoProcessador, enderecoDestino);
 			}
 			break;
 		case INSTRUCAO_JUMP_ON_EQUAL:
-			qualRegistrador = processador_param->IR.conteudo[3];
-			conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador));
-			sprintf(mensagem, "JPE %d", qualRegistrador);
+			enderecoDestino = processador_param->IR.conteudo[3];
+			sprintf(mensagem, "JPE %d", enderecoDestino);
 			if(processador_param->E == 1){
-				contexto_setPC(&processador_param->contextoProcessador, conteudoRegistrador);
+				contexto_setPC(&processador_param->contextoProcessador, enderecoDestino);
 			}
 			break;
 		case INSTRUCAO_JUMP_ON_LESS:
-			qualRegistrador = processador_param->IR.conteudo[3];
-			conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador));
-			sprintf(mensagem, "JPL %d", qualRegistrador);
+			enderecoDestino = processador_param->IR.conteudo[3];
+			sprintf(mensagem, "JPL %d", enderecoDestino);
 			if(processador_param->L == 1){
-				contexto_setPC(&processador_param->contextoProcessador, conteudoRegistrador);
+				contexto_setPC(&processador_param->contextoProcessador, enderecoDestino);
 			}
 			break;
 		default:
@@ -230,5 +227,30 @@ CONTEXTO* processador_getContexto(PROCESSADOR *processador_param){
 }
 
 
+/**
+* @param PROCESSADOR		*processador_param	O processador cujos dados serão impressos.
+* @param int				coluna_param	A coluna da tela em que a impressão será feita.
+*/
+void processador_imprimir(PROCESSADOR *processador_param, int coluna_param){
+	char mensagem[200];
 
+	sprintf(mensagem, "*(Z)=");
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	sprintf(mensagem, " =%d", processador_param->Z);
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	sprintf(mensagem, "*(E)=");
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	sprintf(mensagem, " =%d", processador_param->E);
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	sprintf(mensagem, "*(L)=");
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	sprintf(mensagem, " =%d", processador_param->L);
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+
+	sprintf(mensagem, "*(IR)=");
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	registrador_imprimir(&processador_param->IR, coluna_param);
+
+	contexto_imprimirRegistradores(&processador_param->contextoProcessador, coluna_param);
+}
 

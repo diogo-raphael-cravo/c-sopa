@@ -93,8 +93,13 @@ void contexto_imprimirRegistradores(CONTEXTO *contexto_param, int coluna_param){
 	char mensagem[200];
 	int registrador;
 
+	sprintf(mensagem, "*(PC)=");
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	sprintf(mensagem, " =%d", contexto_param->PC);
+	tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
+	
 	for(registrador=0; registrador<QUANTIDADE_REGISTRADORES_CONTEXTO; registrador++){
-		sprintf(mensagem, "*(%d)=", registrador);
+		sprintf(mensagem, "*(r%d)=", registrador);
 		tela_escreverNaColuna(&global_tela, mensagem, coluna_param);
 		registrador_imprimir(&contexto_param->registradores[registrador], coluna_param);
 	}

@@ -36,7 +36,7 @@ Dependências:						 -
 Nome do Arquivo:					 LC
 Resultado Esperado:					 *número 1 em todos registradores
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 -
 =====================================================
 
@@ -45,7 +45,7 @@ Dependências:						 -
 Nome do Arquivo:					 WM
 Resultado Esperado:					 *número 1 em sua posição 0 de memória
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 
@@ -54,7 +54,7 @@ Dependências:						 3
 Nome do Arquivo:					 LM
 Resultado Esperado:					 *número 1 no registrador 0
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 4
 =====================================================
 
@@ -63,7 +63,7 @@ Dependências:						 4
 Nome do Arquivo:					 SU
 Resultado Esperado:					 *número 3 no registrador 0
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 
@@ -72,34 +72,34 @@ Dependências:						 3
 Nome do Arquivo:					 AD
 Resultado Esperado:					 *número 3 no registrador 0
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 
 =====================================================
 8)									 Decrement Register
 Nome do Arquivo:					 DEC
-Resultado Esperado:					 *número 999999 no registrador 0
+Resultado Esperado:					 *número 255 no registrador 0
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 
 =====================================================
 9)									 Increment Register
 Nome do Arquivo:					 INC
-Resultado Esperado:					 *número 1000001 no registrador 0
+Resultado Esperado:					 *número 256 no registrador 0
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 
 =====================================================
 10)									 Compare Registers Z
 Nome do Arquivo:					 CPZ
-Resultado Esperado:					 *flags do processador Z=1, E=0, L=0
+Resultado Esperado:					 *flags do processador Z=1, E=0, L=1
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 
@@ -108,7 +108,7 @@ Dependências:						 3
 Nome do Arquivo:					 CPE
 Resultado Esperado:					 *flags do processador Z=0, E=1, L=0
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 
@@ -117,17 +117,17 @@ Dependências:						 3
 Nome do Arquivo:					 CPL
 Resultado Esperado:					 *flags do processador Z=0, E=0, L=1
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 
 =====================================================
 13)									 Jump on Zero
 Nome do Arquivo:					 JPZ
-Resultado Esperado:					 *PC incrementa até 6
-									 *quando PC=6, PC <- 60
+Resultado Esperado:					 *PC incrementa até 7
+									 *quando PC=7, PC <- 70
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 8
 =====================================================
 
@@ -135,9 +135,9 @@ Dependências:						 8
 14)									 Jump on Equal
 Nome do Arquivo:					 JPE
 Resultado Esperado:					 *PC incrementa até 7
-									 *quando PC=7, PC <- 70
+									 *quando PC=8, PC <- 70
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 9
 =====================================================
 
@@ -145,9 +145,9 @@ Dependências:						 9
 15)									 Jump on Less
 Nome do Arquivo:					 JPL
 Resultado Esperado:					 *PC incrementa até 6
-									 *quando PC=6, PC <- 60
+									 *quando PC=7, PC <- 60
 									 *jogar falha de segmentação
-Última revisão em que esteve OK:	 -
+Última revisão em que esteve OK:	 58
 Dependências:						 3
 =====================================================
 

@@ -273,7 +273,6 @@ PALAVRA disco_palavrasUltimaLeituraPosicao(DISCO *disco_param, int posicaoBuffer
 
 /*
 * Escreve imediatamente os bytes na posição dada livre do disco.
-* Corre o risco de não escrever os dados em posições contíguas quando chamada sucessivamente.
 * @param DISCO		*disco_param		O disco em que será gravado.
 * @param int		posicao_param		A posição do disco em que será gravado.
 * @param BYTE		byte0_param			O byte que ficará na posição 0 da palavra, que conterá o bit mais significativo da palavra.
@@ -288,6 +287,17 @@ void disco_inicializarPosicao(DISCO *disco_param, int posicao_param, BYTE byte0_
 		| (byte1_param*256*256 & 0x00FF0000)
 		| (byte2_param*256 & 0x0000FF00)
 		| (byte3_param & 0x000000FF);
+}
+
+/*
+* Escreve imediatamente a palavra na posição dada livre do disco.
+* @param DISCO		*disco_param		O disco em que será gravado.
+* @param int		posicao_param		A posição do disco em que será gravado.
+* @param PALAVRA	palavra_param		A palavra que será gravada.
+* ATENÇÃO: esta função serve somente para a inicialização do disco, de forma que dê a impressão de ser persistente.
+*/
+void disco_inicializarPosicaoComPalavra(DISCO *disco_param, int posicao_param, PALAVRA palavra_param){
+	disco_param->conteudo[posicao_param] = palavra_param;
 }
 
 /**

@@ -490,9 +490,16 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			break;
 		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
 			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			sprintf(mensagem,  "Imprimindo contexto do DESCRITOR DO PROCESSO imediatamente anterior 'a falha.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			contexto_imprimirRegistradores(descritorProcesso_getContexto(*kernel_param->processoRodando), 3);
+			sprintf(mensagem,  "Imprimindo contexto do PROCESSADOR imediatamente anterior 'a falha.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			processador_imprimir(&global_processador, 3);
+
 			privada_matarProcessoRodando(kernel_param);
 			privada_escalonar(kernel_param);
-			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);
