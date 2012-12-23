@@ -13,6 +13,7 @@
 //Constantes
 #define MAXIMO_ARQUIVOS 20 //A quantidade máxima de arquivos neste sistema de arquivos.
 #define DIRETORIO_DADOS_DISCO "dados" //Caminho para o diretório onde ficam os arquivos do disco no hospedeiro.
+#define CAMINHO_ARQUIVO_DESCRITOR_SISTEMA_ARQUIVOS "dados/descritorSistemaArquivos"
 
 struct str_sistemaArquivos{
 	FIFO arquivos; //Guarda todos arquivos neste sistema de arquivos.
@@ -24,6 +25,8 @@ typedef struct str_sistemaArquivos SISTEMA_ARQUIVOS;
 //---------------------------------------------------------------------
 //			FUNÇÕES						
 //---------------------------------------------------------------------
+
+
 /**
 * Inicializa o sistema de arquivos e o disco com os arquivos do sistema hospedeiro.
 * Cria a ilusão de persistência do disco.
@@ -39,7 +42,11 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 */
 ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param);
 
-
+/**
+* Atualiza os arquivos na máquina hospedeira.
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que será atualizado.
+*/
+void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArquivos_param);
 
 
 

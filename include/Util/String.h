@@ -29,3 +29,5 @@ char* string_pegarSubtextoNaOrdem(char* texto_param, int tamanhoSubtexto_param, 
 */
 int string_paraInt(char* texto_param);
 
+
+

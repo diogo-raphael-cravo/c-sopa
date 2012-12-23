@@ -10,6 +10,66 @@
 //			FUNÇÕES PRIVADAS DESTE ARQUIVO						
 //---------------------------------------------------------------------
 
+/**
+* Lê o arquivo de inicialização, criando os arquivos que serão posteriormente preenchidos.
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que será inicializado.
+*/
+void privada_lerArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
+	FIFO_inicializar(&sistemaArquivos_param->arquivos, MAXIMO_ARQUIVOS);
+	
+	ARQUIVO **arquivoLido = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
+	FILE *arquivoSistemaArquivos;
+	int posicaoPalavra;
+	char linha[200];
+	char* byte;
+	char* palavraBytes[2];
+
+	arquivoSistemaArquivos = fopen(CAMINHO_ARQUIVO_DESCRITOR_SISTEMA_ARQUIVOS, "r");
+	if(arquivoSistemaArquivos != NULL){
+		while(fgets(linha, 200, arquivoSistemaArquivos)){
+			byte=strtok(linha, " \n");
+			posicaoPalavra = 0;
+			do{
+				if(byte != NULL){
+					palavraBytes[posicaoPalavra] = byte;
+					posicaoPalavra++;
+				}
+			}while(byte=strtok(NULL," \n"));
+
+			*arquivoLido = (ARQUIVO*) malloc(sizeof(ARQUIVO));
+			arquivo_inicializar(*arquivoLido, palavraBytes[0], string_paraInt(palavraBytes[1]));
+			FIFO_inserir(&sistemaArquivos_param->arquivos, arquivoLido);
+			arquivoLido = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
+		}
+		fclose(arquivoSistemaArquivos);
+	} else {
+		tela_escreverNaColuna(&global_tela, "Nao consegui abrir o arquivo que descreve o sistema de arquivos.", 4);
+	}
+	tela_escreverNaColuna(&global_tela, "Sistema de arquivos inicializado.", 4);
+}
+
+/**
+* Atualiza o arquivo de inicialização com o conteúdo deste sistema de arquivos.
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que será salvo.
+*/
+void privada_atualizarArquivoInicializao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
+	FILE *arquivoSistemaArquivos;
+	int arquivoImpresso=0;
+
+	arquivoSistemaArquivos = fopen(CAMINHO_ARQUIVO_DESCRITOR_SISTEMA_ARQUIVOS, "w");
+	if(arquivoSistemaArquivos != NULL){
+		while(arquivoImpresso < FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos)){
+			fprintf(arquivoSistemaArquivos, "%s %d\n", 
+				arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)),
+				arquivo_getTamanhoEmPalavras(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)));
+			arquivoImpresso++;
+		}
+		fclose(arquivoSistemaArquivos);
+	} else {
+		tela_escreverNaColuna(&global_tela, "Nao consegui abrir o arquivo que descreve o sistema de arquivos.", 4);
+	}
+}
+
 
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
@@ -21,58 +81,31 @@
 * @param DISCO				*disco_param			O disco que será preenchido com os dados lidos.
 */
 void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO *disco_param){
-	FIFO_inicializar(&sistemaArquivos_param->arquivos, MAXIMO_ARQUIVOS);
-	
-	ARQUIVO **arquivoLido = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
-	DIR *d;
-	struct dirent *dir;
-	d = opendir(DIRETORIO_DADOS_DISCO);
+	privada_lerArquivoInicializacao(sistemaArquivos_param);
+
 	char caminhoArquivo[200];
 	char mensagem[200];
-	char nomeArquivo[200];
-	int caractere;
-	int palavraInicioDoArquivo = 0;
 	int conseguiuLer = 0;
+	int posicaoLida=0;
 
-	if(d){
-		while((dir = readdir(d)) != NULL){
-			if( dir->d_name[0] == 'A'
-				&& dir->d_name[1] == 'R'
-				&& dir->d_name[2] == 'Q'
-				&& dir->d_name[3] == 'U'
-				&& dir->d_name[4] == 'I'
-				&& dir->d_name[5] == 'V'
-				&& dir->d_name[6] == 'O'
-				&& dir->d_name[7] == '_'
-				&& dir->d_name[strlen(dir->d_name)-1] != '~'){
-					memset(caminhoArquivo, '\0', 200);
-					strcat(caminhoArquivo, DIRETORIO_DADOS_DISCO);
-					strcat(caminhoArquivo, "/");
-					strcat(caminhoArquivo, dir->d_name);
-					*arquivoLido = (ARQUIVO*) malloc(sizeof(ARQUIVO));
+	while(posicaoLida < FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos)){
+		memset(caminhoArquivo, '\0', 200);
+		strcat(caminhoArquivo, DIRETORIO_DADOS_DISCO);
+		strcat(caminhoArquivo, "/");
+		strcat(caminhoArquivo, arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
 
-					memset(nomeArquivo, '\0', 200);
-					for(caractere=0; caractere<strlen(dir->d_name)-8; caractere++){
-						nomeArquivo[caractere] = dir->d_name[caractere+8];
-					}
-					sprintf(mensagem, "    ");
-					tela_escreverNaColuna(&global_tela, mensagem, 4);
-					conseguiuLer = arquivo_lerDaMaquinaHospedeira(*arquivoLido, disco_param, nomeArquivo, caminhoArquivo, palavraInicioDoArquivo);
-					if(conseguiuLer){
-						sprintf(mensagem, "Li '%s'", (*arquivoLido)->nome);
-						tela_escreverNaColuna(&global_tela, mensagem, 4);
-						FIFO_inserir(&sistemaArquivos_param->arquivos, arquivoLido);
-						palavraInicioDoArquivo += arquivo_getTamanhoEmPalavras(*arquivoLido);
-						arquivoLido = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
-					} else {
-						sprintf(mensagem, "Nao consegui ler '%s'", dir->d_name);
-						tela_escreverNaColuna(&global_tela, mensagem, 4);
-					}
-			}
+		sprintf(mensagem, "    ");
+		tela_escreverNaColuna(&global_tela, mensagem, 4);
+		conseguiuLer = arquivo_lerDaMaquinaHospedeira(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida), 
+			disco_param, caminhoArquivo);
+		if(conseguiuLer){
+			sprintf(mensagem, "Li '%s'", arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
+		} else {
+			sprintf(mensagem, "Nao consegui ler '%s'", arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
 		}
-		closedir(d);
-	} else {
-		tela_escreverNaColuna(&global_tela, "Nao consegui abrir a pasta dos arquivos do disco.", 4);
+		posicaoLida++;
 	}
 	tela_escreverNaColuna(&global_tela, "Sistema de arquivos inicializado.", 4);
 }
@@ -102,6 +135,30 @@ ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, c
 	FIFO_destruir(&copiaFila);
 	return arquivoEncontrado;
 }
+
+/**
+* Atualiza os arquivos na máquina hospedeira.
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que será atualizado.
+*/
+void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArquivos_param){
+	privada_atualizarArquivoInicializao(sistemaArquivos_param);
+
+	char caminhoArquivo[200];
+	int arquivoImpresso;
+	for(arquivoImpresso=0; arquivoImpresso<FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos); arquivoImpresso++){
+		memset(caminhoArquivo, '\0', 200);
+		strcat(caminhoArquivo, DIRETORIO_DADOS_DISCO);
+		strcat(caminhoArquivo, "/");
+		strcat(caminhoArquivo, arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)));
+
+		arquivo_atualizarNaMaquinaHospedeira(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso),
+			 caminhoArquivo);
+	}
+
+}
+
+
+
 
 
 
