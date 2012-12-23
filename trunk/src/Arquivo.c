@@ -23,23 +23,28 @@ void privada_setNome(ARQUIVO *arquivo_param, char* nome_param){
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
 /**
+* @param ARQUIVO	*arquivo_param			O arquivo que será inicializado.
+* @param char*		nome_param				Nome do arquivo, amigável ao usuário.
+* @param int		enderecoInicio_param	Endereço do disco que iniciará o arquivo.
+*/
+void arquivo_inicializar(ARQUIVO *arquivo_param, char* nome_param, int enderecoInicio_param){
+	privada_setNome(arquivo_param, nome_param);
+	arquivo_param->enderecoInicioDisco = enderecoInicio_param;
+}
+
+/**
 * Cria um arquivo à partir de um arquivo existente e salvo na máquina hospedeira.
 * O novo arquivo é salvo no disco.
 * @param ARQUIVO	*arquivo_param				Arquivo que será criado.
 * @param DISCO		*disco_param				O disco em que o arquivo será salvo.
-* @param char*		nome_param					O nome que será dado ao arquivo no SOPA.
 * @param char*		caminho_param				Caminho do arquivo na máquina hospedeira.
-* @param int		enderecoInicio_param_param	Endereço do disco que iniciará o arquivo.
 * @return int	Indica se foi possível ler o arquivo.
 */
-int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, char* nome_param, 
-		char* caminho_param, int enderecoInicio_param){
+int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, char* caminho_param){
 	int conseguiuLer = 0;
 	char mensagem[200];
 
 	arquivo_param->processoQueAbriu = NULL;
-
-	privada_setNome(arquivo_param, nome_param);
 
 	int posicaoPalavra = 0;
 	int palavra[TAMANHO_INSTRUCAO_PALAVRAS];
@@ -50,7 +55,6 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 	FILE *arquivoLido = fopen(caminho_param, "r");
 	if(arquivoLido != NULL){
 		conseguiuLer = 1;
-		arquivo_param->enderecoInicioDisco = enderecoInicio_param;
 		
 		while(fgets(linha, 200, arquivoLido)){
 			byte=strtok(linha, " \n");
@@ -87,9 +91,42 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 		
 		arquivo_param->tamanhoEmPalavras = posicaoEscrita;
 		arquivo_param->discoSalvo = disco_param;
+	} else {
+		sprintf(mensagem, "Nao consegui abrir o arquivo %s.", arquivo_param->nome);
+		tela_escreverNaColuna(&global_tela, mensagem, 4);
 	}
 
 	return conseguiuLer;
+}
+
+/**
+* @param ARQUIVO	*arquivo_param	Arquivo que será atualizado na máquina hospedeira.
+* @param char*		caminho_param				Caminho do arquivo na máquina hospedeira.
+*/
+void arquivo_atualizarNaMaquinaHospedeira(ARQUIVO *arquivo_param, char* caminho_param){
+	FILE *arquivoMaquinaHospedeira;
+	char mensagem[200];
+	PALAVRA palavra;
+	BYTE palavraEmBytes[TAMANHO_INSTRUCAO_PALAVRAS];
+	int palavraImpressa=0;
+
+	arquivoMaquinaHospedeira = fopen(caminho_param, "w");
+	if(arquivoMaquinaHospedeira != NULL){
+		for(; palavraImpressa<arquivo_param->tamanhoEmPalavras; palavraImpressa++){
+			palavra = arquivo_param->discoSalvo->conteudo[arquivo_param->enderecoInicioDisco+palavraImpressa];
+			palavraEmBytes[0] = (((palavra & 0xFF000000)/256)/256)/256;
+			palavraEmBytes[1] = ((palavra & 0x00FF0000)/256)/256;
+			palavraEmBytes[2] = (palavra & 0x0000FF00)/256;
+			palavraEmBytes[3] = palavra & 0x000000FF;
+
+			fprintf(arquivoMaquinaHospedeira, "%d %d %d %d\n", palavraEmBytes[0], palavraEmBytes[1],
+				palavraEmBytes[2], palavraEmBytes[3]);
+		}
+		fclose(arquivoMaquinaHospedeira);
+	} else {
+		sprintf(mensagem, "Nao consegui salvar o arquivo %s.", arquivo_param->nome);
+		tela_escreverNaColuna(&global_tela, mensagem, 4);
+	}
 }
 
 /**

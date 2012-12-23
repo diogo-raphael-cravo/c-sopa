@@ -30,16 +30,27 @@ typedef struct str_arquivo ARQUIVO;
 //			FUNÇÕES
 //---------------------------------------------------------------------
 /**
+* @param ARQUIVO	*arquivo_param			O arquivo que será inicializado.
+* @param char*		nome_param				Nome do arquivo, amigável ao usuário.
+* @param int		enderecoInicio_param	Endereço do disco que iniciará o arquivo.
+*/
+void arquivo_inicializar(ARQUIVO *arquivo_param, char* nome_param, int enderecoInicio_param);
+
+/**
 * Cria um arquivo à partir de um arquivo existente e salvo na máquina hospedeira.
 * O novo arquivo é salvo no disco.
 * @param ARQUIVO	*arquivo_param				Arquivo que será criado.
 * @param DISCO		*disco_param				O disco em que o arquivo será salvo.
-* @param char*		nome_param					O nome que será dado ao arquivo no SOPA.
 * @param char*		caminho_param				Caminho do arquivo na máquina hospedeira.
-* @param int		enderecoInicio_param_param	Endereço do disco que iniciará o arquivo.
 * @return int	Indica se foi possível ler o arquivo.
 */
-int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, char* nome_param, char* caminho_param, int enderecoInicio_param_param);
+int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, char* caminho_param);
+
+/**
+* @param ARQUIVO	*arquivo_param	Arquivo que será atualizado na máquina hospedeira.
+* @param char*		caminho_param				Caminho do arquivo na máquina hospedeira.
+*/
+void arquivo_atualizarNaMaquinaHospedeira(ARQUIVO *arquivo_param, char* caminho_param);
 
 /**
 * @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
@@ -71,7 +82,6 @@ DESCRITOR_PROCESSO* arquivo_getProcessoQueAbriu(ARQUIVO *arquivo_param);
 * ATENÇÃO: não checa se o arquivo já está aberto!
 */
 void arquivo_abrirParaProcesso(ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param);
-
 
 
 
