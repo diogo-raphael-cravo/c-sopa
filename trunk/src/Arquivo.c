@@ -15,7 +15,7 @@
 * ATENÇÃO: deve ser usada uma só vez!
 */
 void privada_setNome(ARQUIVO *arquivo_param, char* nome_param){
-	arquivo_param->nome = (char*) malloc(strlen(nome_param)*sizeof(char));
+	arquivo_param->nome = (char*) malloc((strlen(nome_param)+1)*sizeof(char));
 	strcpy(arquivo_param->nome, nome_param);
 }
 
@@ -50,7 +50,7 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 	FILE *arquivoLido = fopen(caminho_param, "r");
 	if(arquivoLido != NULL){
 		conseguiuLer = 1;
-		arquivo_param->enderecoInicioDisco = enderecoInicio_para;
+		arquivo_param->enderecoInicioDisco = enderecoInicio_param;
 		
 		while(fgets(linha, 200, arquivoLido)){
 			byte=strtok(linha, " \n");

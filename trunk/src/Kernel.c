@@ -39,13 +39,6 @@ DESCRITOR_PROCESSO* privada_buscaProcessoComPID(KERNEL *kernel_param, int PID_pa
 			processoEncontrado = processoTestado;
 		}
 	}
-	for(posicaoTestada=0; posicaoTestada<
-			FIFO_quantidadeElementos(&kernel_param->filaProcessosRequisicaoDisco); posicaoTestada++){
-		processoTestado = * (DESCRITOR_PROCESSO**) FIFO_espiarPosicao(&kernel_param->filaProcessosRequisicaoDisco, posicaoTestada);
-		if(descritorProcesso_getPID(processoTestado) == PID_param){
-			processoEncontrado = processoTestado;
-		}
-	}
 
 	return processoEncontrado;
 }
@@ -182,9 +175,7 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 	int erro = KERNEL_ERRO_NENHUM;
 	ARQUIVO *arquivoTransferido;
 
-	if(kernel_param->criandoProcesso){
-		erro = KERNEL_ERRO_CRIANDO_PROCESSO;
-	} else if(kernel_param->quantidadeProcessos+1 == MAXIMO_PROCESSOS_KERNEL){
+	if(kernel_param->quantidadeProcessos+1 == MAXIMO_PROCESSOS_KERNEL){
 		erro = KERNEL_ERRO_MAXIMO_PROCESSOS_ATINGIDO;
 	}
 
@@ -198,8 +189,7 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 
 	if(erro == KERNEL_ERRO_NENHUM){
 		enderecoMemoria = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada,
-			arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
-
+		arquivo_getTamanhoEmPalavras(arquivoTransferido));
 		int faltouMemoria = (enderecoMemoria == MEMORIA_ENDERECO_INEXISTENTE);
 		if(faltouMemoria){
 			erro = KERNEL_ERRO_MEMORIA_INSUFICIENTE;
@@ -209,20 +199,18 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 	if(erro == KERNEL_ERRO_NENHUM){
 		DESCRITOR_PROCESSO **novoProcesso = (DESCRITOR_PROCESSO**) malloc(sizeof(DESCRITOR_PROCESSO*));
 		*novoProcesso = (DESCRITOR_PROCESSO*) malloc(sizeof(DESCRITOR_PROCESSO));
-		descritorProcesso_inicializar(*novoProcesso, PID, enderecoMemoria, arquivo_getTamanhoEmPalavras(kernel_param->arquivoTransferido));
+		descritorProcesso_inicializar(*novoProcesso, PID, enderecoMemoria, arquivo_getTamanhoEmPalavras(arquivoTransferido));
 		contexto_setPC(descritorProcesso_getContexto(*novoProcesso), 0);
 		descritorProcesso_setStatus(*novoProcesso, STATUS_PROCESSO_PRONTO);
-		kernel_param->quantidadeProcessos++;
 
 		kernel_param->arquivoTransferido = arquivoTransferido;
 
-		if(FIFO_vazia(&kernel_param->filaProcessosDMA)){
-			disco_transferirParaMemoria(&global_disco, enderecoMemoria,
-				arquivoTransferido->enderecoInicioDisco, arquivo_getTamanhoEmPalavras(arquivoTransferido));
-		} else {
-			FIFO_inserir(&kernel_param->filaProcessosDMA, novoProcesso);
-			erro = KERNEL_ERRO_DISCO_OCUPADO;
-		}
+		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoCargaDMA(enderecoMemoria, 
+				arquivoTransferido->enderecoInicioDisco, 
+				arquivo_getTamanhoEmPalavras(arquivoTransferido));
+		OPERACAO_KERNEL* operacaoKernel = gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(novoProcesso);
+
+		gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
 	}
 
 	return erro;
@@ -263,7 +251,7 @@ COMANDO_USUARIO privada_getComandoUsuario(KERNEL *kernel_param, char* comando_pa
 */
 void privada_getParametroComandoUsuario(KERNEL *kernel_param, char* comando_param, char* destinoParametro_param, int ordemParametro_param){
 	char parametro[200];
-	char* copiaComandoUsuario = (char*) malloc(strlen(comando_param)*sizeof(char));
+	char* copiaComandoUsuario = (char*) malloc((strlen(comando_param)+1)*sizeof(char));
 	char* palavra;
 	int posicaoPalavra = 0;
 	int haParametro = 0;
@@ -295,7 +283,7 @@ void privada_getParametroComandoUsuario(KERNEL *kernel_param, char* comando_para
 		destinoParametro_param = NULL;
 	}
 
-	//free(copiaComandoUsuario);
+	free(copiaComandoUsuario);
 }
 
 /**
@@ -386,7 +374,7 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 void privada_realizaProximaOperacaoDisco(KERNEL *kernel_param){
 /*
 	DEIXA NA FILA
-*/
+
 	PROCESSO_ESPERANDO **esperaProcesso = (PROCESSO_ESPERANDO**) FIFO_espiar(&kernel_param->filaProcessosRequisicaoDisco);
 
 	if((*esperaProcesso)->motivoEspera == OPERACAO_LEITURA_DISCO){
@@ -396,7 +384,7 @@ void privada_realizaProximaOperacaoDisco(KERNEL *kernel_param){
 		int posicaoEscrita = 1;
 		PALAVRA* dadosEscrita = NULL;
 		disco_executarOperacao(&global_disco, OPERACAO_ESCRITA_DISCO, posicaoEscrita, dadosEscrita, 0);
-	}
+	}*/
 }
 
 /**
@@ -405,7 +393,7 @@ void privada_realizaProximaOperacaoDisco(KERNEL *kernel_param){
 * @param OPERACAO_DISCO		operacao_param			A operação do disco que será executada.
 */
 void privada_requisitaOperacaoDisco(KERNEL *kernel_param, OPERACAO_DISCO operacao_param){
-	PROCESSO_ESPERANDO **esperaProcesso = (PROCESSO_ESPERANDO**) malloc(sizeof(PROCESSO_ESPERANDO*));
+/*	PROCESSO_ESPERANDO **esperaProcesso = (PROCESSO_ESPERANDO**) malloc(sizeof(PROCESSO_ESPERANDO*));
 	*esperaProcesso = (PROCESSO_ESPERANDO*) malloc(sizeof(PROCESSO_ESPERANDO));
 
 	(*esperaProcesso)->processoEsperando = kernel_param->processoRodando;
@@ -414,7 +402,7 @@ void privada_requisitaOperacaoDisco(KERNEL *kernel_param, OPERACAO_DISCO operaca
 	if(FIFO_vazia(&kernel_param->filaProcessosRequisicaoDisco)){
 		privada_realizaProximaOperacaoDisco(kernel_param);
 	}
-	FIFO_inserir(&kernel_param->filaProcessosRequisicaoDisco, esperaProcesso);
+	FIFO_inserir(&kernel_param->filaProcessosRequisicaoDisco, esperaProcesso);*/
 }
 
 
@@ -432,14 +420,11 @@ void privada_recebeResultadoOperacaoDisco(){
 */
 void kernel_inicializar(KERNEL *kernel_param){
 	kernel_param->quantidadeProcessos = 0;
-	kernel_param->criandoProcesso = 0;
-	kernel_param->processoCriadoNaMemoria = 0;
 	kernel_param->ultimoPIDUsado = -1;
 	FIFO_inicializar(&kernel_param->filaProcessosProntos, MAXIMO_PROCESSOS_KERNEL);
 	FIFO_inicializar(&kernel_param->filaProcessosBloqueados, MAXIMO_PROCESSOS_KERNEL);
-	FIFO_inicializar(&kernel_param->filaProcessosRequisicaoDisco, MAXIMO_PROCESSOS_KERNEL);
-	FIFO_inicializar(&kernel_param->filaProcessosDMA, MAXIMO_PROCESSOS_KERNEL);
 
+	gerenciadorDisco_inicializar(&kernel_param->gerenciadorAcessoDisco, &global_disco);
 	sistemaArquivos_inicializarComArquivosDoHospedeiro(&kernel_param->sistemaDeArquivos, &global_disco);
 	mapaAlocacoesMemoria_inicializar(&kernel_param->mapaMemoriaAlocada, &global_MMU, MAXIMO_PROCESSOS_KERNEL);
 
@@ -460,6 +445,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	char mensagem[200];
 	char* mensagemOperador;
+	OPERACAO_KERNEL* operacaoKernel;
 
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
@@ -476,17 +462,31 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			privada_escalonar(kernel_param);
 			break;
 		case INTERRUPCAO_DISCO:
-			if(kernel_param->criandoProcesso){
-				
-				kernel_param->criandoProcesso = 0;
-			} else {
-				if(!FIFO_vazia(&kernel_param->filaProcessosBloqueados)){
-					FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueados));
-				}
+			operacaoKernel = gerenciadorDisco_proximaOperacaoKernel(&kernel_param->gerenciadorAcessoDisco);
+			gerenciadorDisco_executarProxima(&kernel_param->gerenciadorAcessoDisco);
+			if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_CRIACAO_PROCESSO_KERNEL){
+
+				OPERACAO_CRIACAO_PROCESSO_KERNEL* operacaoExecutada = (OPERACAO_CRIACAO_PROCESSO_KERNEL*) operacaoKernel->operacao;
+				FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoCriado);
+				kernel_param->quantidadeProcessos++;
+			} else if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_FEITA_POR_PROCESSO_KERNEL){
+				//FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueados));
 			}
+
+			free(operacaoKernel->operacao);
+			free(operacaoKernel);
 			break;
 		case INTERRUPCAO_SOFTWARE_PARA_DISCO:
- 			privada_requisitaOperacaoDisco(kernel_param, OPERACAO_LEITURA_DISCO);
+//			privada_requisitaOperacaoDisco(kernel_param, OPERACAO_LEITURA_DISCO);
+/*
+		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoCargaDMA(enderecoMemoria, 
+				arquivoTransferido->enderecoInicioDisco, 
+				arquivo_getTamanhoEmPalavras(arquivoTransferido));
+		OPERACAO_KERNEL* operacaoKernel = gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(*novoProcesso);
+
+		gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
+
+*/
 			break;
 		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
 			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));

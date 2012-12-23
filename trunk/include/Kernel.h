@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define MAXIMO_PROCESSOS_KERNEL 30
+#define MAXIMO_PROCESSOS_KERNEL 30 //Sabemos que não há limite, mas nossa implementação necessita de um limite, ainda que altíssimo.
 #define DESCRITOR_PROCESSO_INEXISTENTE NULL
 
 enum enum_errosKernel{
@@ -29,13 +29,6 @@ enum enum_comandosUsuario{
 
 typedef enum enum_comandosUsuario COMANDO_USUARIO;
 
-struct str_processoEsperandoDisco{ //Relaciona um processo que está esperando com o motivo pelo qual ele está esperando.
-	DESCRITOR_PROCESSO** processoEsperando;
-	OPERACAO_DISCO motivoEspera; //Operação que será feita pelo disco.
-};
-
-typedef struct str_processoEsperandoDisco PROCESSO_ESPERANDO;
-
 struct str_kernel{
 		//Espera para escalonamento
 	FIFO filaProcessosBloqueados; //Processos que estão bloqueados, por algum motivo. 
@@ -48,9 +41,8 @@ struct str_kernel{
 	SISTEMA_ARQUIVOS sistemaDeArquivos; //O sistema de arquivos, com todos os arquivos em todos os discos!
 	DESCRITOR_PROCESSO** processoRodando; //Ponteiro para o processo que está rodando.
 	ARQUIVO *arquivoTransferido; //Arquivo que está sendo transferido para a memória.
-	GERENCIADOR_DISCO gerenciadoAcessoDisco; //Gerencia acesso às operações do disco.
+	GERENCIADOR_DISCO gerenciadorAcessoDisco; //Gerencia acesso às operações do disco.
 	int quantidadeProcessos; //A quantidade de processos no momento.
-	int criandoProcesso; //Indica se o kernel está criando um processo.
 	int ultimoPIDUsado; //Último PID utilizado para um processo deste kernel.
 };
 
