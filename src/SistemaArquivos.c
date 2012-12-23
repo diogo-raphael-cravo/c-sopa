@@ -31,7 +31,7 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 	char mensagem[200];
 	char nomeArquivo[200];
 	int caractere;
-	int blocoInicioDoArquivo = 0;
+	int palavraInicioDoArquivo = 0;
 	int conseguiuLer = 0;
 
 	if(d){
@@ -57,12 +57,12 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 					}
 					sprintf(mensagem, "    ");
 					tela_escreverNaColuna(&global_tela, mensagem, 4);
-					conseguiuLer = arquivo_lerDaMaquinaHospedeira(*arquivoLido, disco_param, nomeArquivo, caminhoArquivo, blocoInicioDoArquivo);
+					conseguiuLer = arquivo_lerDaMaquinaHospedeira(*arquivoLido, disco_param, nomeArquivo, caminhoArquivo, palavraInicioDoArquivo);
 					if(conseguiuLer){
 						sprintf(mensagem, "Li '%s'", (*arquivoLido)->nome);
 						tela_escreverNaColuna(&global_tela, mensagem, 4);
 						FIFO_inserir(&sistemaArquivos_param->arquivos, arquivoLido);
-						blocoInicioDoArquivo += arquivo_getTamanhoEmBlocos(*arquivoLido);
+						palavraInicioDoArquivo += arquivo_getTamanhoEmPalavras(*arquivoLido);
 						arquivoLido = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
 					} else {
 						sprintf(mensagem, "Nao consegui ler '%s'", dir->d_name);

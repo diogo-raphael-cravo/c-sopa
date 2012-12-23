@@ -93,6 +93,8 @@ void privada_escreverEndereco(DISCO *disco_param, int endereco_param, PALAVRA *d
 * @param int				quantidadePalavras_param	A quantidade de palavras que serão lidas.
 */
 void privada_transferirParaMemoria(DISCO *disco_param, int enderecoMemoria_param, int enderecoDisco_param, int quantidadePalavras_param){
+	char mensagem[200];
+
 	sprintf(mensagem, "DMA %d palavras de disco(%d) para memoria(%d)", quantidadePalavras_param, enderecoDisco_param, enderecoMemoria_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 4);
 	int palavraLida;
@@ -100,7 +102,7 @@ void privada_transferirParaMemoria(DISCO *disco_param, int enderecoMemoria_param
 	if(enderecoDisco_param < 0 || TAMANHO_DISCO_PALAVRAS <= enderecoDisco_param+quantidadePalavras_param){
 		disco_param->erroUltimaOperacao = ERRO_DISCO_ENDERECO_INVALIDO;
 	} else {
-		for(palavraLida=0; palavraLida<tamanhoDados_param; palavraLida++){
+		for(palavraLida=0; palavraLida<quantidadePalavras_param; palavraLida++){
 			MMU_sincronizado_escreverFisico(&global_MMU, 
 				enderecoMemoria_param+palavraLida, disco_param->conteudo[enderecoDisco_param+palavraLida]);
 
@@ -114,7 +116,7 @@ void privada_transferirParaMemoria(DISCO *disco_param, int enderecoMemoria_param
 				disco_param->conteudo[enderecoDisco_param+palavraLida] & 0x000000FF);
 			tela_escreverNaColuna(&global_tela, mensagem, 5);
 		}
-		disco_imprimir(disco_param);
+		//disco_imprimir(disco_param);
 	}
 }
 
@@ -124,15 +126,13 @@ void privada_transferirParaMemoria(DISCO *disco_param, int enderecoMemoria_param
 * @param DISCO				*disco_param		O disco em que a operação será realizada.
 */
 void privada_executarProximaOperacao(DISCO *disco_param){
-	char mensagem[200];
-
 	disco_param->erroUltimaOperacao = SEM_ERRO_DISCO;
 	switch(disco_param->proximaOperacao){
 		case TIPO_OPERACAO_LEITURA_DISCO:
 			privada_lerEndereco(disco_param, disco_param->enderecoProximaOperacao);
 			break;
 		case TIPO_OPERACAO_ESCRITA_DISCO:
-			privada_escreverEndereco(disco_param->enderecoProximaOperacao, 
+			privada_escreverEndereco(disco_param, disco_param->enderecoProximaOperacao, 
 				disco_param->dadosProximaEscrita, disco_param->tamanhoPalavrasProximaEscrita);
 			break;
 		case TIPO_OPERACAO_CARGA_DMA_DISCO:
@@ -191,7 +191,7 @@ void disco_rodar(DISCO *disco_param){
 * @param int				endereco_param			O endereço lido.
 */
 void disco_lerEndereco(DISCO *disco_param, int endereco_param){
-	if(!disco_estahOcupado(disco_param){
+	if(!disco_estahOcupado(disco_param)){
 		disco_param->realizandoOperacao = 1;
 		disco_param->tamanhoUltimaLeitura = 0;
 		disco_param->erroUltimaOperacao = SEM_ERRO_DISCO;
@@ -209,7 +209,7 @@ void disco_lerEndereco(DISCO *disco_param, int endereco_param){
 * @param int				tamanhoDados_param		A quantidade de palavras que serão escritas.
 */
 void disco_escreverEndereco(DISCO *disco_param, int endereco_param, PALAVRA *dados_param, int tamanhoDados_param){
-	if(!disco_estahOcupado(disco_param){
+	if(!disco_estahOcupado(disco_param)){
 		disco_param->realizandoOperacao = 1;
 		disco_param->tamanhoUltimaLeitura = 0;
 		disco_param->erroUltimaOperacao = SEM_ERRO_DISCO;
@@ -229,7 +229,7 @@ void disco_escreverEndereco(DISCO *disco_param, int endereco_param, PALAVRA *dad
 * @param int				quantidadePalavras_param	A quantidade de palavras que serão lidas.
 */
 void disco_transferirParaMemoria(DISCO *disco_param, int enderecoMemoria_param, int enderecoDisco_param, int quantidadePalavras_param){
-	if(!disco_estahOcupado(disco_param){
+	if(!disco_estahOcupado(disco_param)){
 		disco_param->realizandoOperacao = 1;
 		disco_param->tamanhoUltimaLeitura = 0;
 		disco_param->erroUltimaOperacao = SEM_ERRO_DISCO;

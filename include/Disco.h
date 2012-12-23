@@ -26,29 +26,6 @@ enum enum_erroDisco{
 
 typedef enum enum_erroDisco ERRO_DISCO;
 
-	//Operações do disco.
-struct str_operacaoLeituraDisco{
-	int endereco;
-};
-
-typedef struct str_operacaoLeituraDisco OPERACAO_LEITURA_DISCO;
-
-struct str_operacaoEscritaDisco{
-	int endereco;
-	PALAVRA *dados;
-	int tamanhoDados;
-};
-
-typedef struct str_operacaoEscritaDisco OPERACAO_ESCRITA_DISCO;
-
-struct str_operacaoCargaDMADisco{
-	int enderecoMemoria;
-	int enderecoDisco;
-	int quantidadePalavras;
-};
-
-typedef struct str_operacaoCargaDMADisco OPERACAO_CARGA_DMA_DISCO;
-
 	//Disco
 struct str_disco{
 	sem_t mutexAcessoDisco;
