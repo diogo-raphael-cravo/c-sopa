@@ -54,6 +54,8 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 		instrucaoEncontrada = INSTRUCAO_JUMP_ON_EQUAL;
 	} else if(registrador_contem(&processador_param->IR, 'J', 'P', 'L', BYTE_QUALQUER)){
 		instrucaoEncontrada = INSTRUCAO_JUMP_ON_LESS;
+	} else if(registrador_contem(&processador_param->IR, 'N', 'O', 'P', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_NOP;
 	} else {
 		instrucaoEncontrada = INSTRUCAO_INEXISTENTE;
 	}
@@ -158,13 +160,15 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 				contexto_setPC(&processador_param->contextoProcessador, enderecoDestino);
 			}
 			break;
+		case INSTRUCAO_NOP:
+			sprintf(mensagem, "NOP");
+			break;
 		default:
 			sprintf(mensagem, "Instrucao desconhecida.");
+			kernel_rodar(&global_kernel, INTERRUPCAO_PROCESSADOR);
 	}
 	tela_escreverNaColuna(&global_tela, mensagem, 1);
 }
-
-
 
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
@@ -201,8 +205,7 @@ void processador_rodar(PROCESSADOR *processador_param){
 		registrador_carregarPalavra(&processador_param->IR, instrucaoLida);
 		instrucaoBuscada = privada_decodificaInstrucao(processador_param);
 		privada_executaInstrucao(processador_param, instrucaoBuscada);
-		
-		
+
 		if(controladorInterrupcoes_get(&global_controladorInterrupcoes) != SEM_INTERRUPCAO){
 			kernel_rodar(&global_kernel, controladorInterrupcoes_get(&global_controladorInterrupcoes));
 			controladorInterrupcoes_reset(&global_controladorInterrupcoes);

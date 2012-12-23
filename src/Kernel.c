@@ -452,6 +452,10 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 
 	descritorProcesso_setContexto(*kernel_param->processoRodando, processador_getContexto(&global_processador));
 	switch(interrupcao_param){
+		case INTERRUPCAO_PROCESSADOR:
+			sprintf(mensagem, "Operacao inexistente reportada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
 		case INTERRUPCAO_CONSOLE:
 			mensagemOperador = console_ultimaLinhaDigitada(&global_console);
 			sprintf(mensagem, "Operador digitou: %s", mensagemOperador);
