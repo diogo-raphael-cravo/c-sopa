@@ -63,6 +63,12 @@ void processador_setContexto(PROCESSADOR *processador_param, CONTEXTO *contexto_
 */
 CONTEXTO* processador_getContexto(PROCESSADOR *processador_param);
 
+/**
+* @param PROCESSADOR		*processador_param	O processador cujos dados serão impressos.
+* @param int				coluna_param	A coluna da tela em que a impressão será feita.
+*/
+void processador_imprimir(PROCESSADOR *processador_param, int coluna_param);
+
 
 
 
