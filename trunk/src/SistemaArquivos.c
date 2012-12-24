@@ -18,9 +18,9 @@
 */
 int privada_getPosicaoLivreDisco(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO *disco_param){
 	int posicaoLivre = MEMORIA_ENDERECO_INEXISTENTE;
-	int arquivoChecado;
+	//int arquivoChecado;
 
-	
+		tela_imprimirTelaAzulDaMorte(&global_tela, "privada_getPosicaoLivreDisco de SistemaArquivos nao foi implementada.");
 
 	return posicaoLivre;
 }

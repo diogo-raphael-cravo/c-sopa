@@ -71,7 +71,11 @@ void contexto_setPC(CONTEXTO *contexto_param, int PC_param){
 * @param int			indiceRegistrador_param	O índice em contexto_param->registradores do registrador que se quer.
 */
 void contexto_setRegistrador(CONTEXTO *contexto_param, REGISTRADOR *registrador_param, int indiceRegistrador_param){
-	registrador_copiar(&contexto_param->registradores[indiceRegistrador_param], registrador_param);
+	if(0 <= indiceRegistrador_param && indiceRegistrador_param < QUANTIDADE_REGISTRADORES_CONTEXTO){
+		registrador_copiar(&contexto_param->registradores[indiceRegistrador_param], registrador_param);
+	} else {
+		tela_imprimirTelaAzulDaMorte(&global_tela, "Alguem tentou acessar um registrador inexistente.");
+	}
 }
 
 /**
@@ -81,7 +85,11 @@ void contexto_setRegistrador(CONTEXTO *contexto_param, REGISTRADOR *registrador_
 * @param int			indiceRegistrador_param	O índice em contexto_param->registradores do registrador que se quer.
 */
 void contexto_setRegistradorPalavra(CONTEXTO *contexto_param, PALAVRA palavra_param, int indiceRegistrador_param){
-	registrador_carregarPalavra(&contexto_param->registradores[indiceRegistrador_param], palavra_param);
+	if(0 <= indiceRegistrador_param && indiceRegistrador_param < QUANTIDADE_REGISTRADORES_CONTEXTO){
+		registrador_carregarPalavra(&contexto_param->registradores[indiceRegistrador_param], palavra_param);
+	} else {
+		tela_imprimirTelaAzulDaMorte(&global_tela, "Alguem tentou acessar um registrador inexistente.");
+	}
 }
 
 /**

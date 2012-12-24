@@ -47,7 +47,7 @@ INTERRUPCAO controladorInterrupcoes_get(CONTROLADOR_INTERRUPCOES *controladorInt
 	if(controladorInterrupcoes_param->haInterrupcaoMemoria){
 		return INTERRUPCAO_SEGMENTACAO_MEMORIA;
 	} else {
-		return controladorInterrupcoes_param->interrupcaoGuardada;		
+		return controladorInterrupcoes_param->interrupcaoGuardada;
 	}
 }
 

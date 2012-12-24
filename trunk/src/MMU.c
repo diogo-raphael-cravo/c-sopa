@@ -79,16 +79,23 @@ void MMU_sincronizado_escreverFisico(MMU *MMU_param, int endereco_param, PALAVRA
 * @param MMU		*MMU_param					A MMU em que a operação será realizada.
 * @param int		endereco_param				Endereço da leitura.
 * @param PALAVRA	*destino_param				Endereço da variável em que o resultado será colocado.
+* @param int		deveGerarInterrupcao_param	Indica se deve cadastrar uma interrupção no controlador de interrupções.
+* @return int	Indica se houve invasão da memória.
 */
-void MMU_sincronizado_lerLogico(MMU *MMU_param, int endereco_param, PALAVRA *destino_param){
+int MMU_sincronizado_lerLogico(MMU *MMU_param, int endereco_param, PALAVRA *destino_param, int deveGerarInterrupcao_param){
 	sem_wait(&MMU_param->mutexAcessoMMU);
+	int houveInvasao=0;
 	if(MMU_param->limite <= endereco_param){
-		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_SEGMENTACAO_MEMORIA);
+		if(deveGerarInterrupcao_param){
+			controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_SEGMENTACAO_MEMORIA);
+		}
 		*destino_param = 0;
+		houveInvasao = 1;
 	} else {
 		memoria_sincronizado_ler(MMU_param->memoriaGerenciada, MMU_param->base + endereco_param, destino_param);
 	}
 	sem_post(&MMU_param->mutexAcessoMMU);
+	return houveInvasao;
 }
 
 /*
@@ -96,15 +103,22 @@ void MMU_sincronizado_lerLogico(MMU *MMU_param, int endereco_param, PALAVRA *des
 * @param MMU		*MMU_param					A MMU em que a operação será realizada.
 * @param int		endereco_param				Endereço da escrita.
 * @param PALAVRA	palavraEscrita_param		A palavra que será escrita na memória.
+* @param int		deveGerarInterrupcao_param	Indica se deve cadastrar uma interrupção no controlador de interrupções.
+* @return int	Indica se houve invasão da memória.
 */
-void MMU_sincronizado_escreverLogico(MMU *MMU_param, int endereco_param, PALAVRA palavraEscrita_param){
+int MMU_sincronizado_escreverLogico(MMU *MMU_param, int endereco_param, PALAVRA palavraEscrita_param, int deveGerarInterrupcao_param){
 	sem_wait(&MMU_param->mutexAcessoMMU);
-	if(MMU_param->limite <= endereco_param){
-		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_SEGMENTACAO_MEMORIA);
+	int houveInvasao=0;
+	if(MMU_param->limite <= endereco_param && deveGerarInterrupcao_param){
+		if(deveGerarInterrupcao_param){
+			controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_SEGMENTACAO_MEMORIA);
+		}
+		houveInvasao = 1;
 	} else {
 		memoria_sincronizado_escreverPalavra(MMU_param->memoriaGerenciada, MMU_param->base + endereco_param, palavraEscrita_param);
 	}
 	sem_post(&MMU_param->mutexAcessoMMU);
+	return houveInvasao;
 }
 
 /**
