@@ -12,6 +12,12 @@
 
 //Constantes
 
+enum enum_opcoesAberturaArquivo{
+	LER=0,
+	ESCREVER=1
+};
+
+typedef enum enum_opcoesAberturaArquivo OPCAO_ABERTURA_ARQUIVO;
 
 struct str_arquivo{
 		//No disco
@@ -22,6 +28,7 @@ struct str_arquivo{
 		//No kernel
 	char* nome; //Nome amigável ao usuário, atribuído ao arquivo.
 	DESCRITOR_PROCESSO *processoQueAbriu; //Ponteiro para o processo que abriu este arquivo.
+	int numeroDescritor; //Número usado por processos do SOPA para ler e escrever.
 };
 
 typedef struct str_arquivo ARQUIVO;
@@ -33,8 +40,9 @@ typedef struct str_arquivo ARQUIVO;
 * @param ARQUIVO	*arquivo_param			O arquivo que será inicializado.
 * @param char*		nome_param				Nome do arquivo, amigável ao usuário.
 * @param int		enderecoInicio_param	Endereço do disco que iniciará o arquivo.
+* @param int		numeroDescritor_param	Número usado por processos do SOPA para ler e escrever.
 */
-void arquivo_inicializar(ARQUIVO *arquivo_param, char* nome_param, int enderecoInicio_param);
+void arquivo_inicializar(ARQUIVO *arquivo_param, char* nome_param, int enderecoInicio_param, int numeroDescritor_param);
 
 /**
 * Cria um arquivo à partir de um arquivo existente e salvo na máquina hospedeira.

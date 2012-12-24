@@ -17,6 +17,8 @@
 
 struct str_sistemaArquivos{
 	FIFO arquivos; //Guarda todos arquivos neste sistema de arquivos.
+	int numeroDescritorArquivoLivre; //Sempre conterá um numero de descritor de arquivo que não 
+							// está sendo usado por arquivo algum (utilizado por processos do SOPA).
 };
 
 typedef struct str_sistemaArquivos SISTEMA_ARQUIVOS;

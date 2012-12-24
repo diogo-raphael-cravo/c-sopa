@@ -56,6 +56,40 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 		instrucaoEncontrada = INSTRUCAO_JUMP_ON_LESS;
 	} else if(registrador_contem(&processador_param->IR, 'N', 'O', 'P', BYTE_QUALQUER)){
 		instrucaoEncontrada = INSTRUCAO_NOP;
+	} else if(registrador_contem(&processador_param->IR, 'L', 'D', 'M', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_LOAD_REGISTER_FROM_MEMORY_32;
+	} else if(registrador_contem(&processador_param->IR, 'L', 'D', 'C', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_LOAD_REGISTER_FROM_CONSTANT_32;
+	} else if(registrador_contem(&processador_param->IR, 'W', 'R', 'M', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_WRITE_REGISTER_IN_MEMORY_32;
+	} else if(registrador_contem(&processador_param->IR, 'L', 'I', BYTE_QUALQUER, BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_LOAD_REGISTER_INDIRECTLY;
+	} else if(registrador_contem(&processador_param->IR, 'W', 'I', BYTE_QUALQUER, BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_WRITE_REGISTER_INDIRECTLY;
+	} else if(registrador_contem(&processador_param->IR, 'J', 'C', 'A', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_ABSOLUTE_JUMP_32;
+	} else if(registrador_contem(&processador_param->IR, 'J', 'C', 'Z', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_JUMP_ON_ZERO_32;
+	} else if(registrador_contem(&processador_param->IR, 'J', 'C', 'E', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_JUMP_ON_EQUAL_32;
+	} else if(registrador_contem(&processador_param->IR, 'J', 'C', 'L', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_JUMP_ON_LESS_32;
+	} else if(registrador_contem(&processador_param->IR, 'J', 'R', 'A', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_ABSOLUTE_JUMP_TO_REGISTER;
+	} else if(registrador_contem(&processador_param->IR, 'J', 'R', 'Z', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_JUMP_ON_ZERO_TO_REGISTER;
+	} else if(registrador_contem(&processador_param->IR, 'J', 'R', 'E', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_JUMP_ON_EQUAL_TO_REGISTER;
+	} else if(registrador_contem(&processador_param->IR, 'J', 'R', 'L', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_JUMP_ON_LESS_TO_REGISTER;
+	} else if(registrador_contem(&processador_param->IR, 'C', 'A', 'L', 'L')){
+		instrucaoEncontrada = INSTRUCAO_CALL_ROUTINE;
+	} else if(registrador_contem(&processador_param->IR, 'R', 'E', 'T', 'C')){
+		instrucaoEncontrada = INSTRUCAO_RETURN_FROM_CALL;
+	} else if(registrador_contem(&processador_param->IR, 'P', 'U', 'S', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_PUSH_REGISTER_INTO_STACK;
+	} else if(registrador_contem(&processador_param->IR, 'P', 'O', 'P', BYTE_QUALQUER)){
+		instrucaoEncontrada = INSTRUCAO_POP_REGISTER_FROM_STACK;
 	} else {
 		instrucaoEncontrada = INSTRUCAO_INEXISTENTE;
 	}
@@ -71,7 +105,7 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instrucao_param){
 	char mensagem[200];
 	int enderecoDestino, qualInterrupcao, qualRegistrador, registradorOrigem, registradorDestino;
-	PALAVRA palavraGravada, resultadoOperacao, conteudoOrigem, conteudoDestino, conteudoRegistrador;
+	PALAVRA palavraLida, palavraGravada, resultadoOperacao, conteudoOrigem, conteudoDestino;
 
 	switch(instrucao_param){
 		case INSTRUCAO_ABSOLUTE_JUMP:
@@ -162,6 +196,179 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 			break;
 		case INSTRUCAO_NOP:
 			sprintf(mensagem, "NOP");
+			break;
+		case INSTRUCAO_LOAD_REGISTER_FROM_MEMORY_32:
+			registradorDestino = processador_param->IR.conteudo[3];
+			MMU_sincronizado_lerLogico(&global_MMU, contexto_getPC(&processador_param->contextoProcessador), &palavraLida);
+			MMU_sincronizado_lerLogico(&global_MMU, palavraLida, &palavraGravada);
+			
+			sprintf(mensagem, "LDM %d %d %d %d %d", registradorDestino, 
+				(((palavraLida & 0xFF000000)/256)/256)/256,
+				((palavraLida & 0x00FF0000)/256)/256,
+				(palavraLida & 0x0000FF00)/256,
+				palavraLida & 0x000000FF);
+
+			registrador_carregarPalavra(
+				contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino),
+				palavraGravada);
+			contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
+			break;
+		case INSTRUCAO_LOAD_REGISTER_FROM_CONSTANT_32:
+			registradorDestino = processador_param->IR.conteudo[3];
+			MMU_sincronizado_lerLogico(&global_MMU, contexto_getPC(&processador_param->contextoProcessador), &palavraGravada);
+
+			sprintf(mensagem, "LDC %d %d %d %d %d", registradorDestino, 
+					(((palavraGravada & 0xFF000000)/256)/256)/256,
+					((palavraGravada & 0x00FF0000)/256)/256,
+					(palavraGravada & 0x0000FF00)/256,
+					palavraGravada & 0x000000FF);
+			registrador_carregarPalavra(
+				contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino),
+				palavraGravada);
+			contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
+			break;
+		case INSTRUCAO_WRITE_REGISTER_IN_MEMORY_32:
+			registradorOrigem = processador_param->IR.conteudo[3];
+			MMU_sincronizado_lerLogico(&global_MMU, contexto_getPC(&processador_param->contextoProcessador), &enderecoDestino);
+
+			sprintf(mensagem, "WRM %d %d %d %d %d", registradorOrigem, 
+					(((enderecoDestino & 0xFF000000)/256)/256)/256,
+					((enderecoDestino & 0x00FF0000)/256)/256,
+					(enderecoDestino & 0x0000FF00)/256,
+					enderecoDestino & 0x000000FF);
+
+			conteudoOrigem = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem));
+			MMU_sincronizado_escreverLogico(&global_MMU, enderecoDestino, conteudoOrigem);
+			contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
+			break;
+		case INSTRUCAO_LOAD_REGISTER_INDIRECTLY:
+			registradorDestino = processador_param->IR.conteudo[2];
+			registradorOrigem = processador_param->IR.conteudo[3];
+
+			sprintf(mensagem, "LI %d %d", registradorDestino, registradorOrigem);
+
+			conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem));
+			MMU_sincronizado_lerLogico(&global_MMU, conteudoDestino, &enderecoDestino);
+			MMU_sincronizado_lerLogico(&global_MMU, enderecoDestino, &conteudoOrigem);
+			registrador_carregarPalavra(
+				contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem),
+				conteudoOrigem);
+			break;
+		case INSTRUCAO_WRITE_REGISTER_INDIRECTLY:
+			registradorOrigem = processador_param->IR.conteudo[2];
+			registradorDestino = processador_param->IR.conteudo[3];
+
+			sprintf(mensagem, "WI %d %d", registradorOrigem, registradorDestino);
+
+			conteudoOrigem = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem));
+			conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino));
+			MMU_sincronizado_escreverLogico(&global_MMU, conteudoDestino, conteudoOrigem);
+			break;
+		case INSTRUCAO_ABSOLUTE_JUMP_32:
+			MMU_sincronizado_lerLogico(&global_MMU, contexto_getPC(&processador_param->contextoProcessador), &enderecoDestino);
+
+			sprintf(mensagem, "JCA %d %d %d %d", 
+				(((enderecoDestino & 0xFF000000)/256)/256)/256,
+				((enderecoDestino & 0x00FF0000)/256)/256,
+				(enderecoDestino & 0x0000FF00)/256,
+				enderecoDestino & 0x000000FF);
+
+			contexto_setPC(&processador_param->contextoProcessador, enderecoDestino);
+			break;
+		case INSTRUCAO_JUMP_ON_ZERO_32:
+			MMU_sincronizado_lerLogico(&global_MMU, contexto_getPC(&processador_param->contextoProcessador), &enderecoDestino);
+
+			sprintf(mensagem, "JCZ %d %d %d %d", 
+				(((enderecoDestino & 0xFF000000)/256)/256)/256,
+				((enderecoDestino & 0x00FF0000)/256)/256,
+				(enderecoDestino & 0x0000FF00)/256,
+				enderecoDestino & 0x000000FF);
+
+			if(processador_param->Z == 1){
+				contexto_setPC(&processador_param->contextoProcessador, enderecoDestino);
+			} else {
+				contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
+			}
+			break;
+		case INSTRUCAO_JUMP_ON_EQUAL_32:
+			MMU_sincronizado_lerLogico(&global_MMU, contexto_getPC(&processador_param->contextoProcessador), &enderecoDestino);
+
+			sprintf(mensagem, "JCE %d %d %d %d", 
+				(((enderecoDestino & 0xFF000000)/256)/256)/256,
+				((enderecoDestino & 0x00FF0000)/256)/256,
+				(enderecoDestino & 0x0000FF00)/256,
+				enderecoDestino & 0x000000FF);
+
+			if(processador_param->E == 1){
+				contexto_setPC(&processador_param->contextoProcessador, enderecoDestino);
+			} else {
+				contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
+			}
+			break;
+		case INSTRUCAO_JUMP_ON_LESS_32:
+			MMU_sincronizado_lerLogico(&global_MMU, contexto_getPC(&processador_param->contextoProcessador), &enderecoDestino);
+
+			sprintf(mensagem, "JCL %d %d %d %d", 
+				(((enderecoDestino & 0xFF000000)/256)/256)/256,
+				((enderecoDestino & 0x00FF0000)/256)/256,
+				(enderecoDestino & 0x0000FF00)/256,
+				enderecoDestino & 0x000000FF);
+
+			if(processador_param->L == 1){
+				contexto_setPC(&processador_param->contextoProcessador, enderecoDestino);
+			} else {
+				contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
+			}
+			break;
+		case INSTRUCAO_ABSOLUTE_JUMP_TO_REGISTER:
+			registradorDestino = processador_param->IR.conteudo[3];
+
+			sprintf(mensagem, "JRA %d", registradorDestino);
+
+			conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino));
+			contexto_setPC(&processador_param->contextoProcessador, conteudoDestino);
+			break;
+		case INSTRUCAO_JUMP_ON_ZERO_TO_REGISTER:
+			registradorDestino = processador_param->IR.conteudo[3];
+
+			sprintf(mensagem, "JRZ %d", registradorDestino);
+
+			if(processador_param->Z == 1){
+				conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino));
+				contexto_setPC(&processador_param->contextoProcessador, conteudoDestino);
+			}
+			break;
+		case INSTRUCAO_JUMP_ON_EQUAL_TO_REGISTER:
+			registradorDestino = processador_param->IR.conteudo[3];
+
+			sprintf(mensagem, "JRE %d", registradorDestino);
+
+			if(processador_param->E == 1){
+				conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino));
+				contexto_setPC(&processador_param->contextoProcessador, conteudoDestino);
+			}
+			break;
+		case INSTRUCAO_JUMP_ON_LESS_TO_REGISTER:
+			registradorDestino = processador_param->IR.conteudo[3];
+
+			sprintf(mensagem, "JRL %d", registradorDestino);
+
+			if(processador_param->L == 1){
+				conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino));
+				contexto_setPC(&processador_param->contextoProcessador, conteudoDestino);
+			}
+			break;
+		case INSTRUCAO_CALL_ROUTINE:
+			sprintf(mensagem, "CALL ainda nao foi implementado.");
+			break;
+		case INSTRUCAO_RETURN_FROM_CALL:
+			sprintf(mensagem, "RETURN ainda nao foi implementado.");
+			break;
+		case INSTRUCAO_PUSH_REGISTER_INTO_STACK:
+			sprintf(mensagem, "PUSH_TO_STACK ainda nao foi implementado.");
+			break;
+		case INSTRUCAO_POP_REGISTER_FROM_STACK:
+			sprintf(mensagem, "POP_FROM_STACK ainda nao foi implementado.");
 			break;
 		default:
 			sprintf(mensagem, "Instrucao desconhecida.");
