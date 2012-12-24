@@ -9,7 +9,7 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define CARACTERE_TERMINADOR_STRING_SOPA '\0'
+#define CARACTERE_TERMINADOR_STRING_SOPA 0
 
 
 //---------------------------------------------------------------------

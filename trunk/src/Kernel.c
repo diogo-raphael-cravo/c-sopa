@@ -367,15 +367,37 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 }
 
 /**
-* Abre um arquivo.
+* Abre um arquivo para o processo que está rodando.
 * @param KERNEL						*kernel_param	O kernel que abrirá o arquivo.
 * @param char*						nome_param		O nome do arquivo.
 * @param OPCAO_ABERTURA_ARQUIVO		opcao_param		O que será feito com o arquivo.
+* @return int	Número descritor do arquivo (usado por processos do SOPA para operar sobre o arquivo).
+*				Caso não tenha sido possível abrir, retornará NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE.
 */
-void privada_abrirArquivo(KERNEL *kernel_param, char* nome_param, OPCAO_ABERTURA_ARQUIVO opcao_param){
+int privada_abrirArquivo(KERNEL *kernel_param, char* nome_param, OPCAO_ABERTURA_ARQUIVO opcao_param){
 	char mensagem[200];
 	sprintf(mensagem, "Abrindo arquivo %s.", nome_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
+
+	int temPermissao=1;
+	int descritorArquivoCriado = NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE;
+	int criandoArquivoNovo = (sistemaArquivos_buscaPorNome(&kernel_param->sistemaDeArquivos, nome_param) == NULL);
+
+	if(criandoArquivoNovo){
+		temPermissao=1;
+		descritorArquivoCriado = sistemaArquivos_criarArquivo(&kernel_param->sistemaDeArquivos, nome_param, &global_disco);
+	} else {
+/*
+TODO autenticação
+*/
+		temPermissao=0;
+	}
+
+	if(temPermissao){
+		
+	}
+
+	return descritorArquivoCriado;
 }
 
 //---------------------------------------------------------------------
@@ -413,6 +435,7 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	char* mensagemOperador;
 	char** nomeArquivo;
 	OPERACAO_KERNEL* operacaoKernel;
+	int numeroDescritorArquivoCriado;
 
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
@@ -488,13 +511,20 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			break;
 		case INTERRUPCAO_SOFTWARE_OPEN:
-			sprintf(mensagem, "A interrupcao OPEN nao estah implementada.");
+			sprintf(mensagem, "A interrupcao OPEN nao estah implementada por completo.");
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			nomeArquivo = (char**) malloc(sizeof(char*));
 			*nomeArquivo = contexto_lerStringDosRegistradores(processador_getContexto(&global_processador), 2, 10);
-			privada_abrirArquivo(kernel_param,
-				*nomeArquivo,
-				registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 0)));
+			numeroDescritorArquivoCriado = 
+				privada_abrirArquivo(kernel_param, *nomeArquivo,
+					registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 0)));
+			if(numeroDescritorArquivoCriado == NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE){
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			} else {
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 
+					numeroDescritorArquivoCriado, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 0, 1);
+			}
 			free(*nomeArquivo);
 			free(nomeArquivo);
 			break;

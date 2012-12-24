@@ -130,9 +130,9 @@ char* contexto_lerStringDosRegistradores(CONTEXTO *contexto_param, int numeroReg
 	while(registradorLido<numeroDeRegistradores && !encontrouTerminador){
 		byteLido=0;
 		memset(stringLidaDoRegistrador, '\0', TAMANHO_REGISTRADOR_BYTES+1);
-		conteudoRegistrador = registrador_lerBytes(contexto_getRegistrador(contexto_param, registradorLido));
+		conteudoRegistrador = registrador_lerBytes(contexto_getRegistrador(contexto_param, numeroRegistradorInicio_param+registradorLido));
 		while(byteLido<TAMANHO_REGISTRADOR_BYTES && !encontrouTerminador){
-			stringLidaDoRegistrador[byteLido] = conteudoRegistrador[byteLido];
+			stringLidaDoRegistrador[byteLido] = (char) conteudoRegistrador[byteLido];
 			encontrouTerminador = (stringLidaDoRegistrador[byteLido] == CARACTERE_TERMINADOR_STRING_SOPA);
 			byteLido++;
 		}

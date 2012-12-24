@@ -179,7 +179,14 @@ Resultado Esperado:					 *Programa termina sem falhas
 Dependências:						 16
 =====================================================
 
-
+=====================================================
+19)									 Open File Interruption
+Nome do Arquivo:					 OPEN
+Resultado Esperado:					 *Programa termina sem falhas
+									 *Abre um arquivo chamado ABCDEFGHI para leitura
+Última revisão em que esteve OK:	 60
+Dependências:						 17
+=====================================================
 
 
 

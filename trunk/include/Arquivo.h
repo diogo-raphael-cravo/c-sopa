@@ -12,6 +12,7 @@
 
 //Constantes
 
+
 enum enum_opcoesAberturaArquivo{
 	LER=0,
 	ESCREVER=1
