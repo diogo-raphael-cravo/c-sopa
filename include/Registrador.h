@@ -88,3 +88,14 @@ void registrador_imprimir(REGISTRADOR *registrador_param, int coluna_param);
 
 
 
+
+
+
+
+
+
+
+
+
+
+

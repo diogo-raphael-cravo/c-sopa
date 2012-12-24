@@ -105,4 +105,49 @@ void contexto_imprimirRegistradores(CONTEXTO *contexto_param, int coluna_param){
 	}
 }
 
+/**
+* @param CONTEXTO	*contexto_param					O contexto que será lido.
+* @param int		numeroRegistradorInicio_param	Número do registrador que inicia a string.
+* @param int		numeroRegistradorFim_param		Número limite para o fim da string.
+* @return char*	A string lida dos registradores.
+* ATENÇÃO: sua memória alocada corresponderá ao total de bytes fornecidos pelos registradores no intervalo dado.
+* ATENÇÃO: a string pode não ocupar todos registradores.
+* ATENÇÃO: a string (nos registradores) deve ser terminada por CARACTERE_TERMINADOR_STRING_SOPA.
+*/
+char* contexto_lerStringDosRegistradores(CONTEXTO *contexto_param, int numeroRegistradorInicio_param, int numeroRegistradorFim_param){
+	int numeroDeRegistradores = numeroRegistradorFim_param-numeroRegistradorInicio_param + 1;
+	int registradorLido;
+	int byteLido;
+	int tamanhoStringLida = numeroDeRegistradores*TAMANHO_REGISTRADOR_BYTES;
+	int encontrouTerminador;
+	char* stringLida = (char*) malloc(tamanhoStringLida*sizeof(char));
+	char stringLidaDoRegistrador[TAMANHO_REGISTRADOR_BYTES+1];
+	BYTE *conteudoRegistrador;
+
+	encontrouTerminador = 0;
+	registradorLido=0;
+	memset(stringLida, '\0', tamanhoStringLida);
+	while(registradorLido<numeroDeRegistradores && !encontrouTerminador){
+		byteLido=0;
+		memset(stringLidaDoRegistrador, '\0', TAMANHO_REGISTRADOR_BYTES+1);
+		conteudoRegistrador = registrador_lerBytes(contexto_getRegistrador(contexto_param, registradorLido));
+		while(byteLido<TAMANHO_REGISTRADOR_BYTES && !encontrouTerminador){
+			stringLidaDoRegistrador[byteLido] = conteudoRegistrador[byteLido];
+			encontrouTerminador = (stringLidaDoRegistrador[byteLido] == CARACTERE_TERMINADOR_STRING_SOPA);
+			byteLido++;
+		}
+		free(conteudoRegistrador);
+		strcat(stringLida, stringLidaDoRegistrador);
+		registradorLido++;
+	}
+
+	return stringLida;
+}
+
+
+
+
+
+
+
 

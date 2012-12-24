@@ -128,7 +128,7 @@ Resultado Esperado:					 *PC incrementa até 7
 									 *quando PC=7, PC <- 70
 									 *jogar falha de segmentação
 Última revisão em que esteve OK:	 58
-Dependências:						 8
+Dependências:						 8, 12
 =====================================================
 
 =====================================================
@@ -138,7 +138,7 @@ Resultado Esperado:					 *PC incrementa até 7
 									 *quando PC=8, PC <- 70
 									 *jogar falha de segmentação
 Última revisão em que esteve OK:	 58
-Dependências:						 9
+Dependências:						 9, 12
 =====================================================
 
 =====================================================
@@ -148,8 +148,44 @@ Resultado Esperado:					 *PC incrementa até 6
 									 *quando PC=7, PC <- 60
 									 *jogar falha de segmentação
 Última revisão em que esteve OK:	 58
-Dependências:						 3
+Dependências:						 3, 12
 =====================================================
+
+=====================================================
+16)									 Exit Interruption
+Nome do Arquivo:					 EXIT
+Resultado Esperado:					 *Programa termina sem falhas
+Última revisão em que esteve OK:	 60
+Dependências:						 -
+=====================================================
+
+=====================================================
+17)									 Load Register from Constant 32bits
+Nome do Arquivo:					 LDC
+Resultado Esperado:					 *Programa termina sem falhas
+									 *Todos registradores terminam com valor 168430090, exceto o registrador 1, que terá valor 0
+									 *Nenhum NOP é executado
+Última revisão em que esteve OK:	 60
+Dependências:						 16
+=====================================================
+
+=====================================================
+18)									 Load Register from Memory 32bits
+Nome do Arquivo:					 LDM
+Resultado Esperado:					 *Programa termina sem falhas
+									 *Todos registradores terminam com -1, exceto o registrador 1, que terá valor 1279544576
+									 *Nenhum NOP é executado
+Última revisão em que esteve OK:	 60
+Dependências:						 16
+=====================================================
+
+
+
+
+
+
+
+
 
 
 

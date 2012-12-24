@@ -37,7 +37,9 @@ void privada_lerArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
 			}while(byte=strtok(NULL," \n"));
 
 			*arquivoLido = (ARQUIVO*) malloc(sizeof(ARQUIVO));
-			arquivo_inicializar(*arquivoLido, palavraBytes[0], string_paraInt(palavraBytes[1]));
+			arquivo_inicializar(*arquivoLido, palavraBytes[0], string_paraInt(palavraBytes[1]), 
+				sistemaArquivos_param->numeroDescritorArquivoLivre);
+			sistemaArquivos_param->numeroDescritorArquivoLivre++;
 			FIFO_inserir(&sistemaArquivos_param->arquivos, arquivoLido);
 			arquivoLido = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
 		}
@@ -70,7 +72,6 @@ void privada_atualizarArquivoInicializao(SISTEMA_ARQUIVOS *sistemaArquivos_param
 	}
 }
 
-
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
@@ -81,6 +82,8 @@ void privada_atualizarArquivoInicializao(SISTEMA_ARQUIVOS *sistemaArquivos_param
 * @param DISCO				*disco_param			O disco que será preenchido com os dados lidos.
 */
 void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO *disco_param){
+	sistemaArquivos_param->numeroDescritorArquivoLivre = 0;
+
 	privada_lerArquivoInicializacao(sistemaArquivos_param);
 
 	char caminhoArquivo[200];

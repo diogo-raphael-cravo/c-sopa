@@ -26,10 +26,12 @@ void privada_setNome(ARQUIVO *arquivo_param, char* nome_param){
 * @param ARQUIVO	*arquivo_param			O arquivo que será inicializado.
 * @param char*		nome_param				Nome do arquivo, amigável ao usuário.
 * @param int		enderecoInicio_param	Endereço do disco que iniciará o arquivo.
+* @param int		numeroDescritor_param	Número usado por processos do SOPA para ler e escrever.
 */
-void arquivo_inicializar(ARQUIVO *arquivo_param, char* nome_param, int enderecoInicio_param){
+void arquivo_inicializar(ARQUIVO *arquivo_param, char* nome_param, int enderecoInicio_param, int numeroDescritor_param){
 	privada_setNome(arquivo_param, nome_param);
 	arquivo_param->enderecoInicioDisco = enderecoInicio_param;
+	arquivo_param->numeroDescritor = numeroDescritor_param;
 }
 
 /**

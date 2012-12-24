@@ -367,49 +367,15 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 }
 
 /**
-* @param KERNEL 			*kernel_param 			O kernel que irá fazer a operação.
-* ATENÇÃO: se não existir processo esperando, não fará nada.
-* ATENÇÃO: considera-se que os registradores do contexto do processo contém dados da operação!
+* Abre um arquivo.
+* @param KERNEL						*kernel_param	O kernel que abrirá o arquivo.
+* @param char*						nome_param		O nome do arquivo.
+* @param OPCAO_ABERTURA_ARQUIVO		opcao_param		O que será feito com o arquivo.
 */
-void privada_realizaProximaOperacaoDisco(KERNEL *kernel_param){
-/*
-	DEIXA NA FILA
-
-	PROCESSO_ESPERANDO **esperaProcesso = (PROCESSO_ESPERANDO**) FIFO_espiar(&kernel_param->filaProcessosRequisicaoDisco);
-
-	if((*esperaProcesso)->motivoEspera == OPERACAO_LEITURA_DISCO){
-		int posicaoLeitura = 1;//(*esperaProcesso)->processoEsperando
-		disco_executarOperacao(&global_disco, OPERACAO_LEITURA_DISCO, posicaoLeitura, 0, 0);
-	} else if((*esperaProcesso)->motivoEspera == OPERACAO_ESCRITA_DISCO){
-		int posicaoEscrita = 1;
-		PALAVRA* dadosEscrita = NULL;
-		disco_executarOperacao(&global_disco, OPERACAO_ESCRITA_DISCO, posicaoEscrita, dadosEscrita, 0);
-	}*/
-}
-
-/**
-* Põe o processo que está rodando a esperar pelo disco.
-* @param KERNEL 			*kernel_param 			O kernel que irá fazer a operação.
-* @param OPERACAO_DISCO		operacao_param			A operação do disco que será executada.
-*/
-void privada_requisitaOperacaoDisco(KERNEL *kernel_param, OPERACAO_DISCO operacao_param){
-/*	PROCESSO_ESPERANDO **esperaProcesso = (PROCESSO_ESPERANDO**) malloc(sizeof(PROCESSO_ESPERANDO*));
-	*esperaProcesso = (PROCESSO_ESPERANDO*) malloc(sizeof(PROCESSO_ESPERANDO));
-
-	(*esperaProcesso)->processoEsperando = kernel_param->processoRodando;
-	(*esperaProcesso)->motivoEspera = operacao_param;
-
-	if(FIFO_vazia(&kernel_param->filaProcessosRequisicaoDisco)){
-		privada_realizaProximaOperacaoDisco(kernel_param);
-	}
-	FIFO_inserir(&kernel_param->filaProcessosRequisicaoDisco, esperaProcesso);*/
-}
-
-
-void privada_recebeResultadoOperacaoDisco(){
-/*
-	REMOVE
-*/
+void privada_abrirArquivo(KERNEL *kernel_param, char* nome_param, OPCAO_ABERTURA_ARQUIVO opcao_param){
+	char mensagem[200];
+	sprintf(mensagem, "Abrindo arquivo %s.", nome_param);
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
 }
 
 //---------------------------------------------------------------------
@@ -445,6 +411,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	char mensagem[200];
 	char* mensagemOperador;
+	char** nomeArquivo;
 	OPERACAO_KERNEL* operacaoKernel;
 
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
@@ -453,8 +420,18 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	descritorProcesso_setContexto(*kernel_param->processoRodando, processador_getContexto(&global_processador));
 	switch(interrupcao_param){
 		case INTERRUPCAO_PROCESSADOR:
-			sprintf(mensagem, "Operacao inexistente reportada.");
+			sprintf(mensagem, "O processo %d foi morto porque tentou executar uma instrucao ilegal.", descritorProcesso_getPID(*kernel_param->processoRodando));
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			sprintf(mensagem,  "Imprimindo contexto do DESCRITOR DO PROCESSO imediatamente anterior 'a falha.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			contexto_imprimirRegistradores(descritorProcesso_getContexto(*kernel_param->processoRodando), 3);
+			sprintf(mensagem,  "Imprimindo contexto do PROCESSADOR imediatamente anterior 'a falha.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			processador_imprimir(&global_processador, 3);
+
+
+			privada_matarProcessoRodando(kernel_param);
+			privada_escalonar(kernel_param);
 			break;
 		case INTERRUPCAO_CONSOLE:
 			mensagemOperador = console_ultimaLinhaDigitada(&global_console);
@@ -480,18 +457,6 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			free(operacaoKernel->operacao);
 			free(operacaoKernel);
 			break;
-		case INTERRUPCAO_SOFTWARE_PARA_DISCO:
-//			privada_requisitaOperacaoDisco(kernel_param, OPERACAO_LEITURA_DISCO);
-/*
-		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoCargaDMA(enderecoMemoria, 
-				arquivoTransferido->enderecoInicioDisco, 
-				arquivo_getTamanhoEmPalavras(arquivoTransferido));
-		OPERACAO_KERNEL* operacaoKernel = gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(*novoProcesso);
-
-		gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
-
-*/
-			break;
 		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
 			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
@@ -504,6 +469,81 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 
 			privada_matarProcessoRodando(kernel_param);
 			privada_escalonar(kernel_param);
+			break;
+		case INTERRUPCAO_SOFTWARE_EXIT:
+			sprintf(mensagem, "O processo %d foi morto voluntariamente.", descritorProcesso_getPID(*kernel_param->processoRodando));
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			sprintf(mensagem,  "Imprimindo contexto do DESCRITOR DO PROCESSO imediatamente anterior 'a falha.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			contexto_imprimirRegistradores(descritorProcesso_getContexto(*kernel_param->processoRodando), 3);
+			sprintf(mensagem,  "Imprimindo contexto do PROCESSADOR imediatamente anterior 'a falha.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			processador_imprimir(&global_processador, 3);
+
+			privada_matarProcessoRodando(kernel_param);
+			privada_escalonar(kernel_param);
+			break;
+		case INTERRUPCAO_SOFTWARE_KILL:
+			sprintf(mensagem, "A interrupcao KILL nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_OPEN:
+			sprintf(mensagem, "A interrupcao OPEN nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			nomeArquivo = (char**) malloc(sizeof(char*));
+			*nomeArquivo = contexto_lerStringDosRegistradores(processador_getContexto(&global_processador), 2, 10);
+			privada_abrirArquivo(kernel_param,
+				*nomeArquivo,
+				registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 0)));
+			free(*nomeArquivo);
+			free(nomeArquivo);
+			break;
+		case INTERRUPCAO_SOFTWARE_CLOSE:
+			sprintf(mensagem, "A interrupcao CLOSE nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_GET:
+
+//			privada_requisitaOperacaoDisco(kernel_param, OPERACAO_LEITURA_DISCO);
+/*
+		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoCargaDMA(enderecoMemoria, 
+				arquivoTransferido->enderecoInicioDisco, 
+				arquivo_getTamanhoEmPalavras(arquivoTransferido));
+		OPERACAO_KERNEL* operacaoKernel = gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(*novoProcesso);
+
+		gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
+
+*/
+			sprintf(mensagem, "A interrupcao GET nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_PUT:
+			sprintf(mensagem, "A interrupcao PUT nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_READ:
+			sprintf(mensagem, "A interrupcao READ nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_WRITE:
+			sprintf(mensagem, "A interrupcao WRITE nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_SEMINIT:
+			sprintf(mensagem, "A interrupcao SEMINIT nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_P:
+			sprintf(mensagem, "A interrupcao P nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_V:
+			sprintf(mensagem, "A interrupcao V nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			break;
+		case INTERRUPCAO_SOFTWARE_PRINT:
+			sprintf(mensagem, "A interrupcao PRINT nao estah implementada.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);

@@ -73,7 +73,16 @@ void contexto_setRegistradorPalavra(CONTEXTO *contexto_param, PALAVRA palavra_pa
 */
 void contexto_imprimirRegistradores(CONTEXTO *contexto_param, int coluna_param);
 
-
+/**
+* @param CONTEXTO	*contexto_param					O contexto que será lido.
+* @param int		numeroRegistradorInicio_param	Número do registrador que inicia a string.
+* @param int		numeroRegistradorFim_param		Número limite para o fim da string.
+* @return char*	A string lida dos registradores.
+* ATENÇÃO: sua memória alocada corresponderá ao total de bytes fornecidos pelos registradores no intervalo dado.
+* ATENÇÃO: a string pode não ocupar todos registradores.
+* ATENÇÃO: a string (nos registradores) deve ser terminada por CARACTERE_TERMINADOR_STRING_SOPA.
+*/
+char* contexto_lerStringDosRegistradores(CONTEXTO *contexto_param, int numeroRegistradorInicio_param, int numeroRegistradorFim_param);
 
 
 
