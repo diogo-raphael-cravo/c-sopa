@@ -11,6 +11,21 @@
 //---------------------------------------------------------------------
 
 /**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que realizará a busca.
+* @param DISCO				*disco_param			O disco em que a busca é feita.
+* @return int	Posição do disco que está livre para receber um arquivo novo. 
+* 				Retornará MEMORIA_ENDERECO_INEXISTENTE, caso não haja posição livre.
+*/
+int privada_getPosicaoLivreDisco(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO *disco_param){
+	int posicaoLivre = MEMORIA_ENDERECO_INEXISTENTE;
+	int arquivoChecado;
+
+	
+
+	return posicaoLivre;
+}
+
+/**
 * Lê o arquivo de inicialização, criando os arquivos que serão posteriormente preenchidos.
 * @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que será inicializado.
 */
@@ -54,7 +69,7 @@ void privada_lerArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
 * Atualiza o arquivo de inicialização com o conteúdo deste sistema de arquivos.
 * @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que será salvo.
 */
-void privada_atualizarArquivoInicializao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
+void privada_atualizarArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
 	FILE *arquivoSistemaArquivos;
 	int arquivoImpresso=0;
 
@@ -144,7 +159,7 @@ ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, c
 * @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que será atualizado.
 */
 void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArquivos_param){
-	privada_atualizarArquivoInicializao(sistemaArquivos_param);
+	privada_atualizarArquivoInicializacao(sistemaArquivos_param);
 
 	char caminhoArquivo[200];
 	int arquivoImpresso;
@@ -159,7 +174,31 @@ void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArqui
 	}
 }
 
+/**
+* Cria um arquivo novo.
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos no qual o arquivo será criado.
+* @param char*				nome_param				Nome do arquivo, amigável ao usuário.
+* @param DISCO				*disco_param			Disco em que o arquivo será salvo.
+* @return int	Número descritor do arquivo (usado por processos do SOPA para operar sobre o arquivo).
+*				Caso não tenha sido possível criar, retornará NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE.
+*/
+int sistemaArquivos_criarArquivo(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nome_param, DISCO *disco_param){
+	ARQUIVO **arquivoCriado = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
+	int posicaoLivreDisco = privada_getPosicaoLivreDisco(sistemaArquivos_param, disco_param);
+	int descritorArquivoCriado = NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE;
 
+	if(posicaoLivreDisco != MEMORIA_ENDERECO_INEXISTENTE){
+		*arquivoCriado = (ARQUIVO*) malloc(sizeof(ARQUIVO));
+		descritorArquivoCriado = sistemaArquivos_param->numeroDescritorArquivoLivre;
+		arquivo_inicializar(*arquivoCriado, nome_param, posicaoLivreDisco, descritorArquivoCriado);
+		sistemaArquivos_param->numeroDescritorArquivoLivre++;
+		FIFO_inserir(&sistemaArquivos_param->arquivos, arquivoCriado);
+	} else {
+		free(arquivoCriado);
+	}
+
+	return descritorArquivoCriado;
+}
 
 
 
