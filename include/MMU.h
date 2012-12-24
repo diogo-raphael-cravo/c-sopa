@@ -62,16 +62,20 @@ void MMU_sincronizado_escreverFisico(MMU *MMU_param, int endereco_param, PALAVRA
 * @param MMU		*MMU_param					A MMU em que a operação será realizada.
 * @param int		endereco_param				Endereço da leitura.
 * @param PALAVRA	*destino_param				Endereço da variável em que o resultado será colocado.
+* @param int		deveGerarInterrupcao_param	Indica se deve cadastrar uma interrupção no controlador de interrupções.
+* @return int	Indica se houve invasão da memória.
 */
-void MMU_sincronizado_lerLogico(MMU *MMU_param, int endereco_param, PALAVRA *destino_param);
+int MMU_sincronizado_lerLogico(MMU *MMU_param, int endereco_param, PALAVRA *destino_param, int deveGerarInterrupcao_param);
 
 /*
 * Escreve na memória com endereçamento lógico e consistência de limites.
 * @param MMU		*MMU_param					A MMU em que a operação será realizada.
 * @param int		endereco_param				Endereço da escrita.
 * @param PALAVRA	palavraEscrita_param		A palavra que será escrita na memória.
+* @param int		deveGerarInterrupcao_param	Indica se deve cadastrar uma interrupção no controlador de interrupções.
+* @return int	Indica se houve invasão da memória.
 */
-void MMU_sincronizado_escreverLogico(MMU *MMU_param, int endereco_param, PALAVRA palavraEscrita_param);
+int MMU_sincronizado_escreverLogico(MMU *MMU_param, int endereco_param, PALAVRA palavraEscrita_param, int deveGerarInterrupcao_param);
 
 /**
 * Indica se a memória tem posições físicas suficientes para gravar um bloco que começa no endereço dado
