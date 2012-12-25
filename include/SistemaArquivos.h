@@ -1,10 +1,5 @@
 /**
-* Concentra as funções de manipulação do console.
-* ====================================
-*
-* 			ATENÇÃO: Não confundir o console com a tela!
-*
-* ====================================
+* Concentra as funções de manipulação do sistema de arquivos.
 */
 //---------------------------------------------------------------------
 //			DADOS						
