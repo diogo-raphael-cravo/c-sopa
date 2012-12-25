@@ -57,9 +57,16 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 
 /**
 * @param ARQUIVO	*arquivo_param	Arquivo que será atualizado na máquina hospedeira.
-* @param char*		caminho_param				Caminho do arquivo na máquina hospedeira.
+* @param char*		caminho_param	Caminho do arquivo na máquina hospedeira.
 */
 void arquivo_atualizarNaMaquinaHospedeira(ARQUIVO *arquivo_param, char* caminho_param);
+
+/**
+* @param ARQUIVO	*arquivo_param	Arquivo cuja imagem será retornada em forma de string.
+* @return char*	O conteúdo que deve ter o arquivo da máquina hospedeira que representará este.
+* ATENÇÃO: para uso somente em atualizações na máquina hospedeira!
+*/
+char* arquivo_getConteudo(ARQUIVO *arquivo_param);
 
 /**
 * @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
@@ -91,6 +98,14 @@ DESCRITOR_PROCESSO* arquivo_getProcessoQueAbriu(ARQUIVO *arquivo_param);
 * ATENÇÃO: não checa se o arquivo já está aberto!
 */
 void arquivo_abrirParaProcesso(ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param);
+
+/**
+* @param ARQUIVO		*arquivo_param	O arquivo que será movido.
+* @param int			posicao_param	Posição do disco para onde o arquivo vai.
+*/
+void arquivo_relocalizar(ARQUIVO *arquivo_param, int posicao_param);
+
+
 
 
 

@@ -102,28 +102,38 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 }
 
 /**
+* @param ARQUIVO	*arquivo_param	Arquivo cuja imagem será retornada em forma de string.
+* @return char*	O conteúdo que deve ter o arquivo da máquina hospedeira que representará este.
+* ATENÇÃO: para uso somente em atualizações na máquina hospedeira!
+*/
+char* arquivo_getConteudo(ARQUIVO *arquivo_param){
+	char* conteudo = (char*) malloc((arquivo_param->tamanhoEmPalavras+1)*sizeof(char));
+	int palavraImpressa=0;
+	PALAVRA palavra;
+	BYTE palavraEmBytes[TAMANHO_INSTRUCAO_PALAVRAS];
+	memset(conteudo, '\0', arquivo_param->tamanhoEmPalavras+1);
+	for(; palavraImpressa<arquivo_param->tamanhoEmPalavras; palavraImpressa++){
+		palavra = arquivo_param->discoSalvo->conteudo[arquivo_param->enderecoInicioDisco+palavraImpressa];
+		palavraEmBytes[0] = (((palavra & 0xFF000000)/256)/256)/256;
+		palavraEmBytes[1] = ((palavra & 0x00FF0000)/256)/256;
+		palavraEmBytes[2] = (palavra & 0x0000FF00)/256;
+		palavraEmBytes[3] = palavra & 0x000000FF;
+
+		sprintf(conteudo, "%d %d %d %d\n", palavraEmBytes[0], palavraEmBytes[1], palavraEmBytes[2], palavraEmBytes[3]);
+	}
+	return conteudo;
+}
+
+/**
 * @param ARQUIVO	*arquivo_param	Arquivo que será atualizado na máquina hospedeira.
 * @param char*		caminho_param				Caminho do arquivo na máquina hospedeira.
 */
 void arquivo_atualizarNaMaquinaHospedeira(ARQUIVO *arquivo_param, char* caminho_param){
 	FILE *arquivoMaquinaHospedeira;
 	char mensagem[200];
-	PALAVRA palavra;
-	BYTE palavraEmBytes[TAMANHO_INSTRUCAO_PALAVRAS];
-	int palavraImpressa=0;
-
 	arquivoMaquinaHospedeira = fopen(caminho_param, "w");
 	if(arquivoMaquinaHospedeira != NULL){
-		for(; palavraImpressa<arquivo_param->tamanhoEmPalavras; palavraImpressa++){
-			palavra = arquivo_param->discoSalvo->conteudo[arquivo_param->enderecoInicioDisco+palavraImpressa];
-			palavraEmBytes[0] = (((palavra & 0xFF000000)/256)/256)/256;
-			palavraEmBytes[1] = ((palavra & 0x00FF0000)/256)/256;
-			palavraEmBytes[2] = (palavra & 0x0000FF00)/256;
-			palavraEmBytes[3] = palavra & 0x000000FF;
-
-			fprintf(arquivoMaquinaHospedeira, "%d %d %d %d\n", palavraEmBytes[0], palavraEmBytes[1],
-				palavraEmBytes[2], palavraEmBytes[3]);
-		}
+		fprintf(arquivoMaquinaHospedeira, arquivo_getConteudo(arquivo_param));
 		fclose(arquivoMaquinaHospedeira);
 	} else {
 		sprintf(mensagem, "Nao consegui salvar o arquivo %s.", arquivo_param->nome);
@@ -172,7 +182,13 @@ void arquivo_abrirParaProcesso(ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *proce
 	arquivo_param->processoQueAbriu = processo_param;
 }
 
-
+/**
+* @param ARQUIVO		*arquivo_param	O arquivo que será movido.
+* @param int			posicao_param	Posição do disco para onde o arquivo vai.
+*/
+void arquivo_relocalizar(ARQUIVO *arquivo_param, int posicao_param){
+	arquivo_param->enderecoInicioDisco = posicao_param;
+}
 
 
 
