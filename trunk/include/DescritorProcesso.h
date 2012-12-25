@@ -19,6 +19,7 @@ struct str_descritorProcesso{
 	int PID; //Process ID.
 	int enderecoInicio; //Início do programa na memória.
 	int tamanhoAreaMemoriaPalavras; //Tamanho da área de memória reservada ao programa, em palavras.
+	int haQuantosTicksRoda; //Há quantos ticks do relógio este processo está rodando, caso esteja.
 	STATUS_DESCRITOR_PROCESSO status; //Indica se está executando, pronto ou bloqueado.
 	CONTEXTO contextoProcesso;
 };
@@ -78,6 +79,17 @@ int descritorProcesso_getEnderecoInicio(DESCRITOR_PROCESSO *descritorProcesso_pa
 */
 int descritorProcesso_getTamanhoAreaMemoriaPalavras(DESCRITOR_PROCESSO *descritorProcesso_param);
 
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será modificada.
+* @param int				ticks_param					A quantidade de ticks há que o processo está rodando.
+*/
+void descritorProcesso_setFatiaTempo(DESCRITOR_PROCESSO *descritorProcesso_param, int ticks_param);
+
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será modificada.
+* @return int	A quantidade de ticks há que o processo está rodando.
+*/
+int descritorProcesso_getFatiaTempo(DESCRITOR_PROCESSO *descritorProcesso_param);
 
 
 

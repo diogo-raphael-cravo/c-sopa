@@ -452,7 +452,6 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			processador_imprimir(&global_processador, 3);
 
-
 			privada_matarProcessoRodando(kernel_param);
 			privada_escalonar(kernel_param);
 			break;
@@ -463,7 +462,16 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			privada_executarComandoUsuario(kernel_param, mensagemOperador);
 			break;
 		case INTERRUPCAO_TIMER:
-			privada_escalonar(kernel_param);
+			descritorProcesso_setFatiaTempo(*kernel_param->processoRodando, descritorProcesso_getFatiaTempo(*kernel_param->processoRodando)+1);
+			sprintf(mensagem, "Processo %d roda ha %d de %d ticks.", 
+				descritorProcesso_getPID(*kernel_param->processoRodando), 
+				descritorProcesso_getFatiaTempo(*kernel_param->processoRodando),
+				FATIA_TEMPO_TICKS_PROCESSO);
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			if(descritorProcesso_getFatiaTempo(*kernel_param->processoRodando) == FATIA_TEMPO_TICKS_PROCESSO){
+				descritorProcesso_setFatiaTempo(*kernel_param->processoRodando, 0);
+				privada_escalonar(kernel_param);
+			}
 			break;
 		case INTERRUPCAO_DISCO:
 			operacaoKernel = gerenciadorDisco_proximaOperacaoKernel(&kernel_param->gerenciadorAcessoDisco);
