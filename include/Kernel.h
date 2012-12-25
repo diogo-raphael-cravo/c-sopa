@@ -8,6 +8,7 @@
 //Constantes
 #define MAXIMO_PROCESSOS_KERNEL 30 //Sabemos que não há limite, mas nossa implementação necessita de um limite, ainda que altíssimo.
 #define DESCRITOR_PROCESSO_INEXISTENTE NULL
+#define FATIA_TEMPO_TICKS_PROCESSO 5 //Fatia de tempo dada a cada processo, medida em ticks do timer.
 
 enum enum_errosKernel{
 	KERNEL_ERRO_NENHUM,

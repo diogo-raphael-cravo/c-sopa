@@ -23,6 +23,7 @@
 */
 void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param, int enderecoInicio_param, int tamanhoAreaMemoria_param){
 	descritorProcesso_param->PID = PID_param;
+	descritorProcesso_param->haQuantosTicksRoda = 0;
 	descritorProcesso_param->enderecoInicio = enderecoInicio_param;
 	descritorProcesso_param->tamanhoAreaMemoriaPalavras = tamanhoAreaMemoria_param;
 }
@@ -83,7 +84,21 @@ int descritorProcesso_getTamanhoAreaMemoriaPalavras(DESCRITOR_PROCESSO *descrito
 	return descritorProcesso_param->tamanhoAreaMemoriaPalavras;
 }
 
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será modificada.
+* @param int				ticks_param					A quantidade de ticks há que o processo está rodando.
+*/
+void descritorProcesso_setFatiaTempo(DESCRITOR_PROCESSO *descritorProcesso_param, int ticks_param){
+	descritorProcesso_param->haQuantosTicksRoda = ticks_param;
+}
 
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será modificada.
+* @return int	A quantidade de ticks há que o processo está rodando.
+*/
+int descritorProcesso_getFatiaTempo(DESCRITOR_PROCESSO *descritorProcesso_param){
+	return descritorProcesso_param->haQuantosTicksRoda;
+}
 
 
 
