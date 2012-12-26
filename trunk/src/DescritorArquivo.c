@@ -19,18 +19,18 @@ void privada_setNome(DESCRITOR_ARQUIVO *descritor_param, char* nome_param){
 	strcpy(descritor_param->nome, nome_param);
 }
 
-
-
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
 /**
 * @param DESCRITOR_ARQUIVO	*descritor_param	O descritor de arquivo que será inicializado.
 * @param char*				nome_param			Nome que será associado ao descritor, visível ao usuário.
+* @param int		numeroDescritor_param	Número usado por processos do SOPA para ler e escrever.
 */
-void descritorArquivo_inicializar(DESCRITOR_ARQUIVO *descritor_param, char* nome_param){
+void descritorArquivo_inicializar(DESCRITOR_ARQUIVO *descritor_param, char* nome_param, int numeroDescritor_param){
 	FIFO_inicializar(&descritor_param->segmentos, MAXIMO_SEGMENTOS_DESCRITOR_ARQUIVO);
-	descritor_param->segmentos = palavraAtual;
+	descritor_param->palavraAtual = 0;
+	descritor_param->numeroDescritor = numeroDescritor_param;
 	privada_setNome(descritor_param, nome_param);
 }
 
@@ -44,6 +44,15 @@ void descritorArquivo_adicionarSegmento(DESCRITOR_ARQUIVO *descritor_param, ARQU
 	} else {
 		tela_imprimirTelaAzulDaMorte(&global_tela, "Nao eh possivel adicionar mais segmentos ao arquivo em descritorArquivo_adicionarSegmento.");
 	}
+}
+
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
+* @param int				segmento_param		A ordem do segmento que deve ser retornado.
+* @return ARQUIVO*	O arquivo na ordem especificada deste arquivo lógico.
+*/
+ARQUIVO* descritorArquivo_getSegmento(DESCRITOR_ARQUIVO *descritor_param, int segmento_param){
+	return FIFO_espiarPosicao(&descritor_param->segmentos, segmento_param);
 }
 
 /**
@@ -87,7 +96,7 @@ void descritorArquivo_atualizarNaMaquinaHospedeira(DESCRITOR_ARQUIVO *descritor_
 
 	memset(conteudoArquivoLogico, '\0', (descritorArquivo_tamanhoEmPalavras(descritor_param)+1));
 	for(; arquivoAtual<FIFO_quantidadeElementos(&descritor_param->segmentos); arquivoAtual++){
-		conteudoSegmento = arquivo_getConteudo(FIFO_espiarElemento(&descritor_param->segmentos, arquivoAtual));
+		conteudoSegmento = arquivo_getConteudo(FIFO_espiarPosicao(&descritor_param->segmentos, arquivoAtual));
 		strcat(conteudoArquivoLogico, conteudoSegmento);
 		free(conteudoSegmento);
 	}
@@ -96,7 +105,7 @@ void descritorArquivo_atualizarNaMaquinaHospedeira(DESCRITOR_ARQUIVO *descritor_
 	char mensagem[200];
 	arquivoMaquinaHospedeira = fopen(caminho_param, "w");
 	if(arquivoMaquinaHospedeira != NULL){
-		fprintf(arquivoMaquinaHospedeira, conteudoArquivoLogico);
+		fprintf(arquivoMaquinaHospedeira, "%s", conteudoArquivoLogico);
 		fclose(arquivoMaquinaHospedeira);
 	} else {
 		sprintf(mensagem, "Nao consegui salvar o arquivo %s.", descritor_param->nome);
@@ -105,7 +114,23 @@ void descritorArquivo_atualizarNaMaquinaHospedeira(DESCRITOR_ARQUIVO *descritor_
 	free(conteudoArquivoLogico);
 }
 
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
+* @return char* 	Nome que será associado ao descritor, visível ao usuário.
+*/
+char* descritorArquivo_getNome(DESCRITOR_ARQUIVO *descritor_param){
+	return descritor_param->nome;
+}
 
-
-
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo que será testado.
+* @return int	Indica se o arquivo está fragmentado no disco.
+*/
+int descritorArquivo_estahFragmentado(DESCRITOR_ARQUIVO *descritor_param){
+	int estahFragmentado = 0;
+	if(1 < FIFO_quantidadeElementos(&descritor_param->segmentos)){
+		estahFragmentado = 1;
+	}
+	return estahFragmentado;
+}
 

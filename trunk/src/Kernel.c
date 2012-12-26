@@ -189,7 +189,7 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 
 	if(erro == KERNEL_ERRO_NENHUM){
 		enderecoMemoria = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada,
-		arquivo_getTamanhoEmPalavras(arquivoTransferido));
+			arquivo_getTamanhoEmPalavras(arquivoTransferido));
 		int faltouMemoria = (enderecoMemoria == MEMORIA_ENDERECO_INEXISTENTE);
 		if(faltouMemoria){
 			erro = KERNEL_ERRO_MEMORIA_INSUFICIENTE;
@@ -305,7 +305,7 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 					sprintf(mensagem, "Executando programa %s", parametro);
 					tela_escreverNaColuna(&global_tela, mensagem, 3);
 				} else if(erro == KERNEL_ERRO_ARQUIVO_INEXISTENTE){
-					sprintf(mensagem, "O programa %s nao foi encontrado.", parametro);
+					sprintf(mensagem, "O programa %s nao foi encontrado ou estah fragmentado e nao pode ser carregado (a ultima opcao caracteriza erro de implementacao).", parametro);
 					tela_escreverNaColuna(&global_tela, mensagem, 3);
 				} else if(erro == KERNEL_ERRO_CRIANDO_PROCESSO){
 					tela_escreverNaColuna(&global_tela, "O kernel jah estah criando um processo. Por favor, aguarde.", 3);

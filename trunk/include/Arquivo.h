@@ -27,9 +27,7 @@ struct str_arquivo{
 	DISCO *discoSalvo; //O disco em que o arquivo está salvo.
 
 		//No kernel
-	char* nome; //Nome amigável ao usuário, atribuído ao arquivo.
 	DESCRITOR_PROCESSO *processoQueAbriu; //Ponteiro para o processo que abriu este arquivo.
-	int numeroDescritor; //Número usado por processos do SOPA para ler e escrever.
 };
 
 typedef struct str_arquivo ARQUIVO;
@@ -39,11 +37,9 @@ typedef struct str_arquivo ARQUIVO;
 //---------------------------------------------------------------------
 /**
 * @param ARQUIVO	*arquivo_param			O arquivo que será inicializado.
-* @param char*		nome_param				Nome do arquivo, amigável ao usuário.
 * @param int		enderecoInicio_param	Endereço do disco que iniciará o arquivo.
-* @param int		numeroDescritor_param	Número usado por processos do SOPA para ler e escrever.
 */
-void arquivo_inicializar(ARQUIVO *arquivo_param, char* nome_param, int enderecoInicio_param, int numeroDescritor_param);
+void arquivo_inicializar(ARQUIVO *arquivo_param, int enderecoInicio_param);
 
 /**
 * Cria um arquivo à partir de um arquivo existente e salvo na máquina hospedeira.
@@ -67,12 +63,6 @@ void arquivo_atualizarNaMaquinaHospedeira(ARQUIVO *arquivo_param, char* caminho_
 * ATENÇÃO: para uso somente em atualizações na máquina hospedeira!
 */
 char* arquivo_getConteudo(ARQUIVO *arquivo_param);
-
-/**
-* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
-* @return int	Nome amigável ao usuário, atribuído ao arquivo.
-*/
-char* arquivo_getNome(ARQUIVO *arquivo_param);
 
 /**
 * @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
