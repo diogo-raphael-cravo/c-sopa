@@ -12,6 +12,7 @@ struct str_descritorArquivo{
 	FIFO segmentos; //Os segmentos deste arquivo. A ordem da fila é a ordem para reconstrução do arquivo.
 	int palavraAtual; //Palavra sendo lida/escrita pelo usuário.
 	char* nome; //Nome que será associado ao descritor, visível ao usuário.
+	int numeroDescritor; //Número usado por processos do SOPA para ler e escrever.
 };
 
 typedef struct str_descritorArquivo DESCRITOR_ARQUIVO;
@@ -23,14 +24,22 @@ typedef struct str_descritorArquivo DESCRITOR_ARQUIVO;
 /**
 * @param DESCRITOR_ARQUIVO	*descritor_param	O descritor de arquivo que será inicializado.
 * @param char*				nome_param			Nome que será associado ao descritor, visível ao usuário.
+* @param int		numeroDescritor_param	Número usado por processos do SOPA para ler e escrever.
 */
-void descritorArquivo_inicializar(DESCRITOR_ARQUIVO *descritor_param, char* nome_param);
+void descritorArquivo_inicializar(DESCRITOR_ARQUIVO *descritor_param, char* nome_param, int numeroDescritor_param);
 
 /**
 * @param DESCRITOR_ARQUIVO	*descritor_param	O descritor de arquivo ao qual o segmento será adicionado.
 * @param ARQUIVO			*segmento_param		O segmento que será adicionado ao descritor.
 */
 void descritorArquivo_adicionarSegmento(DESCRITOR_ARQUIVO *descritor_param, ARQUIVO *segmento_param);
+
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
+* @param int				segmento_param		A ordem do segmento que deve ser retornado.
+* @return ARQUIVO*	O arquivo na ordem especificada deste arquivo lógico.
+*/
+ARQUIVO* descritorArquivo_getSegmento(DESCRITOR_ARQUIVO *descritor_param, int segmento_param);
 
 /**
 * @param DESCRITOR_ARQUIVO	*descritor_param		O descritor de arquivo que será desfragmentado.
@@ -51,10 +60,17 @@ int descritorArquivo_tamanhoEmPalavras(DESCRITOR_ARQUIVO *descritor_param);
 */
 void descritorArquivo_atualizarNaMaquinaHospedeira(DESCRITOR_ARQUIVO *descritor_param, char* caminho_param);
 
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
+* @return char* 	Nome que será associado ao descritor, visível ao usuário.
+*/
+char* descritorArquivo_getNome(DESCRITOR_ARQUIVO *descritor_param);
 
-
-
-
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo que será testado.
+* @return int	Indica se o arquivo está fragmentado no disco.
+*/
+int descritorArquivo_estahFragmentado(DESCRITOR_ARQUIVO *descritor_param);
 
 
 

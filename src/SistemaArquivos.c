@@ -32,7 +32,8 @@ int privada_getPosicaoLivreDisco(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO 
 void privada_lerArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
 	FIFO_inicializar(&sistemaArquivos_param->arquivos, MAXIMO_ARQUIVOS);
 	
-	ARQUIVO **arquivoLido = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
+	ARQUIVO *segmentoLido = (ARQUIVO*) malloc(sizeof(ARQUIVO));
+	DESCRITOR_ARQUIVO **arquivo = (DESCRITOR_ARQUIVO**) malloc(sizeof(DESCRITOR_ARQUIVO**));
 	FILE *arquivoSistemaArquivos;
 	int posicaoPalavra;
 	char linha[200];
@@ -51,12 +52,15 @@ void privada_lerArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
 				}
 			}while(byte=strtok(NULL," \n"));
 
-			*arquivoLido = (ARQUIVO*) malloc(sizeof(ARQUIVO));
-			arquivo_inicializar(*arquivoLido, palavraBytes[0], string_paraInt(palavraBytes[1]), 
-				sistemaArquivos_param->numeroDescritorArquivoLivre);
+			arquivo = (DESCRITOR_ARQUIVO**) malloc(sizeof(DESCRITOR_ARQUIVO*));
+			*arquivo = (DESCRITOR_ARQUIVO*) malloc(sizeof(DESCRITOR_ARQUIVO));
+			arquivo_inicializar(segmentoLido, string_paraInt(palavraBytes[1]));
+			descritorArquivo_inicializar(*arquivo, palavraBytes[0], sistemaArquivos_param->numeroDescritorArquivoLivre);
+			descritorArquivo_adicionarSegmento(*arquivo, segmentoLido);
 			sistemaArquivos_param->numeroDescritorArquivoLivre++;
-			FIFO_inserir(&sistemaArquivos_param->arquivos, arquivoLido);
-			arquivoLido = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
+
+			FIFO_inserir(&sistemaArquivos_param->arquivos, arquivo);
+			segmentoLido = (ARQUIVO*) malloc(sizeof(ARQUIVO));
 		}
 		fclose(arquivoSistemaArquivos);
 	} else {
@@ -77,8 +81,8 @@ void privada_atualizarArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_par
 	if(arquivoSistemaArquivos != NULL){
 		while(arquivoImpresso < FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos)){
 			fprintf(arquivoSistemaArquivos, "%s %d\n", 
-				arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)),
-				arquivo_getTamanhoEmPalavras(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)));
+				descritorArquivo_getNome(* (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)),
+				descritorArquivo_tamanhoEmPalavras(* (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)));
 			arquivoImpresso++;
 		}
 		fclose(arquivoSistemaArquivos);
@@ -110,17 +114,23 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 		memset(caminhoArquivo, '\0', 200);
 		strcat(caminhoArquivo, DIRETORIO_DADOS_DISCO);
 		strcat(caminhoArquivo, "/");
-		strcat(caminhoArquivo, arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
+		strcat(caminhoArquivo, descritorArquivo_getNome(
+			* (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
 
 		sprintf(mensagem, "    ");
 		tela_escreverNaColuna(&global_tela, mensagem, 4);
-		conseguiuLer = arquivo_lerDaMaquinaHospedeira(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida), 
+		conseguiuLer = arquivo_lerDaMaquinaHospedeira(
+			descritorArquivo_getSegmento(
+				* (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida),
+				0), 
 			disco_param, caminhoArquivo);
 		if(conseguiuLer){
-			sprintf(mensagem, "Li '%s'", arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
+			sprintf(mensagem, "Li '%s'", descritorArquivo_getNome(
+				* (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
 			tela_escreverNaColuna(&global_tela, mensagem, 4);
 		} else {
-			sprintf(mensagem, "Nao consegui ler '%s'", arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
+			sprintf(mensagem, "Nao consegui ler '%s'", descritorArquivo_getNome(
+				* (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, posicaoLida)));
 			tela_escreverNaColuna(&global_tela, mensagem, 4);
 		}
 		posicaoLida++;
@@ -131,27 +141,29 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 /**
 * @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
 * @param char*				nomeProcurado_param		O nome do arquivo que se quer.
-* @return ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja, retonará NULL.
+* @return ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja ou esteja fragmentado, retonará NULL.
 */
 ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param){
 	int totalArquivos = FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos);
 	int arquivoAtual;
-	ARQUIVO* arquivo;
-	ARQUIVO* arquivoEncontrado = NULL;
-	FIFO copiaFila;
-	FIFO_inicializar(&copiaFila, totalArquivos);
+	DESCRITOR_ARQUIVO* arquivo;
+	DESCRITOR_ARQUIVO* arquivoEncontrado = NULL;
+	ARQUIVO* arquivoFisicoEncontrado;
 
 	for(arquivoAtual=0; arquivoAtual<totalArquivos; arquivoAtual++){
-		arquivo = * (ARQUIVO**) FIFO_espiar(&sistemaArquivos_param->arquivos);
-		FIFO_inserir(&copiaFila, FIFO_remover(&sistemaArquivos_param->arquivos));
-		if(strcmp(arquivo_getNome(arquivo), nomeProcurado_param) == 0){
+		arquivo = * (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoAtual);
+		if(strcmp(descritorArquivo_getNome(arquivo), nomeProcurado_param) == 0){
 			arquivoEncontrado = arquivo;
 		}
 	}
 
-	FIFO_copiar(&sistemaArquivos_param->arquivos, &copiaFila);
-	FIFO_destruir(&copiaFila);
-	return arquivoEncontrado;
+	if(arquivoEncontrado != NULL && !descritorArquivo_estahFragmentado(arquivoEncontrado)){
+		arquivoFisicoEncontrado = descritorArquivo_getSegmento(arquivoEncontrado, 0);
+	} else {
+		arquivoFisicoEncontrado = NULL;
+	}
+
+	return arquivoFisicoEncontrado;
 }
 
 /**
@@ -167,9 +179,10 @@ void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArqui
 		memset(caminhoArquivo, '\0', 200);
 		strcat(caminhoArquivo, DIRETORIO_DADOS_DISCO);
 		strcat(caminhoArquivo, "/");
-		strcat(caminhoArquivo, arquivo_getNome(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)));
+		strcat(caminhoArquivo, descritorArquivo_getNome(* (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso)));
 
-		arquivo_atualizarNaMaquinaHospedeira(* (ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso),
+		descritorArquivo_atualizarNaMaquinaHospedeira(
+			* (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoImpresso),
 			 caminhoArquivo);
 	}
 }
@@ -183,18 +196,22 @@ void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArqui
 *				Caso não tenha sido possível criar, retornará NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE.
 */
 int sistemaArquivos_criarArquivo(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nome_param, DISCO *disco_param){
-	ARQUIVO **arquivoCriado = (ARQUIVO**) malloc(sizeof(ARQUIVO*));
+	ARQUIVO *segmento = (ARQUIVO*) malloc(sizeof(ARQUIVO));
+	DESCRITOR_ARQUIVO **arquivo = (DESCRITOR_ARQUIVO**) malloc(sizeof(DESCRITOR_ARQUIVO*));
 	int posicaoLivreDisco = privada_getPosicaoLivreDisco(sistemaArquivos_param, disco_param);
 	int descritorArquivoCriado = NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE;
 
 	if(posicaoLivreDisco != MEMORIA_ENDERECO_INEXISTENTE){
-		*arquivoCriado = (ARQUIVO*) malloc(sizeof(ARQUIVO));
+		*arquivo = (DESCRITOR_ARQUIVO*) malloc(sizeof(DESCRITOR_ARQUIVO));
 		descritorArquivoCriado = sistemaArquivos_param->numeroDescritorArquivoLivre;
-		arquivo_inicializar(*arquivoCriado, nome_param, posicaoLivreDisco, descritorArquivoCriado);
+		arquivo_inicializar(segmento, posicaoLivreDisco);
+		descritorArquivo_inicializar(*arquivo, nome_param, descritorArquivoCriado);
+		descritorArquivo_adicionarSegmento(*arquivo, segmento);
 		sistemaArquivos_param->numeroDescritorArquivoLivre++;
-		FIFO_inserir(&sistemaArquivos_param->arquivos, arquivoCriado);
+		FIFO_inserir(&sistemaArquivos_param->arquivos, arquivo);
 	} else {
-		free(arquivoCriado);
+		free(arquivo);
+		free(segmento);
 	}
 
 	return descritorArquivoCriado;

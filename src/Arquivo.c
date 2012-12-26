@@ -9,29 +9,16 @@
 //---------------------------------------------------------------------
 //			FUNÇÕES PRIVADAS DESTE ARQUIVO						
 //---------------------------------------------------------------------
-/**
-* @param ARQUIVO	*arquivo_param				Arquivo em que a operação será realizada.
-* @param char*		nome_param					Nome que o arquivo terá.
-* ATENÇÃO: deve ser usada uma só vez!
-*/
-void privada_setNome(ARQUIVO *arquivo_param, char* nome_param){
-	arquivo_param->nome = (char*) malloc((strlen(nome_param)+1)*sizeof(char));
-	strcpy(arquivo_param->nome, nome_param);
-}
 
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
 /**
 * @param ARQUIVO	*arquivo_param			O arquivo que será inicializado.
-* @param char*		nome_param				Nome do arquivo, amigável ao usuário.
 * @param int		enderecoInicio_param	Endereço do disco que iniciará o arquivo.
-* @param int		numeroDescritor_param	Número usado por processos do SOPA para ler e escrever.
 */
-void arquivo_inicializar(ARQUIVO *arquivo_param, char* nome_param, int enderecoInicio_param, int numeroDescritor_param){
-	privada_setNome(arquivo_param, nome_param);
+void arquivo_inicializar(ARQUIVO *arquivo_param, int enderecoInicio_param){
 	arquivo_param->enderecoInicioDisco = enderecoInicio_param;
-	arquivo_param->numeroDescritor = numeroDescritor_param;
 }
 
 /**
@@ -94,7 +81,7 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 		arquivo_param->tamanhoEmPalavras = posicaoEscrita;
 		arquivo_param->discoSalvo = disco_param;
 	} else {
-		sprintf(mensagem, "Nao consegui abrir o arquivo %s.", arquivo_param->nome);
+		sprintf(mensagem, "Nao consegui abrir o arquivo %s.", caminho_param);
 		tela_escreverNaColuna(&global_tela, mensagem, 4);
 	}
 
@@ -133,20 +120,12 @@ void arquivo_atualizarNaMaquinaHospedeira(ARQUIVO *arquivo_param, char* caminho_
 	char mensagem[200];
 	arquivoMaquinaHospedeira = fopen(caminho_param, "w");
 	if(arquivoMaquinaHospedeira != NULL){
-		fprintf(arquivoMaquinaHospedeira, arquivo_getConteudo(arquivo_param));
+		fprintf(arquivoMaquinaHospedeira, "%s", arquivo_getConteudo(arquivo_param));
 		fclose(arquivoMaquinaHospedeira);
 	} else {
-		sprintf(mensagem, "Nao consegui salvar o arquivo %s.", arquivo_param->nome);
+		sprintf(mensagem, "Nao consegui salvar o arquivo %s.", caminho_param);
 		tela_escreverNaColuna(&global_tela, mensagem, 4);
 	}
-}
-
-/**
-* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
-* @return int	Nome amigável ao usuário, atribuído ao arquivo.
-*/
-char* arquivo_getNome(ARQUIVO *arquivo_param){
-	return arquivo_param->nome;
 }
 
 /**

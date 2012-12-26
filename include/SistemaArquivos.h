@@ -34,7 +34,7 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 /**
 * @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
 * @param char*				nomeProcurado_param		O nome do arquivo que se quer.
-* @return ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja, retonará NULL.
+* @return ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja ou esteja fragmentado, retonará NULL.
 */
 ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param);
 
