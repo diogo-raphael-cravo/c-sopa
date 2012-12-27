@@ -169,7 +169,13 @@ void arquivo_relocalizar(ARQUIVO *arquivo_param, int posicao_param){
 	arquivo_param->enderecoInicioDisco = posicao_param;
 }
 
-
+/**
+* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
+* @return int	O endereço de início do arquivo.
+*/
+int arquivo_getEnderecoInicial(ARQUIVO *arquivo_param){
+	return arquivo_param->enderecoInicioDisco;
+}
 
 
 
