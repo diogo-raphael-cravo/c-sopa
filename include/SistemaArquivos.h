@@ -10,6 +10,7 @@
 #define DIRETORIO_DADOS_DISCO "dados" //Caminho para o diretório onde ficam os arquivos do disco no hospedeiro.
 #define CAMINHO_ARQUIVO_DESCRITOR_SISTEMA_ARQUIVOS "dados/descritorSistemaArquivos"
 #define NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE -1
+#define TAMANHO_ARQUIVO_RECEM_CRIADO 32
 
 struct str_sistemaArquivos{
 	FIFO arquivos; //Guarda todos arquivos neste sistema de arquivos.

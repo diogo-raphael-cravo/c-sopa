@@ -36,6 +36,12 @@ void descritorArquivo_adicionarSegmento(DESCRITOR_ARQUIVO *descritor_param, ARQU
 
 /**
 * @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
+* @return int	O número de segmentos do arquivo.
+*/
+int descritorArquivo_getQuantidadeSegmentos(DESCRITOR_ARQUIVO *descritor_param);
+
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
 * @param int				segmento_param		A ordem do segmento que deve ser retornado.
 * @return ARQUIVO*	O arquivo na ordem especificada deste arquivo lógico.
 */

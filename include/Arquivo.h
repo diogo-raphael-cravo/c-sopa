@@ -95,7 +95,11 @@ void arquivo_abrirParaProcesso(ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *proce
 */
 void arquivo_relocalizar(ARQUIVO *arquivo_param, int posicao_param);
 
-
+/**
+* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
+* @return int	O endereço de início do arquivo.
+*/
+int arquivo_getEnderecoInicial(ARQUIVO *arquivo_param);
 
 
 
