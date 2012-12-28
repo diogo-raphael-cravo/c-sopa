@@ -48,7 +48,8 @@ struct str_operacaoCriacaoProcesso{
 typedef struct str_operacaoCriacaoProcesso OPERACAO_CRIACAO_PROCESSO_KERNEL;
 
 struct str_operacaoFeitaPorProcesso{
-	
+	TIPO_OPERACAO_DISCO tipoOperacaoFeita;
+	DESCRITOR_PROCESSO **processoQuePediu;
 };
 
 typedef struct str_operacaoFeitaPorProcesso OPERACAO_FEITA_POR_PROCESSO_KERNEL;
@@ -124,9 +125,12 @@ OPERACAO_KERNEL* gerenciadorDisco_proximaOperacaoKernel(GERENCIADOR_DISCO *geren
 OPERACAO_KERNEL* gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(DESCRITOR_PROCESSO **descritorProcesso_param);
 
 /**
+* @param DESCRITOR_PROCESSO**	descritorProcesso_param		O processo que será criado.
+* @param TIPO_OPERACAO_DISCO	tipoOperacao_param			O tipo da operação que o processo requisitou.
 * @return OPERACAO_KERNEL*	A operação criada.
 */
-OPERACAO_KERNEL* gerenciadorDisco_criarOperacaoKernelFeitaPorProcesso();
+OPERACAO_KERNEL* gerenciadorDisco_criarOperacaoKernelFeitaPorProcesso(DESCRITOR_PROCESSO** descritorProcesso_param, 
+		TIPO_OPERACAO_DISCO tipoOperacao_param);
 
 	/**
 	* Operações do DISCO

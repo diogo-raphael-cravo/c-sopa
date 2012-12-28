@@ -25,9 +25,6 @@ struct str_arquivo{
 	int enderecoInicioDisco; //O bloco de início deste arquivo no disco.
 	int tamanhoEmPalavras; //Tamanho deste arquivo em palavras.
 	DISCO *discoSalvo; //O disco em que o arquivo está salvo.
-
-		//No kernel
-	DESCRITOR_PROCESSO *processoQueAbriu; //Ponteiro para o processo que abriu este arquivo.
 };
 
 typedef struct str_arquivo ARQUIVO;
@@ -69,25 +66,6 @@ char* arquivo_getConteudo(ARQUIVO *arquivo_param);
 * @return int	O tamanho do arquivo em palavras. Retornará -1 caso o arquivo não esteja salvo nem no disco, nem na memória.
 */
 int arquivo_getTamanhoEmPalavras(ARQUIVO *arquivo_param);
-
-/**
-* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
-* @return int	Indica se o arquivo pode ser aberto.
-*/
-int arquivo_podeSerAberto(ARQUIVO *arquivo_param);
-
-/**
-* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
-* @return DESCRITOR_PROCESSO*	O processo que abriu este arquivo. Caso o arquivo não tenha sido aberto, retornará NULL.
-*/
-DESCRITOR_PROCESSO* arquivo_getProcessoQueAbriu(ARQUIVO *arquivo_param);
-
-/**
-* @param ARQUIVO				*arquivo_param		O arquivo cuja informação será retornada.
-* @param DESCRITOR_PROCESSO		*processo_param		O processo que abrirá o arquivo.
-* ATENÇÃO: não checa se o arquivo já está aberto!
-*/
-void arquivo_abrirParaProcesso(ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param);
 
 /**
 * @param ARQUIVO		*arquivo_param	O arquivo que será movido.
