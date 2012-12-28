@@ -35,8 +35,10 @@
 #include "../include/Arquivo.h" 					//Depende de: Disco.h, MMU.h
 #include "../include/DescritorArquivo.h" 			//Depende de: Arquivo.h
 #include "../include/SistemaArquivos.h" 			//Depende de: Arquivo.h, DescritorArquivo.h
+#include "../include/PacoteAplicacaoSOPA.h"			//Depende de: 
+#include "../include/PlacaRede.h"					//Depende de: PacoteAplicacaoSOPA.h
 #include "../include/RPC.h" 						//Depende de: 
-#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h, MMU.h, MapaMemoria.h, Arquivo.h, SistemaArquivos.h, RPC.h, GerenciadorDisco.h
+#include "../include/Kernel.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h, MMU.h, MapaMemoria.h, Arquivo.h, SistemaArquivos.h, RPC.h, GerenciadorDisco.h, PlacaRede.h
 #include "../include/Timer.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Console.h" 					//Depende de: Tela.h, ControladorInterrupcoes.h
 
@@ -55,6 +57,7 @@ pthread_t global_threadIdTimer;
 pthread_t global_threadIdKernel;
 pthread_t global_threadIdDisco;
 pthread_t global_threadIdConsole;
+pthread_t global_threadIdPlacaRede;
 
 sem_t global_mutexAcessoTela; //Controla acesso à tela em geral.
 sem_t global_mutexParaTela; //Controla acesso à tela somente dos elementos que não são tela.
@@ -70,4 +73,8 @@ TELA 						global_tela;
 MEMORIA 					global_memoria;
 MMU							global_MMU;
 CONSOLE 					global_console;
+PLACA_REDE					global_placaRede;
+
+
+
 
