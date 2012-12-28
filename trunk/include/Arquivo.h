@@ -14,8 +14,8 @@
 
 
 enum enum_opcoesAberturaArquivo{
-	LER=0,
-	ESCREVER=1
+	OPCAO_ABERTURA_ARQUIVO_LER=0,
+	OPCAO_ABERTURA_ARQUIVO_ESCREVER=1
 };
 
 typedef enum enum_opcoesAberturaArquivo OPCAO_ABERTURA_ARQUIVO;

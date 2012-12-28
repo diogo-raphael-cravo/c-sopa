@@ -84,14 +84,26 @@ void privada_lerEndereco(DISCO *disco_param, int endereco_param){
 * @param int				tamanhoDados_param		A quantidade de palavras que serão escritas.
 */
 void privada_escreverEndereco(DISCO *disco_param, int endereco_param, PALAVRA *dados_param, int tamanhoDados_param){
-	tela_escreverNaColuna(&global_tela, "Escrita.",4);
-
+	char mensagem[200];
 	if(endereco_param < 0 || TAMANHO_DISCO_PALAVRAS < endereco_param+tamanhoDados_param){
 		disco_param->erroUltimaOperacao = ERRO_DISCO_ENDERECO_INVALIDO;
+		tela_escreverNaColuna(&global_tela, "Escrita: o endereco eh invalido.", 4);
 	} else {
-		int palavraEscrita = tamanhoDados_param;
+		int palavraEscrita = 0;
 		for(; palavraEscrita<tamanhoDados_param; palavraEscrita++){
 			disco_param->conteudo[endereco_param+palavraEscrita] = dados_param[palavraEscrita];
+			sprintf(mensagem, "Escrita: *(%d) = %d %d %d %d", endereco_param+palavraEscrita,
+				(((disco_param->conteudo[endereco_param+palavraEscrita] & 0xFF000000)/256)/256)/256,
+				((disco_param->conteudo[endereco_param+palavraEscrita] & 0x00FF0000)/256)/256,
+				(disco_param->conteudo[endereco_param+palavraEscrita] & 0x0000FF00)/256,
+				disco_param->conteudo[endereco_param+palavraEscrita] & 0x000000FF);
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
+			sprintf(mensagem, " = %c %c %c %c", 
+				(((disco_param->conteudo[endereco_param+palavraEscrita] & 0xFF000000)/256)/256)/256,
+				((disco_param->conteudo[endereco_param+palavraEscrita] & 0x00FF0000)/256)/256,
+				(disco_param->conteudo[endereco_param+palavraEscrita] & 0x0000FF00)/256,
+				disco_param->conteudo[endereco_param+palavraEscrita] & 0x000000FF);
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
 		}
 		free(dados_param);
 	}

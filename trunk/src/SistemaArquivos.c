@@ -253,19 +253,20 @@ DESCRITOR_ARQUIVO* sistemaArquivos_buscaPorNumeroDescritor(SISTEMA_ARQUIVOS *sis
 }
 
 /**
-* @param SISTEMA_ARQUIVOS		*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
-* @param char*					nomeProcurado_param		O nome do arquivo que se quer.
-* @param DESCRITOR_PROCESSO		*processo_param			O processo que terá posse do arquivo aberto.
+* @param SISTEMA_ARQUIVOS			*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param char*						nomeProcurado_param		O nome do arquivo que se quer.
+* @param DESCRITOR_PROCESSO			*processo_param			O processo que terá posse do arquivo aberto.
+* @param OPCAO_ABERTURA_ARQUIVO		opcao_param				O que será feito com o arquivo.
 * @return int	Número descritor do arquivo (usado por processos do SOPA para operar sobre o arquivo).
 *				Caso não tenha sido possível encontrar/abrir, retornará NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE.
 */
 int sistemaArquivos_abrirArquivoExistentePara(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param,
-		DESCRITOR_PROCESSO *processo_param){
+		DESCRITOR_PROCESSO *processo_param, OPCAO_ABERTURA_ARQUIVO opcao_param){
 	DESCRITOR_ARQUIVO* arquivoEncontrado = privada_buscaPorNome(sistemaArquivos_param, nomeProcurado_param);
 	int descritor = NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE;
 	if(arquivoEncontrado != NULL && descritorArquivo_getProcessoQueAbriu(arquivoEncontrado) == NULL){
 		descritor = descritorArquivo_getNumeroDescritor(arquivoEncontrado);
-		descritorArquivo_abrirParaProcesso(arquivoEncontrado, processo_param);
+		descritorArquivo_abrirParaProcesso(arquivoEncontrado, processo_param, opcao_param);
 	}
 	return descritor;
 }

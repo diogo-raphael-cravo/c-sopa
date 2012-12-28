@@ -16,6 +16,7 @@ struct str_descritorArquivo{
 	char* nome; //Nome que será associado ao descritor, visível ao usuário.
 	int numeroDescritor; //Número usado por processos do SOPA para ler e escrever.
 	DESCRITOR_PROCESSO *processoQueAbriu; //Ponteiro para o processo que abriu este arquivo.
+	OPCAO_ABERTURA_ARQUIVO opcaoAbertura; //O que será feito com o arquivo.
 };
 
 typedef struct str_descritorArquivo DESCRITOR_ARQUIVO;
@@ -94,11 +95,13 @@ int descritorArquivo_estahFragmentado(DESCRITOR_ARQUIVO *descritor_param);
 DESCRITOR_PROCESSO* descritorArquivo_getProcessoQueAbriu(DESCRITOR_ARQUIVO *arquivo_param);
 
 /**
-* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo cuja informação será retornada.
-* @param DESCRITOR_PROCESSO		*processo_param		O processo que abrirá o arquivo.
+* @param DESCRITOR_ARQUIVO			*arquivo_param		O arquivo cuja informação será retornada.
+* @param DESCRITOR_PROCESSO			*processo_param		O processo que abrirá o arquivo.
+* @param OPCAO_ABERTURA_ARQUIVO		opcao_param			O que será feito com o arquivo.
 * ATENÇÃO: não checa se o arquivo já está aberto!
 */
-void descritorArquivo_abrirParaProcesso(DESCRITOR_ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param);
+void descritorArquivo_abrirParaProcesso(DESCRITOR_ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param,
+		OPCAO_ABERTURA_ARQUIVO opcao_param);
 
 /**
 * @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo que será fechado.
@@ -124,7 +127,12 @@ void descritorArquivo_setPalavraAtual(DESCRITOR_ARQUIVO *arquivo_param, int pala
 */
 int descritorArquivo_getEnderecoDiscoPosicao(DESCRITOR_ARQUIVO *arquivo_param, int enderecoLogico_param);
 
-
+/**
+* @param DESCRITOR_ARQUIVO			*arquivo_param			O arquivo que será consultado.
+* @param OPCAO_ABERTURA_ARQUIVO		opcao_param				Opção que será testada.
+* @return int	Indica se o arquivo está aberto com a opção dada.
+*/
+int descritorArquivo_abertoComOpcao(DESCRITOR_ARQUIVO *arquivo_param, OPCAO_ABERTURA_ARQUIVO opcao_param);
 
 
 

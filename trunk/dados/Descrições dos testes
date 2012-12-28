@@ -200,7 +200,7 @@ Dependências:						 19
 =====================================================
 
 =====================================================
-20)									 Get from File Interruption
+21)									 Get from File Interruption
 Nome do Arquivo:					 GET
 Resultado Esperado:					 *Programa termina sem falhas
 									 *Abre um arquivo chamado GET para leitura
@@ -210,6 +210,20 @@ Resultado Esperado:					 *Programa termina sem falhas
 Dependências:						 7, 20
 =====================================================
 
+=====================================================
+22)									 Put in File Interruption
+Nome do Arquivo:					 PUT
+Resultado Esperado:					 *Programa termina sem falhas
+									 *Abre um arquivo chamado PUT para leitura
+									 *Tenta gravar e não consegue.
+									 *Fecha o arquivo.
+									 *Abre novamente o arquivo PUT para escrita
+									 *Grava o valor 128 0 0 0 = -2147483648 na segunda posição do arquivo
+									 *Fecha o arquivo aberto
+									 *Termina com o valor 128 0 0 0 = -2147483648 no registrador r10.
+Última revisão em que esteve OK:	 67
+Dependências:						 14, 21
+=====================================================
 
 
 

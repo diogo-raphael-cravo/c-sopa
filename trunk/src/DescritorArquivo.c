@@ -212,13 +212,16 @@ DESCRITOR_PROCESSO* descritorArquivo_getProcessoQueAbriu(DESCRITOR_ARQUIVO *arqu
 }
 
 /**
-* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo cuja informação será retornada.
-* @param DESCRITOR_PROCESSO		*processo_param		O processo que abrirá o arquivo.
+* @param DESCRITOR_ARQUIVO			*arquivo_param		O arquivo cuja informação será retornada.
+* @param DESCRITOR_PROCESSO			*processo_param		O processo que abrirá o arquivo.
+* @param OPCAO_ABERTURA_ARQUIVO		opcao_param			O que será feito com o arquivo.
 * ATENÇÃO: não checa se o arquivo já está aberto!
 */
-void descritorArquivo_abrirParaProcesso(DESCRITOR_ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param){
+void descritorArquivo_abrirParaProcesso(DESCRITOR_ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param,
+		OPCAO_ABERTURA_ARQUIVO opcao_param){
 	arquivo_param->palavraAtual = 0;
 	arquivo_param->processoQueAbriu = processo_param;
+	arquivo_param->opcaoAbertura = opcao_param;
 }
 
 /**
@@ -267,7 +270,18 @@ int descritorArquivo_getEnderecoDiscoPosicao(DESCRITOR_ARQUIVO *arquivo_param, i
 	return enderecoDisco;
 }
 
-
+/**
+* @param DESCRITOR_ARQUIVO			*arquivo_param			O arquivo que será consultado.
+* @param OPCAO_ABERTURA_ARQUIVO		opcao_param			Opção que será testada.
+* @return int	Indica se o arquivo está aberto com a opção dada.
+*/
+int descritorArquivo_abertoComOpcao(DESCRITOR_ARQUIVO *arquivo_param, OPCAO_ABERTURA_ARQUIVO opcao_param){
+	int estahAbertoComOpcao = 0;
+	if(arquivo_param->processoQueAbriu != NULL && arquivo_param->opcaoAbertura == opcao_param){
+		estahAbertoComOpcao = 1;
+	}
+	return estahAbertoComOpcao;
+}
 
 
 
