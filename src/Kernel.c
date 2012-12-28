@@ -390,13 +390,67 @@ int privada_abrirArquivo(KERNEL *kernel_param, char* nome_param, OPCAO_ABERTURA_
 			sprintf(mensagem, "Nao encontrei espaco para %s.", nome_param);
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 		} else {
-			sistemaArquivos_abrirArquivoExistentePara(&kernel_param->sistemaDeArquivos, nome_param, processo_param);
+			sistemaArquivos_abrirArquivoExistentePara(&kernel_param->sistemaDeArquivos, nome_param, processo_param, opcao_param);
 		}
 	} else {
-		descritorArquivoCriado = sistemaArquivos_abrirArquivoExistentePara(&kernel_param->sistemaDeArquivos, nome_param, processo_param);
+		descritorArquivoCriado = sistemaArquivos_abrirArquivoExistentePara(&kernel_param->sistemaDeArquivos, nome_param, 
+			processo_param, opcao_param);
 	}
 
 	return descritorArquivoCriado;
+}
+
+/**
+* Agenda a leitura da próxima palavra do arquivo.
+* @param KERNEL						*kernel_param					O kernel que executará a operação.
+* @param int						numeroDescritorArquivo_param	O arquivo de cuja posse será testada.
+* @param PALAVRA					palavraEscrita_param			A palavra que será escrita.
+* @return ERRO_KERNEL	Um erro que descreve se a operação foi realizada ou o erro que aconteceu.
+*/
+ERRO_KERNEL privada_agendarPutPalavraDeArquivoParaProcessoRodando(KERNEL *kernel_param, int numeroDescritorArquivo_param,
+		PALAVRA palavraEscrita_param){
+	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
+	DESCRITOR_ARQUIVO *arquivo;
+	int enderecoLogicoEscrita;
+	int enderecoFisicoEscrita;
+
+	if(!sistemaArquivos_arquivoEstahAbertoPara(&kernel_param->sistemaDeArquivos, 
+			*kernel_param->processoRodando, numeroDescritorArquivo_param)){
+		erro = KERNEL_ERRO_PROCESSO_NAO_TEM_ARQUIVO;
+	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+		arquivo = sistemaArquivos_buscaPorNumeroDescritor(&kernel_param->sistemaDeArquivos, 
+			numeroDescritorArquivo_param);
+		if(!descritorArquivo_abertoComOpcao(arquivo, OPCAO_ABERTURA_ARQUIVO_ESCREVER)){
+			erro = KERNEL_ERRO_ARQUIVO_ABERTO_COM_OUTRO_FIM;
+		}
+	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+		enderecoLogicoEscrita = descritorArquivo_getPalavraAtual(arquivo);
+		if(enderecoLogicoEscrita == DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE){
+			erro = KERNEL_ERRO_FIM_DO_ARQUIVO;
+		}
+	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+		enderecoFisicoEscrita = descritorArquivo_getEnderecoDiscoPosicao(arquivo, enderecoLogicoEscrita);
+		descritorArquivo_setPalavraAtual(arquivo, descritorArquivo_getPalavraAtual(arquivo)+1);
+
+		//privada_escreverEndereco(...) em Disco.c vai dar free.
+		PALAVRA* palavraEscrita = (PALAVRA*) malloc(sizeof(PALAVRA)); 
+		*palavraEscrita = palavraEscrita_param;
+
+		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoEscrita(enderecoFisicoEscrita, palavraEscrita, 1);
+		OPERACAO_KERNEL* operacaoKernel;
+		operacaoKernel = gerenciadorDisco_criarOperacaoKernelFeitaPorProcesso(
+			kernel_param->processoRodando, TIPO_OPERACAO_ESCRITA_DISCO);
+
+		gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
+	}
+
+	return erro;
 }
 
 /**
@@ -407,27 +461,41 @@ int privada_abrirArquivo(KERNEL *kernel_param, char* nome_param, OPCAO_ABERTURA_
 */
 ERRO_KERNEL privada_agendarGetPalavraDeArquivoParaProcessoRodando(KERNEL *kernel_param, int numeroDescritorArquivo_param){
 	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
+	DESCRITOR_ARQUIVO *arquivoLido;
+	int enderecoLogicoLeitura;
+	int enderecoFisicoLeitura;
 
-	if(sistemaArquivos_arquivoEstahAbertoPara(&kernel_param->sistemaDeArquivos, 
+	if(!sistemaArquivos_arquivoEstahAbertoPara(&kernel_param->sistemaDeArquivos, 
 			*kernel_param->processoRodando, numeroDescritorArquivo_param)){
-		DESCRITOR_ARQUIVO *arquivoLido = sistemaArquivos_buscaPorNumeroDescritor(&kernel_param->sistemaDeArquivos, 
+		erro = KERNEL_ERRO_PROCESSO_NAO_TEM_ARQUIVO;
+	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+		arquivoLido = sistemaArquivos_buscaPorNumeroDescritor(&kernel_param->sistemaDeArquivos, 
 			numeroDescritorArquivo_param);
-		int enderecoLogicoLeitura = descritorArquivo_getPalavraAtual(arquivoLido);
-		if(enderecoLogicoLeitura != DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE){
-			int enderecoFisicoLeitura = descritorArquivo_getEnderecoDiscoPosicao(arquivoLido, enderecoLogicoLeitura);
-			descritorArquivo_setPalavraAtual(arquivoLido, descritorArquivo_getPalavraAtual(arquivoLido)+1);
 
-			OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoLeitura(enderecoFisicoLeitura);
-			OPERACAO_KERNEL* operacaoKernel;
-			operacaoKernel = gerenciadorDisco_criarOperacaoKernelFeitaPorProcesso(
-				kernel_param->processoRodando, TIPO_OPERACAO_LEITURA_DISCO);
+		if(!descritorArquivo_abertoComOpcao(arquivoLido, OPCAO_ABERTURA_ARQUIVO_LER)){
+			erro = KERNEL_ERRO_ARQUIVO_ABERTO_COM_OUTRO_FIM;
+		}
+	}
 
-			gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
-		} else {
+	if(erro == KERNEL_ERRO_NENHUM){
+		enderecoLogicoLeitura = descritorArquivo_getPalavraAtual(arquivoLido);
+		if(enderecoLogicoLeitura == DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE){
 			erro = KERNEL_ERRO_FIM_DO_ARQUIVO;
 		}
-	} else {
-		erro = KERNEL_ERRO_PROCESSO_NAO_TEM_ARQUIVO;
+	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+		enderecoFisicoLeitura = descritorArquivo_getEnderecoDiscoPosicao(arquivoLido, enderecoLogicoLeitura);
+		descritorArquivo_setPalavraAtual(arquivoLido, descritorArquivo_getPalavraAtual(arquivoLido)+1);
+
+		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoLeitura(enderecoFisicoLeitura);
+		OPERACAO_KERNEL* operacaoKernel;
+		operacaoKernel = gerenciadorDisco_criarOperacaoKernelFeitaPorProcesso(
+			kernel_param->processoRodando, TIPO_OPERACAO_LEITURA_DISCO);
+
+		gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
 	}
 
 	return erro;
@@ -505,24 +573,40 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			}
 			break;
 		case INTERRUPCAO_DISCO:
-			operacaoKernel = gerenciadorDisco_proximaOperacaoKernel(&kernel_param->gerenciadorAcessoDisco);
-			gerenciadorDisco_executarProxima(&kernel_param->gerenciadorAcessoDisco);
-			if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_CRIACAO_PROCESSO_KERNEL){
-				OPERACAO_CRIACAO_PROCESSO_KERNEL* operacaoExecutada = (OPERACAO_CRIACAO_PROCESSO_KERNEL*) operacaoKernel->operacao;
-				FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoCriado);
-				kernel_param->quantidadeProcessos++;
-			} else if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_FEITA_POR_PROCESSO_KERNEL){
-				OPERACAO_FEITA_POR_PROCESSO_KERNEL* operacaoExecutada = (OPERACAO_FEITA_POR_PROCESSO_KERNEL*) operacaoKernel->operacao;
-				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*operacaoExecutada->processoQuePediu), 
-					disco_palavrasUltimaLeituraPosicao(&global_disco, 0), 0);
-				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*operacaoExecutada->processoQuePediu), 0, 1);
-				FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoQuePediu);
-sprintf(mensagem, "Li '%d' do disco.", disco_palavrasUltimaLeituraPosicao(&global_disco, 0));
-tela_escreverNaColuna(&global_tela, mensagem, 5);
+			if(disco_erroUltimaOperacao(&global_disco) == ERRO_DISCO_ENDERECO_INVALIDO){
+				tela_imprimirTelaAzulDaMorte(&global_tela, "Alguem tentou acessar um endereco invalido do disco!");
+			} else {
+				operacaoKernel = gerenciadorDisco_proximaOperacaoKernel(&kernel_param->gerenciadorAcessoDisco);
+				gerenciadorDisco_executarProxima(&kernel_param->gerenciadorAcessoDisco);
+				if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_CRIACAO_PROCESSO_KERNEL){
+					OPERACAO_CRIACAO_PROCESSO_KERNEL* operacaoExecutada = (OPERACAO_CRIACAO_PROCESSO_KERNEL*) operacaoKernel->operacao;
+					FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoCriado);
+					kernel_param->quantidadeProcessos++;
+				} else if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_FEITA_POR_PROCESSO_KERNEL){
+					OPERACAO_FEITA_POR_PROCESSO_KERNEL* operacaoExecutada = (OPERACAO_FEITA_POR_PROCESSO_KERNEL*) operacaoKernel->operacao;
+					if(operacaoExecutada->tipoOperacaoFeita == TIPO_OPERACAO_LEITURA_DISCO){
+						contexto_setRegistradorPalavra(
+							descritorProcesso_getContexto(*operacaoExecutada->processoQuePediu), 
+							disco_palavrasUltimaLeituraPosicao(&global_disco, 0), 
+							0);
+						contexto_setRegistradorPalavra(
+							descritorProcesso_getContexto(*operacaoExecutada->processoQuePediu), 
+							0, 
+							1);
+						FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoQuePediu);
+					} else if(operacaoExecutada->tipoOperacaoFeita == TIPO_OPERACAO_ESCRITA_DISCO){
+						contexto_setRegistradorPalavra(
+							descritorProcesso_getContexto(*operacaoExecutada->processoQuePediu), 
+							0, 
+							1);
+						FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoQuePediu);
+					}
+				}
+
+				free(operacaoKernel->operacao);
+				free(operacaoKernel);
 			}
 
-			free(operacaoKernel->operacao);
-			free(operacaoKernel);
 			break;
 		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
 			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));
@@ -587,6 +671,10 @@ tela_escreverNaColuna(&global_tela, mensagem, 5);
 				tela_escreverNaColuna(&global_tela, "GET: fim do arquivo!", 3);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 0, 0);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			} else if(erro == KERNEL_ERRO_ARQUIVO_ABERTO_COM_OUTRO_FIM){
+				tela_escreverNaColuna(&global_tela, "GET: o arquivo nao foi aberto para leitura.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 2, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
 			} else {
 				tela_escreverNaColuna(&global_tela, "GET: erro desconhecido.", 3);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 2, 0);
@@ -594,8 +682,30 @@ tela_escreverNaColuna(&global_tela, mensagem, 5);
 			}
 			break;
 		case INTERRUPCAO_SOFTWARE_PUT:
-			sprintf(mensagem, "A interrupcao PUT nao estah implementada.");
-			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			erro = privada_agendarPutPalavraDeArquivoParaProcessoRodando(kernel_param, 
+				registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 0)),
+				registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 1)));
+			if(erro == KERNEL_ERRO_NENHUM){
+				kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
+				privada_escalonar(kernel_param);
+				tela_escreverNaColuna(&global_tela, "PUT: escrita agendada.", 3);
+			} else if(erro == KERNEL_ERRO_PROCESSO_NAO_TEM_ARQUIVO){
+				tela_escreverNaColuna(&global_tela, "PUT: arquivo nao estah aberto para o processo.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			} else if(erro == KERNEL_ERRO_FIM_DO_ARQUIVO){
+				tela_escreverNaColuna(&global_tela, "PUT: fim do arquivo!", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 0, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			} else if(erro == KERNEL_ERRO_ARQUIVO_ABERTO_COM_OUTRO_FIM){
+				tela_escreverNaColuna(&global_tela, "PUT: o arquivo nao foi aberto para escrita.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 2, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			} else {
+				tela_escreverNaColuna(&global_tela, "PUT: erro desconhecido.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 2, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			}
 			break;
 		case INTERRUPCAO_SOFTWARE_READ:
 			sprintf(mensagem, "A interrupcao READ nao estah implementada.");
