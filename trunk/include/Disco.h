@@ -8,6 +8,7 @@
 //Constantes
 #define TAMANHO_DISCO_PALAVRAS 1024
 #define POSICAO_VAZIA -99999
+#define DISCO_ENDERECO_INEXISTENTE -1
 #define DADO_NENHUM NULL
 
 enum enum_operacaoDisco{

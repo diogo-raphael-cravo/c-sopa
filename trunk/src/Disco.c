@@ -48,10 +48,10 @@ void privada_escreverNaProximaPalavraLivre(DISCO *disco_param, BYTE byte0_param,
 * @param int				endereco_param			O endereço lido.
 */
 void privada_lerEndereco(DISCO *disco_param, int endereco_param){
-	tela_escreverNaColuna(&global_tela, "Leitura.",4);
-	
+	char mensagem[200];
 	if(endereco_param < 0 || TAMANHO_DISCO_PALAVRAS <= endereco_param){
 		disco_param->erroUltimaOperacao = ERRO_DISCO_ENDERECO_INVALIDO;
+		tela_escreverNaColuna(&global_tela, "Leitura: o endereco eh invalido.", 4);
 	} else {
 		disco_param->tamanhoUltimaLeitura = 1;
 		if(disco_param->dadosUltimaLeitura != NULL){
@@ -59,6 +59,19 @@ void privada_lerEndereco(DISCO *disco_param, int endereco_param){
 		}
 		disco_param->dadosUltimaLeitura = (PALAVRA*) malloc(disco_param->tamanhoUltimaLeitura*sizeof(PALAVRA));
 		disco_param->dadosUltimaLeitura[0] = disco_param->conteudo[endereco_param];
+
+		sprintf(mensagem, "Leitura: *(%d) = %d %d %d %d", endereco_param,
+			(((disco_param->conteudo[endereco_param] & 0xFF000000)/256)/256)/256,
+			((disco_param->conteudo[endereco_param] & 0x00FF0000)/256)/256,
+			(disco_param->conteudo[endereco_param] & 0x0000FF00)/256,
+			disco_param->conteudo[endereco_param] & 0x000000FF);
+		tela_escreverNaColuna(&global_tela, mensagem, 4);
+		sprintf(mensagem, " = %c %c %c %c", 
+			(((disco_param->conteudo[endereco_param] & 0xFF000000)/256)/256)/256,
+			((disco_param->conteudo[endereco_param] & 0x00FF0000)/256)/256,
+			(disco_param->conteudo[endereco_param] & 0x0000FF00)/256,
+			disco_param->conteudo[endereco_param] & 0x000000FF);
+		tela_escreverNaColuna(&global_tela, mensagem, 4);
 	}
 }
 

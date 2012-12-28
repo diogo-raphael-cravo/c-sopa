@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define MAXIMO_ARQUIVOS 20 //A quantidade máxima de arquivos neste sistema de arquivos.
+#define MAXIMO_ARQUIVOS 500 //A quantidade máxima de arquivos neste sistema de arquivos.
 #define DIRETORIO_DADOS_DISCO "dados" //Caminho para o diretório onde ficam os arquivos do disco no hospedeiro.
 #define CAMINHO_ARQUIVO_DESCRITOR_SISTEMA_ARQUIVOS "dados/descritorSistemaArquivos"
 #define NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE -1
@@ -40,6 +40,29 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param);
 
 /**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param int				numeroDescritor_param	Número descritor do arquivo que se quer.
+* @return DESCRITOR_ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja, retonará NULL.
+*/
+DESCRITOR_ARQUIVO* sistemaArquivos_buscaPorNumeroDescritor(SISTEMA_ARQUIVOS *sistemaArquivos_param, int numeroDescritor_param);
+
+/**
+* @param SISTEMA_ARQUIVOS		*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param char*					nomeProcurado_param		O nome do arquivo que se quer.
+* @param DESCRITOR_PROCESSO		*processo_param			O processo que terá posse do arquivo aberto.
+* @return int	Número descritor do arquivo (usado por processos do SOPA para operar sobre o arquivo).
+*				Caso não tenha sido possível encontrar/abrir, retornará NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE.
+*/
+int sistemaArquivos_abrirArquivoExistentePara(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param,
+	DESCRITOR_PROCESSO *processo_param);
+
+/**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param int				numeroDescritor_param	Número descritor do arquivo que será fechado.
+*/
+void sistemaArquivos_fecharArquivo(SISTEMA_ARQUIVOS *sistemaArquivos_param, int numeroDescritor_param);
+
+/**
 * Atualiza os arquivos na máquina hospedeira.
 * @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que será atualizado.
 */
@@ -54,6 +77,26 @@ void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArqui
 *				Caso não tenha sido possível criar, retornará NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE.
 */
 int sistemaArquivos_criarArquivo(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nome_param, DISCO *disco_param);
+
+/**
+* Fecha os arquivos que ainda estão abertos para o processo passado.
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param		O sistema de arquivos em que a operação será realizada.
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O processo cujos arquivos abertos serão fechados.
+*/
+void sistemaArquivos_fecharArquivosAbertosPara(SISTEMA_ARQUIVOS *sistemaArquivos_param, DESCRITOR_PROCESSO *descritorProcesso_param);
+
+/**
+* @param SISTEMA_ARQUIVOS		*sistemaArquivos_param			O sistema de arquivos em que a operação será realizada.
+* @param DESCRITOR_PROCESSO		*descritorProcesso_param		O processo cuja possa do arquivo será testada.
+* @param int					numeroDescritorArquivo_param	O arquivo de cuja posse será testada.
+* @return int	Indica se o arquivo está aberto para o processo.
+* ATENÇÃO: retornará false (0) se o arquivo não existir.
+*/
+int sistemaArquivos_arquivoEstahAbertoPara(SISTEMA_ARQUIVOS *sistemaArquivos_param, DESCRITOR_PROCESSO *descritorProcesso_param,
+	int numeroDescritorArquivo_param);
+
+
+
 
 
 

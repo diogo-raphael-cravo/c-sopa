@@ -140,6 +140,48 @@ void privada_atualizarArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_par
 	}
 }
 
+/**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param char*				nomeProcurado_param		O nome do arquivo que se quer.
+* @return DESCRITOR_ARQUIVO*	O arquivo que tem o nome procurado.
+*/
+DESCRITOR_ARQUIVO* privada_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param){
+	int totalArquivos = FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos);
+	int arquivoAtual;
+	DESCRITOR_ARQUIVO* arquivo;
+	DESCRITOR_ARQUIVO* arquivoEncontrado = NULL;
+
+	for(arquivoAtual=0; arquivoAtual<totalArquivos; arquivoAtual++){
+		arquivo = * (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoAtual);
+		if(strcmp(descritorArquivo_getNome(arquivo), nomeProcurado_param) == 0){
+			arquivoEncontrado = arquivo;
+		}
+	}
+
+	return arquivoEncontrado;
+}
+
+/**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param int				numeroDescritor_param	Número descritor que o arquivo deve ter.
+* @return DESCRITOR_ARQUIVO*	O arquivo que tem o número descritor procurado.
+*/
+DESCRITOR_ARQUIVO* privada_buscaPorNumeroDescritor(SISTEMA_ARQUIVOS *sistemaArquivos_param, int numeroDescritor_param){
+	int totalArquivos = FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos);
+	int arquivoAtual;
+	DESCRITOR_ARQUIVO* arquivo;
+	DESCRITOR_ARQUIVO* arquivoEncontrado = NULL;
+
+	for(arquivoAtual=0; arquivoAtual<totalArquivos; arquivoAtual++){
+		arquivo = * (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoAtual);
+		if(descritorArquivo_getNumeroDescritor(arquivo) == numeroDescritor_param){
+			arquivoEncontrado = arquivo;
+		}
+	}
+
+	return arquivoEncontrado;
+}
+
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
@@ -193,26 +235,50 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 * @return ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja ou esteja fragmentado, retonará NULL.
 */
 ARQUIVO* sistemaArquivos_buscaPorNome(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param){
-	int totalArquivos = FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos);
-	int arquivoAtual;
-	DESCRITOR_ARQUIVO* arquivo;
-	DESCRITOR_ARQUIVO* arquivoEncontrado = NULL;
-	ARQUIVO* arquivoFisicoEncontrado;
-
-	for(arquivoAtual=0; arquivoAtual<totalArquivos; arquivoAtual++){
-		arquivo = * (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoAtual);
-		if(strcmp(descritorArquivo_getNome(arquivo), nomeProcurado_param) == 0){
-			arquivoEncontrado = arquivo;
-		}
-	}
-
+	DESCRITOR_ARQUIVO* arquivoEncontrado = privada_buscaPorNome(sistemaArquivos_param, nomeProcurado_param);
+	ARQUIVO* arquivoFisicoEncontrado = NULL;
 	if(arquivoEncontrado != NULL && !descritorArquivo_estahFragmentado(arquivoEncontrado)){
 		arquivoFisicoEncontrado = descritorArquivo_getSegmento(arquivoEncontrado, 0);
-	} else {
-		arquivoFisicoEncontrado = NULL;
 	}
-
 	return arquivoFisicoEncontrado;
+}
+
+/**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param int				numeroDescritor_param	Número descritor do arquivo que se quer.
+* @return DESCRITOR_ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja, retonará NULL.
+*/
+DESCRITOR_ARQUIVO* sistemaArquivos_buscaPorNumeroDescritor(SISTEMA_ARQUIVOS *sistemaArquivos_param, int numeroDescritor_param){
+	return privada_buscaPorNumeroDescritor(sistemaArquivos_param, numeroDescritor_param);
+}
+
+/**
+* @param SISTEMA_ARQUIVOS		*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param char*					nomeProcurado_param		O nome do arquivo que se quer.
+* @param DESCRITOR_PROCESSO		*processo_param			O processo que terá posse do arquivo aberto.
+* @return int	Número descritor do arquivo (usado por processos do SOPA para operar sobre o arquivo).
+*				Caso não tenha sido possível encontrar/abrir, retornará NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE.
+*/
+int sistemaArquivos_abrirArquivoExistentePara(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nomeProcurado_param,
+		DESCRITOR_PROCESSO *processo_param){
+	DESCRITOR_ARQUIVO* arquivoEncontrado = privada_buscaPorNome(sistemaArquivos_param, nomeProcurado_param);
+	int descritor = NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE;
+	if(arquivoEncontrado != NULL && descritorArquivo_getProcessoQueAbriu(arquivoEncontrado) == NULL){
+		descritor = descritorArquivo_getNumeroDescritor(arquivoEncontrado);
+		descritorArquivo_abrirParaProcesso(arquivoEncontrado, processo_param);
+	}
+	return descritor;
+}
+
+/**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
+* @param int				numeroDescritor_param	Número descritor do arquivo que será fechado.
+*/
+void sistemaArquivos_fecharArquivo(SISTEMA_ARQUIVOS *sistemaArquivos_param, int numeroDescritor_param){
+	DESCRITOR_ARQUIVO* arquivoEncontrado = privada_buscaPorNumeroDescritor(sistemaArquivos_param, numeroDescritor_param);
+	if(arquivoEncontrado != NULL){
+		descritorArquivo_fechar(arquivoEncontrado);
+	}
 }
 
 /**
@@ -266,8 +332,45 @@ int sistemaArquivos_criarArquivo(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* 
 	return descritorArquivoCriado;
 }
 
+/**
+* Fecha os arquivos que ainda estão abertos para o processo passado.
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param		O sistema de arquivos em que a operação será realizada.
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O processo cujos arquivos abertos serão fechados.
+*/
+void sistemaArquivos_fecharArquivosAbertosPara(SISTEMA_ARQUIVOS *sistemaArquivos_param, DESCRITOR_PROCESSO *descritorProcesso_param){
+	int totalArquivos = FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos);
+	int arquivoAtual;
+	DESCRITOR_ARQUIVO* arquivo;
+	for(arquivoAtual=0; arquivoAtual<totalArquivos; arquivoAtual++){
+		arquivo = * (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoAtual);
+		if(descritorArquivo_getProcessoQueAbriu(arquivo) != NULL
+			&& descritorProcesso_getPID(descritorArquivo_getProcessoQueAbriu(arquivo)) == descritorProcesso_getPID(descritorProcesso_param)){
+			descritorArquivo_fechar(arquivo);
+		}
+	}
+}
 
+/**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param			O sistema de arquivos em que a operação será realizada.
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param		O processo cuja possa do arquivo será testada.
+* @param int				numeroDescritorArquivo_param	O arquivo de cuja posse será testada.
+* @return int	Indica se o arquivo está aberto para o processo.
+* ATENÇÃO: retornará false (0) se o arquivo não existir.
+*/
+int sistemaArquivos_arquivoEstahAbertoPara(SISTEMA_ARQUIVOS *sistemaArquivos_param, DESCRITOR_PROCESSO *descritorProcesso_param,
+		int numeroDescritorArquivo_param){
+	
+	DESCRITOR_ARQUIVO *arquivo = privada_buscaPorNumeroDescritor(sistemaArquivos_param, numeroDescritorArquivo_param);
+	int estahAbertoParaProcessoDado = 0;
 
+	if(arquivo != NULL
+		&& descritorArquivo_getProcessoQueAbriu(arquivo) != NULL
+		&& descritorProcesso_getPID(descritorArquivo_getProcessoQueAbriu(arquivo)) == descritorProcesso_getPID(descritorProcesso_param)){
+		estahAbertoParaProcessoDado = 1;
+	}
+
+	return estahAbertoParaProcessoDado;
+}
 
 
 

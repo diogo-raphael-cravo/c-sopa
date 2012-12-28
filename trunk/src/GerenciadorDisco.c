@@ -38,7 +38,7 @@ void gerenciadorDisco_agendar(GERENCIADOR_DISCO *gerenciador_param, OPERACAO_DIS
 	if(!disco_estahOcupado(gerenciador_param->discoGerenciado)){
 		gerenciadorDisco_executarProxima(gerenciador_param);
 	}
-tela_escreverNaColuna(&global_tela, "agendado", 5);
+	tela_escreverNaColuna(&global_tela, "Acesso a disco agendado.", 3);
 }
 
 /**
@@ -116,16 +116,20 @@ OPERACAO_KERNEL* gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(DESCRITOR_P
 }
 
 /**
+* @param DESCRITOR_PROCESSO**	descritorProcesso_param		O processo que será criado.
+* @param TIPO_OPERACAO_DISCO	tipoOperacao_param			O tipo da operação que o processo requisitou.
 * @return OPERACAO_KERNEL*	A operação criada.
 */
-OPERACAO_KERNEL* gerenciadorDisco_criarOperacaoKernelFeitaPorProcesso(){
+OPERACAO_KERNEL* gerenciadorDisco_criarOperacaoKernelFeitaPorProcesso(DESCRITOR_PROCESSO** descritorProcesso_param, 
+		TIPO_OPERACAO_DISCO tipoOperacao_param){
 	OPERACAO_KERNEL* operacaoNova = (OPERACAO_KERNEL*) malloc(sizeof(OPERACAO_KERNEL));
 	OPERACAO_FEITA_POR_PROCESSO_KERNEL* operacaoGuardadaNova = (OPERACAO_FEITA_POR_PROCESSO_KERNEL*) malloc(sizeof(OPERACAO_FEITA_POR_PROCESSO_KERNEL));
 
+	operacaoGuardadaNova->processoQuePediu = descritorProcesso_param;
+	operacaoGuardadaNova->tipoOperacaoFeita = tipoOperacao_param;
+
 	operacaoNova->operacao = operacaoGuardadaNova;
 	operacaoNova->tipoOperacao = TIPO_OPERACAO_AGENDAVEL_FEITA_POR_PROCESSO_KERNEL;
-
-
 
 	return operacaoNova;
 }

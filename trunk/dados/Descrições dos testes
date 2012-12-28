@@ -184,11 +184,31 @@ Dependências:						 16
 Nome do Arquivo:					 OPEN
 Resultado Esperado:					 *Programa termina sem falhas
 									 *Abre um arquivo chamado ABCDEFGHI para leitura
-Última revisão em que esteve OK:	 60
+Última revisão em que esteve OK:	 67
 Dependências:						 17
 =====================================================
 
+=====================================================
+20)									 Close File Interruption
+Nome do Arquivo:					 CLOSE
+Resultado Esperado:					 *Programa termina sem falhas
+									 *Abre um arquivo chamado ABCDEFGHI para leitura
+									 *Fecha o arquivo aberto
+									 *Abre novamente um arquivo chamado ABCDEFGHI para leitura, que desta vez não é criado.
+Última revisão em que esteve OK:	 67
+Dependências:						 19
+=====================================================
 
+=====================================================
+20)									 Get from File Interruption
+Nome do Arquivo:					 GET
+Resultado Esperado:					 *Programa termina sem falhas
+									 *Abre um arquivo chamado GET para leitura
+									 *Fecha o arquivo aberto
+									 *Termina com o valor 20 20 20 20 = 336860180 no registrador r10.
+Última revisão em que esteve OK:	 67
+Dependências:						 7, 20
+=====================================================
 
 
 

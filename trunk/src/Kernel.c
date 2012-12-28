@@ -105,7 +105,7 @@ void privada_escalonar(KERNEL *kernel_param){
 		}
 		privada_rodarProcesso(kernel_param, (DESCRITOR_PROCESSO**) FIFO_remover(&kernel_param->filaProcessosProntos));
 	} else {
-		tela_escreverNaColuna(&global_tela, "Nao ha processo elegivel para ser executado. Vou continuar executando o que estava.", 3);
+		tela_escreverNaColuna(&global_tela, "Nao ha processo elegivel para ser executado. Vou executar o dummy.", 3);
 	}
 }
 
@@ -158,6 +158,7 @@ int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param,
 * @param KERNEL	*kernel_param 	O kernel cujo processo será morto.
 */
 void privada_matarProcessoRodando(KERNEL *kernel_param){
+	sistemaArquivos_fecharArquivosAbertosPara(&kernel_param->sistemaDeArquivos, *kernel_param->processoRodando);
 	mapaAlocacoesMemoria_liberar(&kernel_param->mapaMemoriaAlocada, descritorProcesso_getEnderecoInicio(*kernel_param->processoRodando));
 	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
 }
@@ -368,36 +369,68 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 
 /**
 * Abre um arquivo para o processo que está rodando.
-* @param KERNEL						*kernel_param	O kernel que abrirá o arquivo.
-* @param char*						nome_param		O nome do arquivo.
-* @param OPCAO_ABERTURA_ARQUIVO		opcao_param		O que será feito com o arquivo.
+* @param KERNEL						*kernel_param		O kernel que abrirá o arquivo.
+* @param char*						nome_param			O nome do arquivo.
+* @param OPCAO_ABERTURA_ARQUIVO		opcao_param			O que será feito com o arquivo.
+* @param DESCRITOR_PROCESSO			*processo_param		O processo que terá posse do arquivo aberto.
 * @return int	Número descritor do arquivo (usado por processos do SOPA para operar sobre o arquivo).
 *				Caso não tenha sido possível abrir, retornará NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE.
 */
-int privada_abrirArquivo(KERNEL *kernel_param, char* nome_param, OPCAO_ABERTURA_ARQUIVO opcao_param){
+int privada_abrirArquivo(KERNEL *kernel_param, char* nome_param, OPCAO_ABERTURA_ARQUIVO opcao_param, DESCRITOR_PROCESSO *processo_param){
 	char mensagem[200];
 	sprintf(mensagem, "Abrindo arquivo %s.", nome_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
 
-	int temPermissao=1;
 	int descritorArquivoCriado = NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE;
 	int criandoArquivoNovo = (sistemaArquivos_buscaPorNome(&kernel_param->sistemaDeArquivos, nome_param) == NULL);
 
 	if(criandoArquivoNovo){
-		temPermissao=1;
 		descritorArquivoCriado = sistemaArquivos_criarArquivo(&kernel_param->sistemaDeArquivos, nome_param, &global_disco);
+		if(descritorArquivoCriado == NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE){
+			sprintf(mensagem, "Nao encontrei espaco para %s.", nome_param);
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+		} else {
+			sistemaArquivos_abrirArquivoExistentePara(&kernel_param->sistemaDeArquivos, nome_param, processo_param);
+		}
 	} else {
-/*
-TODO autenticação
-*/
-		temPermissao=0;
-	}
-
-	if(temPermissao){
-		
+		descritorArquivoCriado = sistemaArquivos_abrirArquivoExistentePara(&kernel_param->sistemaDeArquivos, nome_param, processo_param);
 	}
 
 	return descritorArquivoCriado;
+}
+
+/**
+* Agenda a leitura da próxima palavra do arquivo.
+* @param KERNEL						*kernel_param					O kernel que executará a operação.
+* @param int						numeroDescritorArquivo_param	O arquivo de cuja posse será testada.
+* @return ERRO_KERNEL	Um erro que descreve se a operação foi realizada ou o erro que aconteceu.
+*/
+ERRO_KERNEL privada_agendarGetPalavraDeArquivoParaProcessoRodando(KERNEL *kernel_param, int numeroDescritorArquivo_param){
+	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
+
+	if(sistemaArquivos_arquivoEstahAbertoPara(&kernel_param->sistemaDeArquivos, 
+			*kernel_param->processoRodando, numeroDescritorArquivo_param)){
+		DESCRITOR_ARQUIVO *arquivoLido = sistemaArquivos_buscaPorNumeroDescritor(&kernel_param->sistemaDeArquivos, 
+			numeroDescritorArquivo_param);
+		int enderecoLogicoLeitura = descritorArquivo_getPalavraAtual(arquivoLido);
+		if(enderecoLogicoLeitura != DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE){
+			int enderecoFisicoLeitura = descritorArquivo_getEnderecoDiscoPosicao(arquivoLido, enderecoLogicoLeitura);
+			descritorArquivo_setPalavraAtual(arquivoLido, descritorArquivo_getPalavraAtual(arquivoLido)+1);
+
+			OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoLeitura(enderecoFisicoLeitura);
+			OPERACAO_KERNEL* operacaoKernel;
+			operacaoKernel = gerenciadorDisco_criarOperacaoKernelFeitaPorProcesso(
+				kernel_param->processoRodando, TIPO_OPERACAO_LEITURA_DISCO);
+
+			gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
+		} else {
+			erro = KERNEL_ERRO_FIM_DO_ARQUIVO;
+		}
+	} else {
+		erro = KERNEL_ERRO_PROCESSO_NAO_TEM_ARQUIVO;
+	}
+
+	return erro;
 }
 
 //---------------------------------------------------------------------
@@ -435,7 +468,8 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	char* mensagemOperador;
 	char** nomeArquivo;
 	OPERACAO_KERNEL* operacaoKernel;
-	int numeroDescritorArquivoCriado;
+	int numeroDescritorArquivo;
+	int erro;
 
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
@@ -448,9 +482,6 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			sprintf(mensagem,  "Imprimindo contexto do DESCRITOR DO PROCESSO imediatamente anterior 'a falha.");
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			contexto_imprimirRegistradores(descritorProcesso_getContexto(*kernel_param->processoRodando), 3);
-			sprintf(mensagem,  "Imprimindo contexto do PROCESSADOR imediatamente anterior 'a falha.");
-			tela_escreverNaColuna(&global_tela, mensagem, 3);
-			processador_imprimir(&global_processador, 3);
 
 			privada_matarProcessoRodando(kernel_param);
 			privada_escalonar(kernel_param);
@@ -477,12 +508,17 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			operacaoKernel = gerenciadorDisco_proximaOperacaoKernel(&kernel_param->gerenciadorAcessoDisco);
 			gerenciadorDisco_executarProxima(&kernel_param->gerenciadorAcessoDisco);
 			if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_CRIACAO_PROCESSO_KERNEL){
-
 				OPERACAO_CRIACAO_PROCESSO_KERNEL* operacaoExecutada = (OPERACAO_CRIACAO_PROCESSO_KERNEL*) operacaoKernel->operacao;
 				FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoCriado);
 				kernel_param->quantidadeProcessos++;
 			} else if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_FEITA_POR_PROCESSO_KERNEL){
-				//FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueados));
+				OPERACAO_FEITA_POR_PROCESSO_KERNEL* operacaoExecutada = (OPERACAO_FEITA_POR_PROCESSO_KERNEL*) operacaoKernel->operacao;
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*operacaoExecutada->processoQuePediu), 
+					disco_palavrasUltimaLeituraPosicao(&global_disco, 0), 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*operacaoExecutada->processoQuePediu), 0, 1);
+				FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoQuePediu);
+sprintf(mensagem, "Li '%d' do disco.", disco_palavrasUltimaLeituraPosicao(&global_disco, 0));
+tela_escreverNaColuna(&global_tela, mensagem, 5);
 			}
 
 			free(operacaoKernel->operacao);
@@ -494,9 +530,6 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			sprintf(mensagem,  "Imprimindo contexto do DESCRITOR DO PROCESSO imediatamente anterior 'a falha.");
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			contexto_imprimirRegistradores(descritorProcesso_getContexto(*kernel_param->processoRodando), 3);
-			sprintf(mensagem,  "Imprimindo contexto do PROCESSADOR imediatamente anterior 'a falha.");
-			tela_escreverNaColuna(&global_tela, mensagem, 3);
-			processador_imprimir(&global_processador, 3);
 
 			privada_matarProcessoRodando(kernel_param);
 			privada_escalonar(kernel_param);
@@ -504,12 +537,9 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 		case INTERRUPCAO_SOFTWARE_EXIT:
 			sprintf(mensagem, "O processo %d foi morto voluntariamente.", descritorProcesso_getPID(*kernel_param->processoRodando));
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
-			sprintf(mensagem,  "Imprimindo contexto do DESCRITOR DO PROCESSO imediatamente anterior 'a falha.");
+			sprintf(mensagem,  "Imprimindo contexto do DESCRITOR DO PROCESSO.");
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			contexto_imprimirRegistradores(descritorProcesso_getContexto(*kernel_param->processoRodando), 3);
-			sprintf(mensagem,  "Imprimindo contexto do PROCESSADOR imediatamente anterior 'a falha.");
-			tela_escreverNaColuna(&global_tela, mensagem, 3);
-			processador_imprimir(&global_processador, 3);
 
 			privada_matarProcessoRodando(kernel_param);
 			privada_escalonar(kernel_param);
@@ -519,41 +549,49 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			break;
 		case INTERRUPCAO_SOFTWARE_OPEN:
-			sprintf(mensagem, "A interrupcao OPEN nao estah implementada por completo.");
-			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			nomeArquivo = (char**) malloc(sizeof(char*));
 			*nomeArquivo = contexto_lerStringDosRegistradores(processador_getContexto(&global_processador), 2, 10);
-			numeroDescritorArquivoCriado = 
+			numeroDescritorArquivo = 
 				privada_abrirArquivo(kernel_param, *nomeArquivo,
-					registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 0)));
-			if(numeroDescritorArquivoCriado == NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE){
+					registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 0)),
+					*kernel_param->processoRodando);
+			if(numeroDescritorArquivo == NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE){
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
 			} else {
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 
-					numeroDescritorArquivoCriado, 0);
+					numeroDescritorArquivo, 0);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 0, 1);
 			}
 			free(*nomeArquivo);
 			free(nomeArquivo);
 			break;
 		case INTERRUPCAO_SOFTWARE_CLOSE:
-			sprintf(mensagem, "A interrupcao CLOSE nao estah implementada.");
+			numeroDescritorArquivo = 
+				registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 0));
+			sprintf(mensagem, "Fechando arquivo %d.", numeroDescritorArquivo);
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			sistemaArquivos_fecharArquivo(&kernel_param->sistemaDeArquivos, numeroDescritorArquivo);
 			break;
 		case INTERRUPCAO_SOFTWARE_GET:
-
-//			privada_requisitaOperacaoDisco(kernel_param, OPERACAO_LEITURA_DISCO);
-/*
-		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoCargaDMA(enderecoMemoria, 
-				arquivoTransferido->enderecoInicioDisco, 
-				arquivo_getTamanhoEmPalavras(arquivoTransferido));
-		OPERACAO_KERNEL* operacaoKernel = gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(*novoProcesso);
-
-		gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
-
-*/
-			sprintf(mensagem, "A interrupcao GET nao estah implementada.");
-			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			erro = privada_agendarGetPalavraDeArquivoParaProcessoRodando(kernel_param, 
+				registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 0)));
+			if(erro == KERNEL_ERRO_NENHUM){
+				kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
+				privada_escalonar(kernel_param);
+				tela_escreverNaColuna(&global_tela, "GET: leitura agendada.", 3);
+			} else if(erro == KERNEL_ERRO_PROCESSO_NAO_TEM_ARQUIVO){
+				tela_escreverNaColuna(&global_tela, "GET: arquivo nao estah aberto para o processo.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			} else if(erro == KERNEL_ERRO_FIM_DO_ARQUIVO){
+				tela_escreverNaColuna(&global_tela, "GET: fim do arquivo!", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 0, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			} else {
+				tela_escreverNaColuna(&global_tela, "GET: erro desconhecido.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 2, 0);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
+			}
 			break;
 		case INTERRUPCAO_SOFTWARE_PUT:
 			sprintf(mensagem, "A interrupcao PUT nao estah implementada.");

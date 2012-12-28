@@ -7,12 +7,15 @@
 
 //Constantes
 #define MAXIMO_SEGMENTOS_DESCRITOR_ARQUIVO 20
+#define DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE -1
+#define DESCRITOR_ARQUIVO_SEGMENTO_INEXISTENTE NULL
 
 struct str_descritorArquivo{
 	FIFO segmentos; //Os segmentos deste arquivo. A ordem da fila é a ordem para reconstrução do arquivo.
 	int palavraAtual; //Palavra sendo lida/escrita pelo usuário.
 	char* nome; //Nome que será associado ao descritor, visível ao usuário.
 	int numeroDescritor; //Número usado por processos do SOPA para ler e escrever.
+	DESCRITOR_PROCESSO *processoQueAbriu; //Ponteiro para o processo que abriu este arquivo.
 };
 
 typedef struct str_descritorArquivo DESCRITOR_ARQUIVO;
@@ -39,6 +42,12 @@ void descritorArquivo_adicionarSegmento(DESCRITOR_ARQUIVO *descritor_param, ARQU
 * @return int	O número de segmentos do arquivo.
 */
 int descritorArquivo_getQuantidadeSegmentos(DESCRITOR_ARQUIVO *descritor_param);
+
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
+* @return int	Número usado por processos do SOPA para ler e escrever.
+*/
+int descritorArquivo_getNumeroDescritor(DESCRITOR_ARQUIVO *descritor_param);
 
 /**
 * @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
@@ -77,6 +86,45 @@ char* descritorArquivo_getNome(DESCRITOR_ARQUIVO *descritor_param);
 * @return int	Indica se o arquivo está fragmentado no disco.
 */
 int descritorArquivo_estahFragmentado(DESCRITOR_ARQUIVO *descritor_param);
+
+/**
+* @param DESCRITOR_ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
+* @return DESCRITOR_PROCESSO*	O processo que abriu este arquivo. Caso o arquivo não tenha sido aberto, retornará NULL.
+*/
+DESCRITOR_PROCESSO* descritorArquivo_getProcessoQueAbriu(DESCRITOR_ARQUIVO *arquivo_param);
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo cuja informação será retornada.
+* @param DESCRITOR_PROCESSO		*processo_param		O processo que abrirá o arquivo.
+* ATENÇÃO: não checa se o arquivo já está aberto!
+*/
+void descritorArquivo_abrirParaProcesso(DESCRITOR_ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param);
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo que será fechado.
+*/
+void descritorArquivo_fechar(DESCRITOR_ARQUIVO *arquivo_param);
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo que será consultado.
+* @return int	Palavra sendo lida/escrita pelo usuário. Se ultrapassar o limite, retonará DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE.
+*/
+int descritorArquivo_getPalavraAtual(DESCRITOR_ARQUIVO *arquivo_param);
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo que será consultado.
+* @param int					palavraAtual_param	Palavra sendo lida/escrita pelo usuário.
+*/
+void descritorArquivo_setPalavraAtual(DESCRITOR_ARQUIVO *arquivo_param, int palavraAtual_param);
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param			O arquivo que será consultado.
+* @param int					enderecoLogico_param	Ponteiro lógico para alguma palavra do arquivo.
+* @param int	Endereço da palavra no disco. Caso não haja, retornará DISCO_ENDERECO_INEXISTENTE.
+*/
+int descritorArquivo_getEnderecoDiscoPosicao(DESCRITOR_ARQUIVO *arquivo_param, int enderecoLogico_param);
+
+
 
 
 

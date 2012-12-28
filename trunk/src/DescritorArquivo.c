@@ -19,6 +19,58 @@ void privada_setNome(DESCRITOR_ARQUIVO *descritor_param, char* nome_param){
 	strcpy(descritor_param->nome, nome_param);
 }
 
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param			O arquivo que será consultado.
+* @param ARQUIVO				*segmento_param			O segmento cujo endereço lógico será consultado.
+* @return int	Endereço lógico do segmento no arquivo. Se o segmento não existir, retornará DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE.
+*/
+int privada_getEnderecoLogicoArquivo(DESCRITOR_ARQUIVO *arquivo_param, ARQUIVO *segmento_param){
+	int enderecoLogicoDoSegmento = 0;
+
+	ARQUIVO *segmentoAtual;
+	int arquivoAtual=0;
+	int encontrouArquivo=0;
+
+	while(!encontrouArquivo && arquivoAtual < FIFO_quantidadeElementos(&arquivo_param->segmentos)){
+		segmentoAtual = (ARQUIVO*) FIFO_espiarPosicao(&arquivo_param->segmentos, arquivoAtual);
+		encontrouArquivo = (arquivo_getEnderecoInicial(segmentoAtual) == arquivo_getEnderecoInicial(segmento_param));
+		if(!encontrouArquivo){
+			enderecoLogicoDoSegmento += arquivo_getTamanhoEmPalavras(segmentoAtual);
+		}
+		arquivoAtual++;
+	}
+
+	if(!encontrouArquivo){
+		enderecoLogicoDoSegmento = DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE;
+	}
+
+	return enderecoLogicoDoSegmento;
+}
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param			O arquivo que será consultado.
+* @param int					enderecoLogico_param	Ponteiro lógico para alguma palavra do arquivo.
+* @return ARQUIVO*	O segmento que contém a posição lógica do arquivo. Se não houver, retornará DESCRITOR_ARQUIVO_SEGMENTO_INEXISTENTE.
+*/
+ARQUIVO* privada_getSegmentoComEnderecoLogico(DESCRITOR_ARQUIVO *arquivo_param, int enderecoLogico_param){
+	ARQUIVO *segmentoAtual;
+	ARQUIVO *segmentoComEndereco = DESCRITOR_ARQUIVO_SEGMENTO_INEXISTENTE;
+	int arquivoAtual=0;
+	int enderecoLogicoAtual=0;
+
+	while(segmentoComEndereco == DESCRITOR_ARQUIVO_SEGMENTO_INEXISTENTE
+				&& arquivoAtual < FIFO_quantidadeElementos(&arquivo_param->segmentos)){
+		segmentoAtual = (ARQUIVO*) FIFO_espiarPosicao(&arquivo_param->segmentos, arquivoAtual);
+		enderecoLogicoAtual += arquivo_getTamanhoEmPalavras(segmentoAtual);
+		if(enderecoLogico_param < enderecoLogicoAtual){
+			segmentoComEndereco = segmentoAtual;
+		}
+		arquivoAtual++;
+	}
+
+	return segmentoComEndereco;
+}
+
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
@@ -31,6 +83,7 @@ void descritorArquivo_inicializar(DESCRITOR_ARQUIVO *descritor_param, char* nome
 	FIFO_inicializar(&descritor_param->segmentos, MAXIMO_SEGMENTOS_DESCRITOR_ARQUIVO);
 	descritor_param->palavraAtual = 0;
 	descritor_param->numeroDescritor = numeroDescritor_param;
+	descritor_param->processoQueAbriu = NULL;
 	privada_setNome(descritor_param, nome_param);
 }
 
@@ -61,6 +114,14 @@ int descritorArquivo_getQuantidadeSegmentos(DESCRITOR_ARQUIVO *descritor_param){
 */
 ARQUIVO* descritorArquivo_getSegmento(DESCRITOR_ARQUIVO *descritor_param, int segmento_param){
 	return FIFO_espiarPosicao(&descritor_param->segmentos, segmento_param);
+}
+
+/**
+* @param DESCRITOR_ARQUIVO	*descritor_param	O arquivo lógico cuja informação será retornada.
+* @return int	Número usado por processos do SOPA para ler e escrever.
+*/
+int descritorArquivo_getNumeroDescritor(DESCRITOR_ARQUIVO *descritor_param){
+	return descritor_param->numeroDescritor;
 }
 
 /**
@@ -141,4 +202,76 @@ int descritorArquivo_estahFragmentado(DESCRITOR_ARQUIVO *descritor_param){
 	}
 	return estahFragmentado;
 }
+
+/**
+* @param DESCRITOR_ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
+* @return DESCRITOR_PROCESSO*	O processo que abriu este arquivo. Caso o arquivo não tenha sido aberto, retornará NULL.
+*/
+DESCRITOR_PROCESSO* descritorArquivo_getProcessoQueAbriu(DESCRITOR_ARQUIVO *arquivo_param){
+	return arquivo_param->processoQueAbriu;
+}
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo cuja informação será retornada.
+* @param DESCRITOR_PROCESSO		*processo_param		O processo que abrirá o arquivo.
+* ATENÇÃO: não checa se o arquivo já está aberto!
+*/
+void descritorArquivo_abrirParaProcesso(DESCRITOR_ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param){
+	arquivo_param->palavraAtual = 0;
+	arquivo_param->processoQueAbriu = processo_param;
+}
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo que será fechado.
+*/
+void descritorArquivo_fechar(DESCRITOR_ARQUIVO *arquivo_param){
+	char mensagem[200];
+	sprintf(mensagem, "Fechando arquivo %s.", arquivo_param->nome);
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+	arquivo_param->processoQueAbriu = NULL;
+}
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo que será consultado.
+* @return int	Palavra sendo lida/escrita pelo usuário. Se ultrapassar o limite, retonará DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE.
+*/
+int descritorArquivo_getPalavraAtual(DESCRITOR_ARQUIVO *arquivo_param){
+	int ehPossivelLerEscrever = (arquivo_param->palavraAtual < descritorArquivo_tamanhoEmPalavras(arquivo_param));
+	if(ehPossivelLerEscrever){
+		return arquivo_param->palavraAtual;
+	} else {
+		return DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE;
+	}
+}
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param		O arquivo que será consultado.
+* @param int					palavraAtual_param	Palavra sendo lida/escrita pelo usuário.
+*/
+void descritorArquivo_setPalavraAtual(DESCRITOR_ARQUIVO *arquivo_param, int palavraAtual_param){
+	arquivo_param->palavraAtual = palavraAtual_param;
+}
+
+/**
+* @param DESCRITOR_ARQUIVO		*arquivo_param			O arquivo que será consultado.
+* @param int					enderecoLogico_param	Ponteiro lógico para alguma palavra do arquivo.
+* @param int	Endereço da palavra no disco. Caso não haja, retornará DISCO_ENDERECO_INEXISTENTE.
+*/
+int descritorArquivo_getEnderecoDiscoPosicao(DESCRITOR_ARQUIVO *arquivo_param, int enderecoLogico_param){
+	int enderecoDisco = DISCO_ENDERECO_INEXISTENTE;
+	ARQUIVO *segmentoComEndereco = privada_getSegmentoComEnderecoLogico(arquivo_param, enderecoLogico_param);
+	if(segmentoComEndereco != DESCRITOR_ARQUIVO_SEGMENTO_INEXISTENTE){
+		enderecoDisco = enderecoLogico_param - privada_getEnderecoLogicoArquivo(arquivo_param, segmentoComEndereco);
+		enderecoDisco += arquivo_getEnderecoInicial(segmentoComEndereco);
+	}
+	return enderecoDisco;
+}
+
+
+
+
+
+
+
+
 

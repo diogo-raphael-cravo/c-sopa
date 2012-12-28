@@ -33,8 +33,6 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 	int conseguiuLer = 0;
 	char mensagem[200];
 
-	arquivo_param->processoQueAbriu = NULL;
-
 	int posicaoPalavra = 0;
 	int palavra[TAMANHO_INSTRUCAO_PALAVRAS];
 	int posicaoEscrita=0;
@@ -134,31 +132,6 @@ void arquivo_atualizarNaMaquinaHospedeira(ARQUIVO *arquivo_param, char* caminho_
 */
 int arquivo_getTamanhoEmPalavras(ARQUIVO *arquivo_param){
 	return arquivo_param->tamanhoEmPalavras;
-}
-
-/**
-* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
-* @return int	Indica se o arquivo pode ser aberto.
-*/
-int arquivo_podeSerAberto(ARQUIVO *arquivo_param){
-	return (arquivo_param->processoQueAbriu == NULL);
-}
-
-/**
-* @param ARQUIVO	*arquivo_param	O arquivo cuja informação será retornada.
-* @return DESCRITOR_PROCESSO*	O processo que abriu este arquivo. Caso o arquivo não tenha sido aberto, retornará NULL.
-*/
-DESCRITOR_PROCESSO* arquivo_getProcessoQueAbriu(ARQUIVO *arquivo_param){
-	return arquivo_param->processoQueAbriu;
-}
-
-/**
-* @param ARQUIVO				*arquivo_param		O arquivo cuja informação será retornada.
-* @param DESCRITOR_PROCESSO		*processo_param		O processo que abrirá o arquivo.
-* ATENÇÃO: não checa se o arquivo já está aberto!
-*/
-void arquivo_abrirParaProcesso(ARQUIVO *arquivo_param, DESCRITOR_PROCESSO *processo_param){
-	arquivo_param->processoQueAbriu = processo_param;
 }
 
 /**
