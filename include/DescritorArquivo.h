@@ -138,3 +138,6 @@ int descritorArquivo_abertoComOpcao(DESCRITOR_ARQUIVO *arquivo_param, OPCAO_ABER
 
 
 
+
+
+

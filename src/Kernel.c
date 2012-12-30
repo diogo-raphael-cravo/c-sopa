@@ -430,7 +430,14 @@ ERRO_KERNEL privada_agendarPutPalavraDeArquivoParaProcessoRodando(KERNEL *kernel
 	if(erro == KERNEL_ERRO_NENHUM){
 		enderecoLogicoEscrita = descritorArquivo_getPalavraAtual(arquivo);
 		if(enderecoLogicoEscrita == DESCRITOR_ARQUIVO_POSICAO_INEXISTENTE){
-			erro = KERNEL_ERRO_FIM_DO_ARQUIVO;
+			int posicaoLivreDisco = sistemaArquivos_getPosicaoLivreDisco(&kernel_param->sistemaDeArquivos, &global_disco);
+			if(posicaoLivreDisco != MEMORIA_ENDERECO_INEXISTENTE){
+				ARQUIVO *segmentoNovo = (ARQUIVO*) malloc(sizeof(ARQUIVO));
+				arquivo_inicializar(segmentoNovo, posicaoLivreDisco);
+				descritorArquivo_adicionarSegmento(arquivo, segmentoNovo);
+			} else {
+				erro = KERNEL_ERRO_MEMORIA_DISCO_INSUFICIENTE;
+			}
 		}
 	}
 
@@ -438,7 +445,7 @@ ERRO_KERNEL privada_agendarPutPalavraDeArquivoParaProcessoRodando(KERNEL *kernel
 		enderecoFisicoEscrita = descritorArquivo_getEnderecoDiscoPosicao(arquivo, enderecoLogicoEscrita);
 		descritorArquivo_setPalavraAtual(arquivo, descritorArquivo_getPalavraAtual(arquivo)+1);
 
-		//privada_escreverEndereco(...) em Disco.c vai dar free.
+		//privada_escreverEndereco(...) em Disco.c vai dar o free(palavraEscrita).
 		PALAVRA* palavraEscrita = (PALAVRA*) malloc(sizeof(PALAVRA)); 
 		*palavraEscrita = palavraEscrita_param;
 
@@ -577,7 +584,6 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 				tela_imprimirTelaAzulDaMorte(&global_tela, "Alguem tentou acessar um endereco invalido do disco!");
 			} else {
 				operacaoKernel = gerenciadorDisco_proximaOperacaoKernel(&kernel_param->gerenciadorAcessoDisco);
-				gerenciadorDisco_executarProxima(&kernel_param->gerenciadorAcessoDisco);
 				if(operacaoKernel->tipoOperacao == TIPO_OPERACAO_AGENDAVEL_CRIACAO_PROCESSO_KERNEL){
 					OPERACAO_CRIACAO_PROCESSO_KERNEL* operacaoExecutada = (OPERACAO_CRIACAO_PROCESSO_KERNEL*) operacaoKernel->operacao;
 					FIFO_inserir(&kernel_param->filaProcessosProntos, operacaoExecutada->processoCriado);
@@ -606,7 +612,7 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 				free(operacaoKernel->operacao);
 				free(operacaoKernel);
 			}
-
+			gerenciadorDisco_executarProxima(&kernel_param->gerenciadorAcessoDisco);
 			break;
 		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
 			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));
@@ -693,9 +699,9 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 				tela_escreverNaColuna(&global_tela, "PUT: arquivo nao estah aberto para o processo.", 3);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 0);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
-			} else if(erro == KERNEL_ERRO_FIM_DO_ARQUIVO){
-				tela_escreverNaColuna(&global_tela, "PUT: fim do arquivo!", 3);
-				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 0, 0);
+			} else if(erro == KERNEL_ERRO_MEMORIA_DISCO_INSUFICIENTE){
+				tela_escreverNaColuna(&global_tela, "PUT: nao ha espaco suficiente no disco!", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 2, 0);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(*kernel_param->processoRodando), 1, 1);
 			} else if(erro == KERNEL_ERRO_ARQUIVO_ABERTO_COM_OUTRO_FIM){
 				tela_escreverNaColuna(&global_tela, "PUT: o arquivo nao foi aberto para escrita.", 3);

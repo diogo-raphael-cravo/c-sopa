@@ -10,69 +10,6 @@
 //			FUNÇÕES PRIVADAS DESTE ARQUIVO						
 //---------------------------------------------------------------------
 
-/**
-* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que realizará a busca.
-* @param DISCO				*disco_param			O disco em que a busca é feita.
-* @return int	Posição do disco que está livre para receber um arquivo novo (com tamanho TAMANHO_ARQUIVO_RECEM_CRIADO). 
-* 				Retornará MEMORIA_ENDERECO_INEXISTENTE, caso não haja posição livre.
-*/
-int privada_getPosicaoLivreDisco(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO *disco_param){
-	int posicaoLivre = MEMORIA_ENDERECO_INEXISTENTE;
-	int numeroArquivos = FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos);
-
-	int POSICAO=0;
-	int TAMANHO=1;
-	int segmentos[numeroArquivos*MAXIMO_SEGMENTOS_DESCRITOR_ARQUIVO][2];
-
-	int arquivoAtual=0;
-	int segmentoAtual;
-	int quantidadeSegmentos;
-	int indicePreenchido=0;
-
-	DESCRITOR_ARQUIVO* arquivo;
-	for(; arquivoAtual<numeroArquivos; arquivoAtual++){
-		arquivo = * (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoAtual);
-		quantidadeSegmentos = descritorArquivo_getQuantidadeSegmentos(arquivo);
-		for(segmentoAtual=0; segmentoAtual<quantidadeSegmentos; segmentoAtual++){
-			segmentos[indicePreenchido][POSICAO] = arquivo_getEnderecoInicial(descritorArquivo_getSegmento(arquivo, segmentoAtual));
-			segmentos[indicePreenchido][TAMANHO] = arquivo_getTamanhoEmPalavras(descritorArquivo_getSegmento(arquivo, segmentoAtual));
-			indicePreenchido++;
-		}
-	}
-
-	//Bubblesort
-	int totalIndicesPreenchidos = indicePreenchido;
-	int indiceOrdenado=0;
-	int indiceAtual;
-	int segmentoAuxiliar[2];
-	for(; indiceOrdenado<totalIndicesPreenchidos; indiceOrdenado++){ 
-		for(indiceAtual=0; indiceAtual<totalIndicesPreenchidos-1; indiceAtual++){
-			if(segmentos[indiceAtual+1][POSICAO] < segmentos[indiceAtual][POSICAO]){
-				segmentoAuxiliar[POSICAO] = segmentos[indiceAtual][POSICAO];
-				segmentoAuxiliar[TAMANHO] = segmentos[indiceAtual][TAMANHO];
-				segmentos[indiceAtual][POSICAO] = segmentos[indiceAtual+1][POSICAO];
-				segmentos[indiceAtual][TAMANHO] = segmentos[indiceAtual+1][TAMANHO];
-				segmentos[indiceAtual+1][POSICAO] = segmentoAuxiliar[POSICAO];
-				segmentos[indiceAtual+1][TAMANHO] = segmentoAuxiliar[TAMANHO];
-			}
-		}
-	}
-
-	//Procura pelo primeiro intervalo em que caiba.
-	int intervalo=0;
-	int tamanhoIntervalo=0;
-	int encontrou=0;
-	while(intervalo<totalIndicesPreenchidos-1 && !encontrou){
-		tamanhoIntervalo = segmentos[intervalo+1][POSICAO] - segmentos[intervalo][POSICAO]+segmentos[intervalo][TAMANHO];
-		if(TAMANHO_ARQUIVO_RECEM_CRIADO <= tamanhoIntervalo){
-			encontrou = 1;
-			posicaoLivre = segmentos[intervalo][POSICAO]+segmentos[intervalo][TAMANHO];
-		}
-		intervalo++;
-	}
-
-	return posicaoLivre;
-}
 
 /**
 * Lê o arquivo de inicialização, criando os arquivos que serão posteriormente preenchidos.
@@ -82,7 +19,7 @@ void privada_lerArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
 	FIFO_inicializar(&sistemaArquivos_param->arquivos, MAXIMO_ARQUIVOS);
 	
 	ARQUIVO *segmentoLido = (ARQUIVO*) malloc(sizeof(ARQUIVO));
-	DESCRITOR_ARQUIVO **arquivo = (DESCRITOR_ARQUIVO**) malloc(sizeof(DESCRITOR_ARQUIVO**));
+	DESCRITOR_ARQUIVO **arquivo;
 	FILE *arquivoSistemaArquivos;
 	int posicaoPalavra;
 	char linha[200];
@@ -230,6 +167,70 @@ void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistem
 }
 
 /**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que realizará a busca.
+* @param DISCO				*disco_param			O disco em que a busca é feita.
+* @return int	Posição do disco que está livre para receber um arquivo novo (com tamanho TAMANHO_ARQUIVO_RECEM_CRIADO). 
+* 				Retornará MEMORIA_ENDERECO_INEXISTENTE, caso não haja posição livre.
+*/
+int sistemaArquivos_getPosicaoLivreDisco(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO *disco_param){
+	int posicaoLivre = MEMORIA_ENDERECO_INEXISTENTE;
+	int numeroArquivos = FIFO_quantidadeElementos(&sistemaArquivos_param->arquivos);
+
+	int POSICAO=0;
+	int TAMANHO=1;
+	int segmentos[numeroArquivos*MAXIMO_SEGMENTOS_DESCRITOR_ARQUIVO][2];
+
+	int arquivoAtual=0;
+	int segmentoAtual;
+	int quantidadeSegmentos;
+	int indicePreenchido=0;
+
+	DESCRITOR_ARQUIVO* arquivo;
+	for(; arquivoAtual<numeroArquivos; arquivoAtual++){
+		arquivo = * (DESCRITOR_ARQUIVO**) FIFO_espiarPosicao(&sistemaArquivos_param->arquivos, arquivoAtual);
+		quantidadeSegmentos = descritorArquivo_getQuantidadeSegmentos(arquivo);
+		for(segmentoAtual=0; segmentoAtual<quantidadeSegmentos; segmentoAtual++){
+			segmentos[indicePreenchido][POSICAO] = arquivo_getEnderecoInicial(descritorArquivo_getSegmento(arquivo, segmentoAtual));
+			segmentos[indicePreenchido][TAMANHO] = arquivo_getTamanhoEmPalavras(descritorArquivo_getSegmento(arquivo, segmentoAtual));
+			indicePreenchido++;
+		}
+	}
+
+	//Bubblesort
+	int totalIndicesPreenchidos = indicePreenchido;
+	int indiceOrdenado=0;
+	int indiceAtual;
+	int segmentoAuxiliar[2];
+	for(; indiceOrdenado<totalIndicesPreenchidos; indiceOrdenado++){ 
+		for(indiceAtual=0; indiceAtual<totalIndicesPreenchidos-1; indiceAtual++){
+			if(segmentos[indiceAtual+1][POSICAO] < segmentos[indiceAtual][POSICAO]){
+				segmentoAuxiliar[POSICAO] = segmentos[indiceAtual][POSICAO];
+				segmentoAuxiliar[TAMANHO] = segmentos[indiceAtual][TAMANHO];
+				segmentos[indiceAtual][POSICAO] = segmentos[indiceAtual+1][POSICAO];
+				segmentos[indiceAtual][TAMANHO] = segmentos[indiceAtual+1][TAMANHO];
+				segmentos[indiceAtual+1][POSICAO] = segmentoAuxiliar[POSICAO];
+				segmentos[indiceAtual+1][TAMANHO] = segmentoAuxiliar[TAMANHO];
+			}
+		}
+	}
+
+	//Procura pelo primeiro intervalo em que caiba.
+	int intervalo=0;
+	int tamanhoIntervalo=0;
+	int encontrou=0;
+	while(intervalo<totalIndicesPreenchidos-1 && !encontrou){
+		tamanhoIntervalo = segmentos[intervalo+1][POSICAO] - segmentos[intervalo][POSICAO]+segmentos[intervalo][TAMANHO];
+		if(TAMANHO_ARQUIVO_RECEM_CRIADO <= tamanhoIntervalo){
+			encontrou = 1;
+			posicaoLivre = segmentos[intervalo][POSICAO]+segmentos[intervalo][TAMANHO];
+		}
+		intervalo++;
+	}
+
+	return posicaoLivre;
+}
+
+/**
 * @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
 * @param char*				nomeProcurado_param		O nome do arquivo que se quer.
 * @return ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja ou esteja fragmentado, retonará NULL.
@@ -314,7 +315,7 @@ void sistemaArquivos_atualizarNaMaquinaHospedeira(SISTEMA_ARQUIVOS *sistemaArqui
 int sistemaArquivos_criarArquivo(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* nome_param, DISCO *disco_param){
 	ARQUIVO *segmento = (ARQUIVO*) malloc(sizeof(ARQUIVO));
 	DESCRITOR_ARQUIVO **arquivo = (DESCRITOR_ARQUIVO**) malloc(sizeof(DESCRITOR_ARQUIVO*));
-	int posicaoLivreDisco = privada_getPosicaoLivreDisco(sistemaArquivos_param, disco_param);
+	int posicaoLivreDisco = sistemaArquivos_getPosicaoLivreDisco(sistemaArquivos_param, disco_param);
 	int descritorArquivoCriado = NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE;
 
 	if(posicaoLivreDisco != MEMORIA_ENDERECO_INEXISTENTE){
@@ -372,6 +373,7 @@ int sistemaArquivos_arquivoEstahAbertoPara(SISTEMA_ARQUIVOS *sistemaArquivos_par
 
 	return estahAbertoParaProcessoDado;
 }
+
 
 
 

@@ -33,6 +33,14 @@ typedef struct str_sistemaArquivos SISTEMA_ARQUIVOS;
 void sistemaArquivos_inicializarComArquivosDoHospedeiro(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO *disco_param);
 
 /**
+* @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos que realizará a busca.
+* @param DISCO				*disco_param			O disco em que a busca é feita.
+* @return int	Posição do disco que está livre para receber um arquivo novo (com tamanho TAMANHO_ARQUIVO_RECEM_CRIADO). 
+* 				Retornará MEMORIA_ENDERECO_INEXISTENTE, caso não haja posição livre.
+*/
+int sistemaArquivos_getPosicaoLivreDisco(SISTEMA_ARQUIVOS *sistemaArquivos_param, DISCO *disco_param);
+
+/**
 * @param SISTEMA_ARQUIVOS	*sistemaArquivos_param	O sistema de arquivos em que a operação será realizada.
 * @param char*				nomeProcurado_param		O nome do arquivo que se quer.
 * @return ARQUIVO*	O arquivo que tem o nome procurado. Caso não haja ou esteja fragmentado, retonará NULL.
