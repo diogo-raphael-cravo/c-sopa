@@ -225,6 +225,20 @@ Resultado Esperado:					 *Programa termina sem falhas
 Dependências:						 14, 21
 =====================================================
 
+=====================================================
+23)									 Arquivo com múltiplos segmentos
+Nome do Arquivo:					 multiplosSegmentos
+Resultado Esperado:					 *Programa termina sem falhas
+									 *Abre um arquivo chamado 'paerwqrd' para escrita
+									 *Grava 33 palavas (os números de 1 a 33) no arquivo, o que forçará a criação de um novo segmento.
+									 *Fecha o arquivo 'paerwqrd'.
+									 *Abre o arquivo 'paerwqrd' para leitura.
+									 *Lê o arquivo até o fim, exibindo os números de 1 a 33.
+									 *Fecha o arquivo 'paerwqrd'.
+Última revisão em que esteve OK:	 71
+Dependências:						 15, 21, 22
+									 TAMANHO_ARQUIVO_RECEM_CRIADO em SistemaArquivos.h deve ser 32
+=====================================================
 
 
 
