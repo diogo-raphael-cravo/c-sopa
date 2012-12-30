@@ -75,7 +75,7 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 
 			posicaoEscrita++;
 		}
-		
+		fclose(arquivoLido);
 		arquivo_param->tamanhoEmPalavras = posicaoEscrita;
 		arquivo_param->discoSalvo = disco_param;
 	} else {
