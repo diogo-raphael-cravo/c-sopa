@@ -240,8 +240,27 @@ Dependências:						 15, 21, 22
 									 TAMANHO_ARQUIVO_RECEM_CRIADO em SistemaArquivos.h deve ser 32
 =====================================================
 
+=====================================================
+24)									 Push Register into Stack
+Nome do Arquivo:					 PUS
+Resultado Esperado:					 *Programa insere 10 valores na stack
+									 *Programa termina com estouro de pilha
+Última revisão em que esteve OK:	 74
+Dependências:						 -
+									 O tamanho da stack do processo deve ser 10
+=====================================================
 
-
+=====================================================
+25)									 Pop Register from Stack
+Nome do Arquivo:					 POP
+Resultado Esperado:					 *Programa insere 10 valores na stack (em ordem, de 1 a 10).
+									 *Programa coloca os 10 valores da stack nos 10 registradores de 1 a 10.
+									 *Programa tenta ler 11ª posição da stack.
+									 *Programa termina com estouro de pilha
+Última revisão em que esteve OK:	 74
+Dependências:						 3, 24
+									 O tamanho da stack do processo deve ser 10
+=====================================================
 
 
 

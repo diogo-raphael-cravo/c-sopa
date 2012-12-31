@@ -10,6 +10,18 @@
 //			FUNÇÕES PRIVADAS DESTE ARQUIVO						
 //---------------------------------------------------------------------
 /**
+* @param PROCESSADOR	*processador_param			O processador que irá ler.
+* @return int	O tamanho da stack do processo rodando no processador, isto é, a posição "que está em PC=-1", por assim dizer.
+*/
+int privada_getTamanhoStackProcessoRodando(PROCESSADOR *processador_param){
+	PALAVRA tamanhoStack;
+	int base;
+	MMU_sincronizado_getBase(&global_MMU, &base);
+	MMU_sincronizado_lerFisico(&global_MMU, base-1, &tamanhoStack);
+	return tamanhoStack;
+}
+
+/**
 * Busca uma instrução na memória, a próxima a ser executada.
 * @param PROCESSADOR	*processador_param			O processador que está realizando a busca.
 * @param MMU			*MMU_param					A memória em que a busca é feita.
@@ -341,6 +353,44 @@ void privada_JRL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	}
 }
 
+void privada_PUS(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorOrigem_param){
+	sprintf(mensagemInstrucao_param, "PUS %d", registradorOrigem_param);
+
+	registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER), 1);
+	int posicaoApontadaStack = 
+		registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER));
+	int tamanhoStack = privada_getTamanhoStackProcessoRodando(processador_param);
+
+	if(tamanhoStack < posicaoApontadaStack){
+		kernel_rodar(&global_kernel, INTERRUPCAO_ESTOURO_PILHA);
+	} else {
+		int base;
+		int conteudoGravado = 
+			registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem_param));
+		MMU_sincronizado_getBase(&global_MMU, &base);
+		MMU_sincronizado_escreverFisico(&global_MMU, base-(posicaoApontadaStack+1), conteudoGravado);
+	}
+}
+void privada_POP(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param){
+	sprintf(mensagemInstrucao_param, "POP %d", registradorDestino_param);
+
+	int posicaoApontadaStack = 
+		registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER));
+
+	if(posicaoApontadaStack < 1){
+		kernel_rodar(&global_kernel, INTERRUPCAO_ESTOURO_PILHA);
+	} else {
+		int base;
+		int conteudoGravado;
+		MMU_sincronizado_getBase(&global_MMU, &base);
+		MMU_sincronizado_lerFisico(&global_MMU, base-(posicaoApontadaStack+1), &conteudoGravado);
+		registrador_carregarPalavra(
+			contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino_param),
+			conteudoGravado);
+		registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER), -1);
+	}
+}
+
 
 /**
 * Executa uma instrução.
@@ -575,10 +625,20 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 			sprintf(mensagem, "RETURN ainda nao foi implementado.");
 			break;
 		case INSTRUCAO_PUSH_REGISTER_INTO_STACK:
-			sprintf(mensagem, "PUSH_TO_STACK ainda nao foi implementado.");
+			registradorOrigem = processador_param->IR.conteudo[3];
+			if(!(0 <= registradorOrigem && registradorOrigem < QUANTIDADE_REGISTRADORES_CONTEXTO)){
+				kernel_rodar(&global_kernel, INTERRUPCAO_PROCESSADOR);
+			} else {
+				privada_PUS(processador_param, mensagem, registradorOrigem);
+			}
 			break;
 		case INSTRUCAO_POP_REGISTER_FROM_STACK:
-			sprintf(mensagem, "POP_FROM_STACK ainda nao foi implementado.");
+			registradorDestino = processador_param->IR.conteudo[3];
+			if(!(0 <= registradorDestino && registradorDestino < QUANTIDADE_REGISTRADORES_CONTEXTO)){
+				kernel_rodar(&global_kernel, INTERRUPCAO_PROCESSADOR);
+			} else {
+				privada_POP(processador_param, mensagem, registradorDestino);
+			}
 			break;
 		default:
 			sprintf(mensagem, "Instrucao desconhecida.");
