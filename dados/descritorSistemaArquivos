@@ -23,3 +23,5 @@ PUT 191
 multiplosSegmentos 235
 PUS 286
 POP 297
+CALL 328
+RETC 362

@@ -352,7 +352,40 @@ void privada_JRL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 		contexto_setPC(&processador_param->contextoProcessador, conteudoDestino);
 	}
 }
+void privada_CALL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, PALAVRA enderecoDestino_param){
+	sprintf(mensagemInstrucao_param, "CALL %d", enderecoDestino_param);
 
+	registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER), 1);
+	int posicaoApontadaStack = 
+		registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER));
+	int tamanhoStack = privada_getTamanhoStackProcessoRodando(processador_param);
+
+	if(tamanhoStack < posicaoApontadaStack){
+		kernel_rodar(&global_kernel, INTERRUPCAO_ESTOURO_PILHA);
+	} else {
+		int base;
+		MMU_sincronizado_getBase(&global_MMU, &base);
+		MMU_sincronizado_escreverFisico(&global_MMU, base-(posicaoApontadaStack+1), contexto_getPC(&processador_param->contextoProcessador)+1);
+		contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
+	}
+}
+void privada_RETC(PROCESSADOR *processador_param, char* mensagemInstrucao_param){
+	sprintf(mensagemInstrucao_param, "RETC");
+
+	int posicaoApontadaStack = 
+		registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER));
+
+	if(posicaoApontadaStack < 1){
+		kernel_rodar(&global_kernel, INTERRUPCAO_ESTOURO_PILHA);
+	} else {
+		int base;
+		int enderecoRetorno;
+		MMU_sincronizado_getBase(&global_MMU, &base);
+		MMU_sincronizado_lerFisico(&global_MMU, base-(posicaoApontadaStack+1), &enderecoRetorno);
+		registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER), -1);
+		contexto_setPC(&processador_param->contextoProcessador, enderecoRetorno);
+	}
+}
 void privada_PUS(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorOrigem_param){
 	sprintf(mensagemInstrucao_param, "PUS %d", registradorOrigem_param);
 
@@ -619,10 +652,16 @@ void privada_executaInstrucao(PROCESSADOR *processador_param, INSTRUCAO instruca
 			}
 			break;
 		case INSTRUCAO_CALL_ROUTINE:
-			sprintf(mensagem, "CALL ainda nao foi implementado.");
+			invadiuMemoria = MMU_sincronizado_lerLogico(&global_MMU, contexto_getPC(&processador_param->contextoProcessador), 
+				&enderecoDestino, 0);
+			if(invadiuMemoria){
+				kernel_rodar(&global_kernel, INTERRUPCAO_SEGMENTACAO_MEMORIA);
+			} else {
+				privada_CALL(processador_param, mensagem, enderecoDestino);
+			}
 			break;
 		case INSTRUCAO_RETURN_FROM_CALL:
-			sprintf(mensagem, "RETURN ainda nao foi implementado.");
+			privada_RETC(processador_param, mensagem);
 			break;
 		case INSTRUCAO_PUSH_REGISTER_INTO_STACK:
 			registradorOrigem = processador_param->IR.conteudo[3];
