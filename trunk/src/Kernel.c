@@ -60,8 +60,14 @@ int privada_getPIDNaoUsado(KERNEL *kernel_param){
 void privada_rodarProcesso(KERNEL *kernel_param, DESCRITOR_PROCESSO **descritorProcesso_param){
 	kernel_param->processoRodando = descritorProcesso_param;
 	descritorProcesso_setStatus(*descritorProcesso_param, STATUS_PROCESSO_EXECUTANDO);
-	MMU_sincronizado_setBase(&global_MMU, descritorProcesso_getEnderecoInicio(*descritorProcesso_param));
-	MMU_sincronizado_setLimite(&global_MMU, descritorProcesso_getTamanhoAreaMemoriaPalavras(*descritorProcesso_param));
+	int enderecoInicioProcesso = 
+		descritorProcesso_getEnderecoInicio(*descritorProcesso_param)
+		+descritorProcesso_getTamanhoStackPalavras(*descritorProcesso_param);
+	int limiteProcesso = 
+		descritorProcesso_getTamanhoAreaMemoriaPalavras(*descritorProcesso_param)
+		-descritorProcesso_getTamanhoStackPalavras(*descritorProcesso_param);
+	MMU_sincronizado_setBase(&global_MMU, enderecoInicioProcesso);
+	MMU_sincronizado_setLimite(&global_MMU, limiteProcesso);
 }
 
 /**
@@ -118,6 +124,7 @@ void privada_escalonar(KERNEL *kernel_param){
 * @param int					enderecoMemoria_param			Caso o processo esteja na memória. 
 *																Caso contrário, deverá conter MEMORIA_ENDERECO_INEXISTENTE.
 * @return int	Indica se conseguiu adicionar o processo.
+* ATENÇÃO: O PROCESSO NÃO TERÁ STACK!!!!!
 */
 int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param, int tamanhoMemoriaPalavras_param, int enderecoMemoria_param){
 	int adicionou = 0;
@@ -135,7 +142,7 @@ int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param,
 		alocouMemoria = (enderecoAlocado != MEMORIA_ENDERECO_INEXISTENTE);
 
 		if(alocouMemoria){
-			descritorProcesso_inicializar(*novoProcesso, PID_param, enderecoAlocado, tamanhoMemoriaPalavras_param);
+			descritorProcesso_inicializar(*novoProcesso, PID_param, enderecoAlocado, tamanhoMemoriaPalavras_param, 0);
 			contexto_setPC(descritorProcesso_getContexto(*novoProcesso), PC_param);
 			descritorProcesso_setStatus(*novoProcesso, STATUS_PROCESSO_PRONTO);
 			FIFO_inserir(&kernel_param->filaProcessosProntos, novoProcesso);
@@ -163,17 +170,17 @@ void privada_matarProcessoRodando(KERNEL *kernel_param){
 	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
 }
 
-
 /**
 * Inicia a criação de um processo.
 * @param KERNEL	*kernel_param			O kernel que criará o processo.
 * @param char*	nomeArquivo_param		Nome do arquivo que contém o processo.
 * @return ERRO_KERNEL	Indica o erro que aconteceu, caso algum erro tenha acontecido.
-* ATENÇÃO: se o disco não estiver rodando, vai travar a thread até que o disco rode!
+* ATENÇÃO: se o disco não estiver rodando, vai travar o processo até que o disco rode!
 */
 int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 	int PID, enderecoMemoria;
 	int erro = KERNEL_ERRO_NENHUM;
+	int tamanhoStackProcesso = TAMANHO_PADRAO_STACK_PALAVRAS;
 	ARQUIVO *arquivoTransferido;
 
 	if(kernel_param->quantidadeProcessos+1 == MAXIMO_PROCESSOS_KERNEL){
@@ -200,13 +207,15 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 	if(erro == KERNEL_ERRO_NENHUM){
 		DESCRITOR_PROCESSO **novoProcesso = (DESCRITOR_PROCESSO**) malloc(sizeof(DESCRITOR_PROCESSO*));
 		*novoProcesso = (DESCRITOR_PROCESSO*) malloc(sizeof(DESCRITOR_PROCESSO));
-		descritorProcesso_inicializar(*novoProcesso, PID, enderecoMemoria, arquivo_getTamanhoEmPalavras(arquivoTransferido));
+		descritorProcesso_inicializar(*novoProcesso, PID, enderecoMemoria, 
+			arquivo_getTamanhoEmPalavras(arquivoTransferido), tamanhoStackProcesso);
 		contexto_setPC(descritorProcesso_getContexto(*novoProcesso), 0);
 		descritorProcesso_setStatus(*novoProcesso, STATUS_PROCESSO_PRONTO);
 
 		kernel_param->arquivoTransferido = arquivoTransferido;
 
-		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoCargaDMA(enderecoMemoria, 
+		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoCargaDMA(
+				enderecoMemoria+tamanhoStackProcesso, 
 				arquivoTransferido->enderecoInicioDisco, 
 				arquivo_getTamanhoEmPalavras(arquivoTransferido));
 		OPERACAO_KERNEL* operacaoKernel = gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(novoProcesso);

@@ -20,6 +20,7 @@ struct str_descritorProcesso{
 	int enderecoInicio; //Início do programa na memória.
 	int tamanhoAreaMemoriaPalavras; //Tamanho da área de memória reservada ao programa, em palavras.
 	int haQuantosTicksRoda; //Há quantos ticks do relógio este processo está rodando, caso esteja.
+	int tamanhoStack; //Tamanho da stack deste processo em palavras.
 	STATUS_DESCRITOR_PROCESSO status; //Indica se está executando, pronto ou bloqueado.
 	CONTEXTO contextoProcesso;
 };
@@ -34,8 +35,10 @@ typedef struct str_descritorProcesso DESCRITOR_PROCESSO;
 * @param int				PID_param					A PID deste descritor de processo.
 * @param int				enderecoInicio_param		Endereço, na memória, do início do processo.
 * @param int				tamanhoAreaMemoria_param	Tamanho da área de memória do processo, em palavras.
+* @param int				tamanhoStack_param			O tamanho da stack do processo, em palavras.
 */
-void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param, int enderecoInicio_param, int tamanhoAreaMemoria_param);
+void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param, int enderecoInicio_param, 
+	int tamanhoAreaMemoria_param, int tamanhoStack_param);
 
 /**
 * @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo no qual a informação será buscada.
@@ -91,9 +94,11 @@ void descritorProcesso_setFatiaTempo(DESCRITOR_PROCESSO *descritorProcesso_param
 */
 int descritorProcesso_getFatiaTempo(DESCRITOR_PROCESSO *descritorProcesso_param);
 
-
-
-
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será modificada.
+* @return int	O tamanho da stack do processo, em palavras.
+*/
+int descritorProcesso_getTamanhoStackPalavras(DESCRITOR_PROCESSO *descritorProcesso_param);
 
 
 

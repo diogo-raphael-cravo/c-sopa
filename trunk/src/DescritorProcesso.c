@@ -20,12 +20,15 @@
 * @param int				PID_param					A PID deste descritor de processo.
 * @param int				enderecoInicio_param		Endereço, na memória, do início do processo.
 * @param int				tamanhoAreaMemoria_param	Tamanho da área de memória do processo, em palavras.
+* @param int				tamanhoStack_param			O tamanho da stack do processo, em palavras.
 */
-void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param, int enderecoInicio_param, int tamanhoAreaMemoria_param){
+void descritorProcesso_inicializar(DESCRITOR_PROCESSO *descritorProcesso_param, int PID_param, int enderecoInicio_param, 
+	int tamanhoAreaMemoria_param, int tamanhoStack_param){
 	descritorProcesso_param->PID = PID_param;
 	descritorProcesso_param->haQuantosTicksRoda = 0;
 	descritorProcesso_param->enderecoInicio = enderecoInicio_param;
 	descritorProcesso_param->tamanhoAreaMemoriaPalavras = tamanhoAreaMemoria_param;
+	descritorProcesso_param->tamanhoStack = tamanhoStack_param;
 }
 
 /**
@@ -81,7 +84,7 @@ int descritorProcesso_getEnderecoInicio(DESCRITOR_PROCESSO *descritorProcesso_pa
 * @return int	O tamanho da área de memória reservada ao processo, em palavras.
 */
 int descritorProcesso_getTamanhoAreaMemoriaPalavras(DESCRITOR_PROCESSO *descritorProcesso_param){
-	return descritorProcesso_param->tamanhoAreaMemoriaPalavras;
+	return descritorProcesso_param->tamanhoAreaMemoriaPalavras+descritorProcesso_param->tamanhoStack;
 }
 
 /**
@@ -100,6 +103,13 @@ int descritorProcesso_getFatiaTempo(DESCRITOR_PROCESSO *descritorProcesso_param)
 	return descritorProcesso_param->haQuantosTicksRoda;
 }
 
+/**
+* @param DESCRITOR_PROCESSO	*descritorProcesso_param	O descritor de processo do qual a informação será modificada.
+* @return int	O tamanho da stack do processo, em palavras.
+*/
+int descritorProcesso_getTamanhoStackPalavras(DESCRITOR_PROCESSO *descritorProcesso_param){
+	return descritorProcesso_param->tamanhoStack;
+}
 
 
 
