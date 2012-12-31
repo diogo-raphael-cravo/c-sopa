@@ -262,6 +262,28 @@ Dependências:						 3, 24
 									 O tamanho da stack do processo deve ser 10
 =====================================================
 
+=====================================================
+26)									 Call 32 bit Memory Routine
+Nome do Arquivo:					 CALL
+Resultado Esperado:					 *Chama 10 procedimentos diferentes em cadeia
+									 *Termina com estouro de pilha na 11ª chamada.
+Última revisão em que esteve OK:	 75
+Dependências:						 O tamanho da stack do processo deve ser 10
+=====================================================
+
+=====================================================
+27)									 Return from 32 bit Call
+Nome do Arquivo:					 RETC
+Resultado Esperado:					 *Chama 3 procedimentos diferentes em cadeia e retorna para o procedimento principal
+									 *Termina com 1 no registrador 1, 2 no 2, 3 no 3 e 4 no 4.
+									 *Termina com estouro de pilha no último RETC, que não corresponde a CALL algum.
+Última revisão em que esteve OK:	 75
+Dependências:						 3, 26
+									 O tamanho da stack do processo deve ser no mínimo 3
+=====================================================
+
+
+
 
 
 
