@@ -40,6 +40,17 @@ void MMU_sincronizado_setBase(MMU *MMU_param, int base_param){
 }
 
 /**
+* Define o registrador base, que é usado para converter endereços para endereços físicos.
+* @param MMU		*MMU_param					A MMU em que a operação será realizada.
+* @param int		*destino_param				Onde será colocado o valor base.
+*/
+void MMU_sincronizado_getBase(MMU *MMU_param, int *destino_param){
+	sem_wait(&MMU_param->mutexAcessoMMU);
+	*destino_param = MMU_param->base;
+	sem_post(&MMU_param->mutexAcessoMMU);
+}
+
+/**
 * Define o registrador limite, que é utilizado em endereços lógicos.
 * @param MMU		*MMU_param					A MMU em que a operação será realizada.
 * @param int		limite_param				O valor do limite.

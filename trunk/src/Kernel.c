@@ -59,15 +59,9 @@ int privada_getPIDNaoUsado(KERNEL *kernel_param){
 */
 void privada_rodarProcesso(KERNEL *kernel_param, DESCRITOR_PROCESSO **descritorProcesso_param){
 	kernel_param->processoRodando = descritorProcesso_param;
-	descritorProcesso_setStatus(*descritorProcesso_param, STATUS_PROCESSO_EXECUTANDO);
-	int enderecoInicioProcesso = 
-		descritorProcesso_getEnderecoInicio(*descritorProcesso_param)
-		+descritorProcesso_getTamanhoStackPalavras(*descritorProcesso_param);
-	int limiteProcesso = 
-		descritorProcesso_getTamanhoAreaMemoriaPalavras(*descritorProcesso_param)
-		-descritorProcesso_getTamanhoStackPalavras(*descritorProcesso_param);
-	MMU_sincronizado_setBase(&global_MMU, enderecoInicioProcesso);
-	MMU_sincronizado_setLimite(&global_MMU, limiteProcesso);
+	MMU_sincronizado_setBase(&global_MMU, descritorProcesso_getEnderecoInicioCodigo(*descritorProcesso_param));
+	MMU_sincronizado_setLimite(&global_MMU, descritorProcesso_getTamanhoAreaCodigoPalavras(*descritorProcesso_param));
+	descritorProcesso_inicializarStack(*descritorProcesso_param);
 }
 
 /**
@@ -75,7 +69,6 @@ void privada_rodarProcesso(KERNEL *kernel_param, DESCRITOR_PROCESSO **descritorP
 * @param KERNEL					*kernel_param				O kernel ao qual pertencem o processo.
 */
 void privada_pararDeRodarProcessoRodando(KERNEL *kernel_param){
-	descritorProcesso_setStatus(*kernel_param->processoRodando, STATUS_PROCESSO_PRONTO);
 	FIFO_inserir(&kernel_param->filaProcessosProntos, kernel_param->processoRodando);
 	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
 	MMU_sincronizado_setBase(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
@@ -87,7 +80,6 @@ void privada_pararDeRodarProcessoRodando(KERNEL *kernel_param){
 * @param KERNEL					*kernel_param				O kernel ao qual pertencem o processo.
 */
 void privada_mandarProcessoRodandoEsperarDisco(KERNEL *kernel_param){
-	descritorProcesso_setStatus(*kernel_param->processoRodando, STATUS_PROCESSO_BLOQUEADO);
 	FIFO_inserir(&kernel_param->filaProcessosBloqueados, kernel_param->processoRodando);
 	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
 	MMU_sincronizado_setBase(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
@@ -120,31 +112,31 @@ void privada_escalonar(KERNEL *kernel_param){
 * @param KERNEL 				*kernel_param					O kernel que receberá o processo.
 * @param int					PID_param						PID do descritor do processo que será adicionado.
 * @param int					PC_param						PC do descritor do processo que será adicionado.
-* @param int					tamanhoMemoriaPalavras_param	Tamanho da região de memória do processo, quando criado.
+* @param int					tamanhoCodigoPalavras_param		Tamanho da região de código do processo, quando criado.
 * @param int					enderecoMemoria_param			Caso o processo esteja na memória. 
 *																Caso contrário, deverá conter MEMORIA_ENDERECO_INEXISTENTE.
 * @return int	Indica se conseguiu adicionar o processo.
 * ATENÇÃO: O PROCESSO NÃO TERÁ STACK!!!!!
 */
-int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param, int tamanhoMemoriaPalavras_param, int enderecoMemoria_param){
+int privada_adicionarProcesso(KERNEL *kernel_param, int PID_param, int PC_param, int tamanhoCodigoPalavras_param, 
+		int enderecoMemoria_param){
 	int adicionou = 0;
 	int alocouMemoria;
 	int enderecoAlocado;
 	DESCRITOR_PROCESSO **novoProcesso = (DESCRITOR_PROCESSO**) malloc(sizeof(DESCRITOR_PROCESSO*));
 	*novoProcesso = (DESCRITOR_PROCESSO*) malloc(sizeof(DESCRITOR_PROCESSO));
-	
+
 	if(kernel_param->quantidadeProcessos < MAXIMO_PROCESSOS_KERNEL){
 		if(enderecoMemoria_param == MEMORIA_ENDERECO_INEXISTENTE){
-			enderecoAlocado = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada, tamanhoMemoriaPalavras_param);
+			enderecoAlocado = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada, tamanhoCodigoPalavras_param+1);
 		} else {
 			enderecoAlocado = enderecoMemoria_param;
 		}
 		alocouMemoria = (enderecoAlocado != MEMORIA_ENDERECO_INEXISTENTE);
 
 		if(alocouMemoria){
-			descritorProcesso_inicializar(*novoProcesso, PID_param, enderecoAlocado, tamanhoMemoriaPalavras_param, 0);
+			descritorProcesso_inicializar(*novoProcesso, PID_param, enderecoAlocado, tamanhoCodigoPalavras_param, 0);
 			contexto_setPC(descritorProcesso_getContexto(*novoProcesso), PC_param);
-			descritorProcesso_setStatus(*novoProcesso, STATUS_PROCESSO_PRONTO);
 			FIFO_inserir(&kernel_param->filaProcessosProntos, novoProcesso);
 			kernel_param->quantidadeProcessos++;
 			adicionou = 1;
@@ -197,7 +189,8 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 
 	if(erro == KERNEL_ERRO_NENHUM){
 		enderecoMemoria = mapaAlocacoesMemoria_alocar(&kernel_param->mapaMemoriaAlocada,
-			arquivo_getTamanhoEmPalavras(arquivoTransferido));
+			arquivo_getTamanhoEmPalavras(arquivoTransferido)+tamanhoStackProcesso+1);
+//1, pois a primeira palavra da stack guarda o tamanho dela
 		int faltouMemoria = (enderecoMemoria == MEMORIA_ENDERECO_INEXISTENTE);
 		if(faltouMemoria){
 			erro = KERNEL_ERRO_MEMORIA_INSUFICIENTE;
@@ -210,12 +203,14 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 		descritorProcesso_inicializar(*novoProcesso, PID, enderecoMemoria, 
 			arquivo_getTamanhoEmPalavras(arquivoTransferido), tamanhoStackProcesso);
 		contexto_setPC(descritorProcesso_getContexto(*novoProcesso), 0);
-		descritorProcesso_setStatus(*novoProcesso, STATUS_PROCESSO_PRONTO);
+		memoria_sincronizado_escreverPalavra(&global_memoria, 
+			descritorProcesso_getEnderecoInicioCodigo(*novoProcesso)-1, 
+			descritorProcesso_getTamanhoStackPalavras(*novoProcesso)-1); //-1, porque deve ser somente a área útil da stack
 
 		kernel_param->arquivoTransferido = arquivoTransferido;
 
 		OPERACAO_DISCO* operacaoDisco = gerenciadorDisco_criarOperacaoDiscoCargaDMA(
-				enderecoMemoria+tamanhoStackProcesso, 
+				descritorProcesso_getEnderecoInicioCodigo(*novoProcesso), 
 				arquivoTransferido->enderecoInicioDisco, 
 				arquivo_getTamanhoEmPalavras(arquivoTransferido));
 		OPERACAO_KERNEL* operacaoKernel = gerenciadorDisco_criarOperacaoKernelCriacaoProcesso(novoProcesso);
@@ -533,7 +528,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 	sistemaArquivos_inicializarComArquivosDoHospedeiro(&kernel_param->sistemaDeArquivos, &global_disco);
 	mapaAlocacoesMemoria_inicializar(&kernel_param->mapaMemoriaAlocada, &global_MMU, MAXIMO_PROCESSOS_KERNEL);
 
-	memoria_sincronizado_escreverBytes(&global_memoria, 0, 'J', 'P', 'A', 0);
+	memoria_sincronizado_escreverBytes(&global_memoria, 1, 'J', 'P', 'A', 0);
 	int adicionou = privada_adicionarProcesso(kernel_param, privada_getPIDNaoUsado(kernel_param), 0, 1, MEMORIA_ENDERECO_INEXISTENTE);
 
 	if(adicionou){
@@ -622,6 +617,16 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 				free(operacaoKernel);
 			}
 			gerenciadorDisco_executarProxima(&kernel_param->gerenciadorAcessoDisco);
+			break;
+		case INTERRUPCAO_ESTOURO_PILHA:
+			sprintf(mensagem, "O processo %d foi morto por estouro de pilha.", descritorProcesso_getPID(*kernel_param->processoRodando));
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			sprintf(mensagem,  "Imprimindo contexto do DESCRITOR DO PROCESSO imediatamente anterior 'a falha.");
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			contexto_imprimirRegistradores(descritorProcesso_getContexto(*kernel_param->processoRodando), 3);
+
+			privada_matarProcessoRodando(kernel_param);
+			privada_escalonar(kernel_param);
 			break;
 		case INTERRUPCAO_SEGMENTACAO_MEMORIA:
 			sprintf(mensagem, "O processo %d foi morto por falha de segmentacao.", descritorProcesso_getPID(*kernel_param->processoRodando));
