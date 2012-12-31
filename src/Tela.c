@@ -337,6 +337,12 @@ void tela_rodar(TELA *tela_param){
 							sem_wait(&global_mutexParaEscritaTela);
 							privada_indicaSeUsuarioPodeEscrever(tela_param, 0);
 				break;
+			case KEY_PPAGE:
+							tela_rolar(tela_param, -(CARACTERES_POR_COLUNA_PARA_ESCRITA-3));
+				break;
+			case KEY_NPAGE:
+							tela_rolar(tela_param, CARACTERES_POR_COLUNA_PARA_ESCRITA-3);
+				break;
 			case 'q':
 					tela_imprimirTelaAzulDaMorte(tela_param, "Nao ocorreu erro algum. Esta tela apareceu porque voce apertou 'q'.");
 				break;
