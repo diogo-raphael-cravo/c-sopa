@@ -219,12 +219,22 @@ int sistemaArquivos_getPosicaoLivreDisco(SISTEMA_ARQUIVOS *sistemaArquivos_param
 	int tamanhoIntervalo=0;
 	int encontrou=0;
 	while(intervalo<totalIndicesPreenchidos-1 && !encontrou){
-		tamanhoIntervalo = segmentos[intervalo+1][POSICAO] - segmentos[intervalo][POSICAO]+segmentos[intervalo][TAMANHO];
+		tamanhoIntervalo = segmentos[intervalo+1][POSICAO] - (segmentos[intervalo][POSICAO]+segmentos[intervalo][TAMANHO]);
 		if(TAMANHO_ARQUIVO_RECEM_CRIADO <= tamanhoIntervalo){
 			encontrou = 1;
 			posicaoLivre = segmentos[intervalo][POSICAO]+segmentos[intervalo][TAMANHO];
 		}
 		intervalo++;
+	}
+
+	if(!encontrou){
+		//Aqui, lembre que a lista de posições foi ordenada, portanto a última é a última no disco.
+		int primeiraPosicaoLivre = segmentos[totalIndicesPreenchidos-1][POSICAO] + segmentos[totalIndicesPreenchidos-1][TAMANHO];
+		if(TAMANHO_ARQUIVO_RECEM_CRIADO <= TAMANHO_DISCO_PALAVRAS-primeiraPosicaoLivre-5){
+			encontrou = 1;
+			posicaoLivre = primeiraPosicaoLivre;
+
+		}
 	}
 
 	return posicaoLivre;
@@ -317,6 +327,9 @@ int sistemaArquivos_criarArquivo(SISTEMA_ARQUIVOS *sistemaArquivos_param, char* 
 	DESCRITOR_ARQUIVO **arquivo = (DESCRITOR_ARQUIVO**) malloc(sizeof(DESCRITOR_ARQUIVO*));
 	int posicaoLivreDisco = sistemaArquivos_getPosicaoLivreDisco(sistemaArquivos_param, disco_param);
 	int descritorArquivoCriado = NUMERO_DESCRITOR_ARQUIVO_INEXISTENTE;
+char mensagem[200];
+sprintf(mensagem, "CRIANDO ARQUIVO EM %d.", posicaoLivreDisco);
+tela_escreverNaColuna(&global_tela, mensagem, 5);
 
 	if(posicaoLivreDisco != MEMORIA_ENDERECO_INEXISTENTE){
 		*arquivo = (DESCRITOR_ARQUIVO*) malloc(sizeof(DESCRITOR_ARQUIVO));
