@@ -48,7 +48,7 @@ int main(void){
 
 	pthread_create(&global_threadIdDisco, NULL, disco_rodar, &global_disco);
 
-	usleep(1000*1000);
+	//usleep(1000*1000);
 	pthread_create(&global_threadIdPlacaRede, NULL, placaRede_rodar, &global_placaRede);
 	pthread_create(&global_threadIdProcessador, NULL, processador_rodar, &global_processador);
 	pthread_create(&global_threadIdTimer, NULL, timer_rodar, &global_timer);

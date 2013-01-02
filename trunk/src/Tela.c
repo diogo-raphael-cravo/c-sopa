@@ -251,7 +251,6 @@ void tela_inicializar(TELA *tela_param){
 * @param TELA	*tela_param A tela em que a operação será realizada.
 */
 char* tela_esperarLinhaUsuario(TELA *tela_param){
-
 	sem_wait(&global_mutexAcessoTela);
 	privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO,COLUNA_CARACTERE_INPUT_USUARIO);
 	char* digitado = (char*)malloc(100*sizeof(char));
@@ -261,23 +260,26 @@ char* tela_esperarLinhaUsuario(TELA *tela_param){
 	int inteiroDigitado;
 	noecho();
 	cbreak();
-	sem_post(&global_mutexAcessoTela);	
+	sem_post(&global_mutexAcessoTela);
 
 	do{
-		digitado[indiceCharDigitado] = inteiroDigitado = getch();
-		
+		inteiroDigitado = getch();
 		sem_wait(&global_mutexAcessoTela);
-		privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO, 
-			COLUNA_CARACTERE_INPUT_USUARIO+indiceCharDigitado);
+		digitado[indiceCharDigitado] = inteiroDigitado;
 		mostrado[0] = digitado[indiceCharDigitado];
 		if(inteiroDigitado == KEY_BACKSPACE){
-			privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO, 
+			privada_moverCursorParaCaractere(tela_param, 
+				LINHA_CARACTERE_INPUT_USUARIO, 
 				COLUNA_CARACTERE_INPUT_USUARIO+indiceCharDigitado-1);
 			printw(" ");
-			privada_moverCursorParaCaractere(tela_param, LINHA_CARACTERE_INPUT_USUARIO, 
+			privada_moverCursorParaCaractere(tela_param, 
+				LINHA_CARACTERE_INPUT_USUARIO, 
 				COLUNA_CARACTERE_INPUT_USUARIO+indiceCharDigitado-1);
 			indiceCharDigitado = (0<indiceCharDigitado? indiceCharDigitado-1 : 0);
 		} else {
+			privada_moverCursorParaCaractere(tela_param, 
+				LINHA_CARACTERE_INPUT_USUARIO, 
+				COLUNA_CARACTERE_INPUT_USUARIO+indiceCharDigitado);
 			printw(mostrado);
 			indiceCharDigitado++;
 		}
