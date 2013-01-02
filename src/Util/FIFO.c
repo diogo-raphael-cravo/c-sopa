@@ -34,7 +34,7 @@ void FIFO_inicializar(FIFO *fifo_param, int tamanho_param){
 * @param void	*dado_param O dado que será procurado na fila.
 * @return int	Indica se o ponteiro fornecido está na fila.
 */
-int FIFO_contem(FIFO *fifo_param, void *dado_param){
+int FIFO_buscaElemento(FIFO *fifo_param, void *dado_param){
 	int indiceElemento;
 	int encontrou = 0;
 	for(indiceElemento=0; indiceElemento<fifo_param->tamanho; indiceElemento++){
@@ -44,7 +44,6 @@ int FIFO_contem(FIFO *fifo_param, void *dado_param){
 	}
 	return encontrou;
 }
-
 
 /**
 * Insere um elemento na última posição da FIFO.
@@ -56,7 +55,7 @@ void FIFO_inserir(FIFO *fifo_param, void* dado_param){
 	int indiceElemento;
 	int indicePrimeiraPosicaoLivre = FIFO_INDICE_ELEMENTO_INEXISTENTE;
 
-	if(!FIFO_contem(fifo_param, dado_param)){
+	if(!FIFO_buscaElemento(fifo_param, dado_param)){
 		for(indiceElemento=0; indiceElemento<fifo_param->tamanho; indiceElemento++){
 			if(fifo_param->conteudo[indiceElemento] == FIFO_ELEMENTO_INEXISTENTE 
 					&& indicePrimeiraPosicaoLivre == FIFO_INDICE_ELEMENTO_INEXISTENTE){
@@ -197,5 +196,25 @@ void* FIFO_espiarPosicao(FIFO *fifo_param, int posicaoElemento_param){
 	}
 }
 
-
-
+/**
+* @param FIFO	*fifo_param				A fifo em que a busca será feita.
+* @param int	posicaoElemento_param	A posição do elemento que se deseja.
+* @return void* 	O elemento que está na posicaoElemento_param da FIFO. Considera 0 como a primeira posição.
+*					Retornará FIFO_ELEMENTO_INEXISTENTE, caso não haja.
+* ATENÇÃO: retorna/recebe um void*! É necessário utilizar cast!
+*/
+void* FIFO_removerPosicao(FIFO *fifo_param, int posicaoElemento_param){
+if(FIFO_capacidadeNumeroElementos(fifo_param) <= posicaoElemento_param){
+		return FIFO_ELEMENTO_INEXISTENTE;
+	} else if(FIFO_quantidadeElementos(fifo_param) <= posicaoElemento_param){
+		return FIFO_ELEMENTO_INEXISTENTE;
+	} else {
+		void* elemento = fifo_param->conteudo[posicaoElemento_param];
+		int indice;
+		for(indice=posicaoElemento_param; indice<fifo_param->tamanho-1; indice++){
+			fifo_param->conteudo[indice] = fifo_param->conteudo[indice+1];
+		}
+		fifo_param->conteudo[FIFO_quantidadeElementos(fifo_param)] = FIFO_ELEMENTO_INEXISTENTE;
+		return elemento;
+	}
+}

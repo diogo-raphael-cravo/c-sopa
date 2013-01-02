@@ -45,9 +45,10 @@ int main(void){
 	placaRede_inicializar(&global_placaRede);
 	kernel_inicializar(&global_kernel);
 	controladorInterrupcoes_inicializar(&global_controladorInterrupcoes);
+	sincronizadorGlobal_inicializar();
 
+	pthread_create(&global_threadIdSincronizadorGlobal, NULL, sincronizadorGlobal_rodar, 0);
 	pthread_create(&global_threadIdDisco, NULL, disco_rodar, &global_disco);
-
 	//usleep(1000*1000);
 	pthread_create(&global_threadIdPlacaRede, NULL, placaRede_rodar, &global_placaRede);
 	pthread_create(&global_threadIdProcessador, NULL, processador_rodar, &global_processador);

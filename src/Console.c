@@ -36,10 +36,7 @@ void console_rodar(CONSOLE *console_param){
 		if(!usuarioDesejaSairDoConsole){
 			console_param->ultimaLinhaDigitada = (char*) malloc(strlen(digitado)*sizeof(char));
 			console_param->ultimaLinhaDigitada = digitado;
-
-			sem_post(&global_mutexParaEscritaTela);
 			controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_CONSOLE);
-			sem_wait(&global_mutexParaEscritaTela);
 		} else {
 			sem_post(&global_mutexParaEscritaTela);
 			sem_wait(&global_mutexParaEscritaConsole);

@@ -127,6 +127,9 @@ void privada_desenharTabela(TELA *tela_param){
 	linha++;
 	privada_moverCursorParaCaractere(tela_param, linha, 1);
 	printw("Para parar as threads, digite [KEY_RIGHT]. Para continuar, [KEY_LEFT]. Para rolar o texto para cima, [KEY_UP]. Para baixo, [KEY_DOWN].");
+	linha++;
+	privada_moverCursorParaCaractere(tela_param, linha, 1);
+	printw("Com as threads paradas, o avanco passo a passo da-se com [KEY_RIGHT].");
 }
 
 /**
@@ -325,19 +328,25 @@ void tela_rodar(TELA *tela_param){
 				break;
 			case KEY_RIGHT: if(tela_param->abertaParaImpressoes == 1){
 								tela_param->abertaParaImpressoes = 0;
-								sem_wait(&global_mutexParaTela);
+								//sem_wait(&global_mutexParaTela);
+								sincronizadorGlobal_sincronizado_pausar();
+							} else {
+								sincronizadorGlobal_sincronizado_avancar();
 							}
 				break;
 			case KEY_LEFT: if(tela_param->abertaParaImpressoes == 0){
 								tela_param->abertaParaImpressoes = 1;
-								sem_post(&global_mutexParaTela);
+								//sem_post(&global_mutexParaTela);
 							}
+							sincronizadorGlobal_sincronizado_continuar();
 				break;
 			case KEY_BACKSPACE:
-							privada_indicaSeUsuarioPodeEscrever(tela_param, 1);
-							sem_post(&global_mutexParaEscritaConsole);
-							sem_wait(&global_mutexParaEscritaTela);
-							privada_indicaSeUsuarioPodeEscrever(tela_param, 0);
+							if(tela_param->abertaParaImpressoes == 1){
+								privada_indicaSeUsuarioPodeEscrever(tela_param, 1);
+								sem_post(&global_mutexParaEscritaConsole);
+								sem_wait(&global_mutexParaEscritaTela);
+								privada_indicaSeUsuarioPodeEscrever(tela_param, 0);
+							}
 				break;
 			case KEY_PPAGE:
 							tela_rolar(tela_param, -(CARACTERES_POR_COLUNA_PARA_ESCRITA-3));
