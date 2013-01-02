@@ -106,13 +106,22 @@ void FIFO_destruir(FIFO *fifo_param);
 
 /**
 * @param FIFO	*fifo_param				A fifo em que a busca será feita.
-* @ṕaram int	posicaoElemento_param	A posição do elemento que se deseja.
+* @param int	posicaoElemento_param	A posição do elemento que se deseja.
 * @return void* 	O elemento que está na posicaoElemento_param da FIFO. Considera 0 como a primeira posição.
 *					Retornará FIFO_ELEMENTO_INEXISTENTE, caso não haja.
 * ATENÇÃO: retorna/recebe um void*! É necessário utilizar cast!
 * ATENÇÃO: o elemento NÂO é removido!
 */
 void* FIFO_espiarPosicao(FIFO *fifo_param, int posicaoElemento_param);
+
+/**
+* @param FIFO	*fifo_param				A fifo em que a busca será feita.
+* @param int	posicaoElemento_param	A posição do elemento que se deseja.
+* @return void* 	O elemento que está na posicaoElemento_param da FIFO. Considera 0 como a primeira posição.
+*					Retornará FIFO_ELEMENTO_INEXISTENTE, caso não haja.
+* ATENÇÃO: retorna/recebe um void*! É necessário utilizar cast!
+*/
+void* FIFO_removerPosicao(FIFO *fifo_param, int posicaoElemento_param);
 
 
 

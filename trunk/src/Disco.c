@@ -202,7 +202,7 @@ void disco_rodar(DISCO *disco_param){
 	while(1){
 		sem_wait(&disco_param->mutexAcessoDisco);
 
-		usleep(1000*1000*2);
+		sincronizadorGlobal_dormir(1000*2);
 
 		privada_executarProximaOperacao(disco_param);
 

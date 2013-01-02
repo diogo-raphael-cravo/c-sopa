@@ -25,7 +25,7 @@ void placaRede_inicializar(PLACA_REDE *placaRede_param){
 */
 void placaRede_rodar(PLACA_REDE *placaRede_param){
 	while(1){
-		usleep(1000*1000);
+		sincronizadorGlobal_dormir(1000);
 		tela_escreverNaColuna(&global_tela, "PLACA DE REDE: ola'! Eu existo!", 5);
 	}
 }
