@@ -22,6 +22,7 @@
 #include "../include/Util/FIFO.h" 						//Depende de: 
 #include "../include/Util/String.h" 					//Depende de: 
 #include "../include/Util/SincronizadorGlobal.h"		//Depende de: 
+#include "../include/Util/SocketSOPA.h"					//Depende de:
 #include "../include/Tela.h" 							//Depende de: ControladorSOPA.h
 #include "../include/Memoria.h" 						//Depende de: Tela.h
 #include "../include/MMU.h" 							//Depende de: Memoria.h
@@ -36,9 +37,9 @@
 #include "../include/Arquivo.h" 						//Depende de: Disco.h, MMU.h
 #include "../include/DescritorArquivo.h" 				//Depende de: Arquivo.h
 #include "../include/SistemaArquivos.h" 				//Depende de: Arquivo.h, DescritorArquivo.h
-#include "../include/PacoteAplicacaoSOPA.h"				//Depende de: 
-#include "../include/PlacaRede.h"						//Depende de: PacoteAplicacaoSOPA.h
 #include "../include/RPC.h" 							//Depende de: 
+#include "../include/PacoteAplicacaoSOPA.h"				//Depende de: RPC.h
+#include "../include/PlacaRede.h"						//Depende de: PacoteAplicacaoSOPA.h
 #include "../include/Kernel.h" 							//Depende de: Tela.h, ControladorInterrupcoes.h, DescritorProcesso.h, FIFO.h, Disco.h, MMU.h, MapaMemoria.h, Arquivo.h, SistemaArquivos.h, RPC.h, GerenciadorDisco.h, PlacaRede.h
 #include "../include/Timer.h" 							//Depende de: Tela.h, ControladorInterrupcoes.h
 #include "../include/Console.h" 						//Depende de: Tela.h, ControladorInterrupcoes.h, ControladorSOPA.h

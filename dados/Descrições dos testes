@@ -282,6 +282,34 @@ Dependências:						 3, 26
 									 O tamanho da stack do processo deve ser no mínimo 3
 =====================================================
 
+=====================================================
+28)									 Load Register Indirectly from Register
+Nome do Arquivo:					 LI
+Resultado Esperado:					 *Programa termina sem erros.
+									 *Programa termina com valor 15 15 15 15 no registrador r12.
+Última revisão em que esteve OK:	 78
+Dependências:						 4, 16, 17
+=====================================================
+
+=====================================================
+29)									 Write Register Indirectly from Register
+Nome do Arquivo:					 WI
+Resultado Esperado:					 *Programa termina sem erros.
+									 *Programa termina com valor 99 99 99 99 no registrador r14.
+Última revisão em que esteve OK:	 78
+Dependências:						 28
+=====================================================
+
+=====================================================
+30)									 Long jumps (INCOMPLETO)
+Nome do Arquivo:					 J_CAZEL_RAZEL
+Resultado Esperado:					 *Faz 8 jumps (JCA, JCZ, JCE, JCL, JRA, JRZ, JRE e JRL).
+									 *Todos jumps condicionais falham uma vez antes de funcionarem.
+									 *Os jumps alternam entre a posição 0 e a posição 300.
+									 *Programa termina sem falhas.
+Última revisão em que esteve OK:	 -
+Dependências:						 16, 17
+=====================================================
 
 
 

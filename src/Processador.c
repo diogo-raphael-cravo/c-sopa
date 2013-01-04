@@ -123,15 +123,15 @@ INSTRUCAO privada_decodificaInstrucao(PROCESSADOR *processador_param){
 **********************************************************/
 
 void privada_JPA(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "JPA %d", enderecoDestino_param);
+	sprintf(mensagemInstrucao_param, "   =JPA %d", enderecoDestino_param);
 	contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
 }
 void privada_INT(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int interrupcao_param){
-	sprintf(mensagemInstrucao_param, "INT %d", interrupcao_param);
+	sprintf(mensagemInstrucao_param, "   =INT %d", interrupcao_param);
 	kernel_rodar(&global_kernel, interrupcao_param);
 }
 void privada_LM(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param, int enderecoMemoria_param){
-	sprintf(mensagemInstrucao_param, "LM %d %d", registradorDestino_param, enderecoMemoria_param);
+	sprintf(mensagemInstrucao_param, "   =LM %d %d", registradorDestino_param, enderecoMemoria_param);
 
 	PALAVRA palavraGravada;
 	int invadiuMemoria = MMU_sincronizado_lerLogico(&global_MMU, processador_param->IR.conteudo[3], &palavraGravada, 0);
@@ -142,11 +142,11 @@ void privada_LM(PROCESSADOR *processador_param, char* mensagemInstrucao_param, i
 	}
 }
 void privada_LC(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param, PALAVRA constante_param){
-	sprintf(mensagemInstrucao_param, "LC %d %d", registradorDestino_param, constante_param);
+	sprintf(mensagemInstrucao_param, "   =LC %d %d", registradorDestino_param, constante_param);
 	contexto_setRegistradorPalavra(&processador_param->contextoProcessador, constante_param, registradorDestino_param);
 }
 void privada_WM(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int qualRegistrador_param, PALAVRA enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "WM %d %d", qualRegistrador_param, enderecoDestino_param);
+	sprintf(mensagemInstrucao_param, "   =WM %d %d", qualRegistrador_param, enderecoDestino_param);
 	PALAVRA conteudoRegistrador = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, qualRegistrador_param));
 	int invadiuMemoria = MMU_sincronizado_escreverLogico(&global_MMU, enderecoDestino_param, conteudoRegistrador, 0);
 	if(invadiuMemoria){
@@ -157,52 +157,52 @@ void privada_SU(PROCESSADOR *processador_param, char* mensagemInstrucao_param, i
 	int resultadoOperacao = 
 		registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino_param))
 		- registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem_param));
-	sprintf(mensagemInstrucao_param, "SU %d %d", registradorDestino_param, registradorOrigem_param);
+	sprintf(mensagemInstrucao_param, "   =SU %d %d", registradorDestino_param, registradorOrigem_param);
 	contexto_setRegistradorPalavra(&processador_param->contextoProcessador, resultadoOperacao, registradorDestino_param);
 }
 void privada_AD(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param, int registradorOrigem_param){
 	int resultadoOperacao = 
 		registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino_param))
 		+ registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem_param));
-	sprintf(mensagemInstrucao_param, "AD %d %d", registradorDestino_param, registradorOrigem_param);
+	sprintf(mensagemInstrucao_param, "   =AD %d %d", registradorDestino_param, registradorOrigem_param);
 	contexto_setRegistradorPalavra(&processador_param->contextoProcessador, resultadoOperacao, registradorDestino_param);
 }
 void privada_DEC(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registrador_param){
-	sprintf(mensagemInstrucao_param, "DEC %d", registrador_param);
+	sprintf(mensagemInstrucao_param, "   =DEC %d", registrador_param);
 	registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, registrador_param), -1);
 }
 void privada_INC(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registrador_param){
-	sprintf(mensagemInstrucao_param, "INC %d", registrador_param);
+	sprintf(mensagemInstrucao_param, "   =INC %d", registrador_param);
 	registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, registrador_param), 1);
 }
 void privada_CP(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registrador1_param, int registrador2_param){
 	PALAVRA conteudo1 = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registrador1_param));
 	PALAVRA conteudo2 = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registrador2_param));
-	sprintf(mensagemInstrucao_param, "CP %d %d", registrador1_param, registrador2_param);
+	sprintf(mensagemInstrucao_param, "   =CP %d %d", registrador1_param, registrador2_param);
 	processador_param->Z = (conteudo1==0			 ? 1 : 0);
 	processador_param->E = (conteudo1==conteudo2	 ? 1 : 0);
 	processador_param->L = (conteudo1<conteudo2		 ? 1 : 0);
 }
 void privada_JPZ(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "JPZ %d", enderecoDestino_param);
+	sprintf(mensagemInstrucao_param, "   =JPZ %d", enderecoDestino_param);
 	if(processador_param->Z == 1){
 		contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
 	}
 }
 void privada_JPE(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "JPE %d", enderecoDestino_param);
+	sprintf(mensagemInstrucao_param, "   =JPE %d", enderecoDestino_param);
 	if(processador_param->E == 1){
 		contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
 	}
 }
 void privada_JPL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "JPL %d", enderecoDestino_param);
+	sprintf(mensagemInstrucao_param, "   =JPL %d", enderecoDestino_param);
 	if(processador_param->L == 1){
 		contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
 	}
 }
 void privada_NOP(PROCESSADOR *processador_param, char* mensagemInstrucao_param){
-	sprintf(mensagemInstrucao_param, "NOP");
+	sprintf(mensagemInstrucao_param, "   =NOP");
 }
 void privada_LDM(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param, int enderecoMemoria_param){
 	PALAVRA palavraParaGravar;
@@ -210,7 +210,7 @@ void privada_LDM(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	if(invadiuMemoria){
 		kernel_rodar(&global_kernel, INTERRUPCAO_SEGMENTACAO_MEMORIA);
 	} else {
-		sprintf(mensagemInstrucao_param, "LDM %d %d %d %d %d", registradorDestino_param, 
+		sprintf(mensagemInstrucao_param, "   =LDM %d %d %d %d %d", registradorDestino_param, 
 			(((enderecoMemoria_param & 0xFF000000)/256)/256)/256,
 			((enderecoMemoria_param & 0x00FF0000)/256)/256,
 			(enderecoMemoria_param & 0x0000FF00)/256,
@@ -221,7 +221,7 @@ void privada_LDM(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	}
 }
 void privada_LDC(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param, PALAVRA constante_param){
-	sprintf(mensagemInstrucao_param, "LDC %d %d %d %d %d", registradorDestino_param, 
+	sprintf(mensagemInstrucao_param, "   =LDC %d %d %d %d %d", registradorDestino_param, 
 		(((constante_param & 0xFF000000)/256)/256)/256,
 		((constante_param & 0x00FF0000)/256)/256,
 		(constante_param & 0x0000FF00)/256,
@@ -231,7 +231,7 @@ void privada_LDC(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 		constante_param);
 }
 void privada_WRM(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorOrigem_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "WRM %d %d %d %d %d", registradorOrigem_param, 
+	sprintf(mensagemInstrucao_param, "   =WRM %d %d %d %d %d", registradorOrigem_param, 
 		(((enderecoDestino_param & 0xFF000000)/256)/256)/256,
 		((enderecoDestino_param & 0x00FF0000)/256)/256,
 		(enderecoDestino_param & 0x0000FF00)/256,
@@ -244,27 +244,22 @@ void privada_WRM(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	}
 }
 void privada_LI(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param, int registradorOrigem_param){
-	sprintf(mensagemInstrucao_param, "LI %d %d", registradorDestino_param, registradorOrigem_param);
+	sprintf(mensagemInstrucao_param, "   =LI %d %d", registradorDestino_param, registradorOrigem_param);
 
-	PALAVRA conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem_param));
-	int enderecoDestino;
-	int invadiuMemoria = MMU_sincronizado_lerLogico(&global_MMU, conteudoDestino, &enderecoDestino, 0);
+	PALAVRA enderecoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem_param));
+	int conteudoDestino;
+	int invadiuMemoria = MMU_sincronizado_lerLogico(&global_MMU, enderecoDestino, &conteudoDestino, 0);
+
 	if(invadiuMemoria){
 		kernel_rodar(&global_kernel, INTERRUPCAO_SEGMENTACAO_MEMORIA);
 	} else {
-		PALAVRA conteudoOrigem;
-		invadiuMemoria = MMU_sincronizado_lerLogico(&global_MMU, enderecoDestino, &conteudoOrigem, 0);
-		if(invadiuMemoria){
-			kernel_rodar(&global_kernel, INTERRUPCAO_SEGMENTACAO_MEMORIA);
-		} else {
-			registrador_carregarPalavra(
-				contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino_param),
-				conteudoOrigem);
-		}
+		registrador_carregarPalavra(
+			contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino_param),
+			conteudoDestino);
 	}
 }
 void privada_WI(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorOrigem_param, int registradorDestino_param){
-	sprintf(mensagemInstrucao_param, "WI %d %d", registradorOrigem_param, registradorDestino_param);
+	sprintf(mensagemInstrucao_param, "   =WI %d %d", registradorOrigem_param, registradorDestino_param);
 
 	PALAVRA conteudoOrigem = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorOrigem_param));
 	PALAVRA conteudoDestino = registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino_param));
@@ -274,7 +269,7 @@ void privada_WI(PROCESSADOR *processador_param, char* mensagemInstrucao_param, i
 	}
 }
 void privada_JCA(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "JCA %d %d %d %d", 
+	sprintf(mensagemInstrucao_param, "   =JCA %d %d %d %d", 
 		(((enderecoDestino_param & 0xFF000000)/256)/256)/256,
 		((enderecoDestino_param & 0x00FF0000)/256)/256,
 		(enderecoDestino_param & 0x0000FF00)/256,
@@ -283,7 +278,7 @@ void privada_JCA(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
 }
 void privada_JCZ(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "JCZ %d %d %d %d", 
+	sprintf(mensagemInstrucao_param, "   =JCZ %d %d %d %d", 
 		(((enderecoDestino_param & 0xFF000000)/256)/256)/256,
 		((enderecoDestino_param & 0x00FF0000)/256)/256,
 		(enderecoDestino_param & 0x0000FF00)/256,
@@ -295,7 +290,7 @@ void privada_JCZ(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 }
 void privada_JCE(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "JCE %d %d %d %d", 
+	sprintf(mensagemInstrucao_param, "   =JCE %d %d %d %d", 
 		(((enderecoDestino_param & 0xFF000000)/256)/256)/256,
 		((enderecoDestino_param & 0x00FF0000)/256)/256,
 		(enderecoDestino_param & 0x0000FF00)/256,
@@ -307,7 +302,7 @@ void privada_JCE(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 }
 void privada_JCL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "JCL %d %d %d %d", 
+	sprintf(mensagemInstrucao_param, "   =JCL %d %d %d %d", 
 		(((enderecoDestino_param & 0xFF000000)/256)/256)/256,
 		((enderecoDestino_param & 0x00FF0000)/256)/256,
 		(enderecoDestino_param & 0x0000FF00)/256,
@@ -319,14 +314,14 @@ void privada_JCL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 }
 void privada_JRA(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param){
-	sprintf(mensagemInstrucao_param, "JRA %d", registradorDestino_param);
+	sprintf(mensagemInstrucao_param, "   =JRA %d", registradorDestino_param);
 
 	PALAVRA conteudoDestino = registrador_lerPalavra(
 		contexto_getRegistrador(&processador_param->contextoProcessador, registradorDestino_param));
 	contexto_setPC(&processador_param->contextoProcessador, conteudoDestino);
 }
 void privada_JRZ(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param){
-	sprintf(mensagemInstrucao_param, "JRZ %d", registradorDestino_param);
+	sprintf(mensagemInstrucao_param, "   =JRZ %d", registradorDestino_param);
 
 	if(processador_param->Z == 1){
 		PALAVRA conteudoDestino = registrador_lerPalavra(
@@ -335,7 +330,7 @@ void privada_JRZ(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	}
 }
 void privada_JRE(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param){
-	sprintf(mensagemInstrucao_param, "JRE %d", registradorDestino_param);
+	sprintf(mensagemInstrucao_param, "   =JRE %d", registradorDestino_param);
 
 	if(processador_param->E == 1){
 		PALAVRA conteudoDestino = registrador_lerPalavra(
@@ -344,7 +339,7 @@ void privada_JRE(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	}
 }
 void privada_JRL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param){
-	sprintf(mensagemInstrucao_param, "JRL %d", registradorDestino_param);
+	sprintf(mensagemInstrucao_param, "   =JRL %d", registradorDestino_param);
 
 	if(processador_param->L == 1){
 		PALAVRA conteudoDestino = registrador_lerPalavra(
@@ -353,7 +348,7 @@ void privada_JRL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	}
 }
 void privada_CALL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, PALAVRA enderecoDestino_param){
-	sprintf(mensagemInstrucao_param, "CALL %d", enderecoDestino_param);
+	sprintf(mensagemInstrucao_param, "   =CALL %d", enderecoDestino_param);
 
 	registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER), 1);
 	int posicaoApontadaStack = 
@@ -370,7 +365,7 @@ void privada_CALL(PROCESSADOR *processador_param, char* mensagemInstrucao_param,
 	}
 }
 void privada_RETC(PROCESSADOR *processador_param, char* mensagemInstrucao_param){
-	sprintf(mensagemInstrucao_param, "RETC");
+	sprintf(mensagemInstrucao_param, "   =RETC");
 
 	int posicaoApontadaStack = 
 		registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER));
@@ -387,7 +382,7 @@ void privada_RETC(PROCESSADOR *processador_param, char* mensagemInstrucao_param)
 	}
 }
 void privada_PUS(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorOrigem_param){
-	sprintf(mensagemInstrucao_param, "PUS %d", registradorOrigem_param);
+	sprintf(mensagemInstrucao_param, "   =PUS %d", registradorOrigem_param);
 
 	registrador_somar(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER), 1);
 	int posicaoApontadaStack = 
@@ -405,7 +400,7 @@ void privada_PUS(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 	}
 }
 void privada_POP(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param){
-	sprintf(mensagemInstrucao_param, "POP %d", registradorDestino_param);
+	sprintf(mensagemInstrucao_param, "   =POP %d", registradorDestino_param);
 
 	int posicaoApontadaStack = 
 		registrador_lerPalavra(contexto_getRegistrador(&processador_param->contextoProcessador, REGISTRADOR_STACK_POINTER));
@@ -712,9 +707,10 @@ void processador_rodar(PROCESSADOR *processador_param){
 
 	while(1){
 		sincronizadorGlobal_dormir(100);
-		sprintf(mensagem, "PROCESSADOR: PC=%d IR=%d %d %d %d", 	contexto_getPC(&processador_param->contextoProcessador),
-			processador_param->IR.conteudo[0], processador_param->IR.conteudo[1], processador_param->IR.conteudo[2],
-			processador_param->IR.conteudo[3]);
+		sprintf(mensagem, "PROCESSADOR: PC=%d", 	contexto_getPC(&processador_param->contextoProcessador));
+		tela_escreverNaColuna(&global_tela, mensagem, 1);
+		sprintf(mensagem, " IR=%d %d %d %d", processador_param->IR.conteudo[0], processador_param->IR.conteudo[1], 
+			processador_param->IR.conteudo[2], processador_param->IR.conteudo[3]);
 		tela_escreverNaColuna(&global_tela, mensagem, 1);
 
 		houveAcessoIlegal=0;

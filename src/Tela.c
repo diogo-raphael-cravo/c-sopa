@@ -327,9 +327,9 @@ void tela_rodar(TELA *tela_param){
 			case KEY_DOWN: tela_rolar(tela_param, 1);
 				break;
 			case KEY_RIGHT: if(tela_param->abertaParaImpressoes == 1){
-								tela_param->abertaParaImpressoes = 0;
-								//sem_wait(&global_mutexParaTela);
+								tela_param->abertaParaImpressoes = 0;								
 								sincronizadorGlobal_sincronizado_pausar();
+								//sem_wait(&global_mutexParaTela);
 							} else {
 								sincronizadorGlobal_sincronizado_avancar();
 							}
