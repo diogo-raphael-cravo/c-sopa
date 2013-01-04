@@ -84,6 +84,7 @@ void sincronizadorGlobal_dormir(int quantosMilissegundos_param){
 		privada_dormir(novoSemaforo);
 	}
 	free(novoSemaforo);
+//	usleep(1000*quantosMilissegundos_param);
 }
 
 /**

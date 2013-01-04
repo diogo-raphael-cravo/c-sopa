@@ -9,16 +9,11 @@
 #define PLACA_REDE_PACOTE_INEXISTENTE NULL
 #define MAXIMO_PACOTES_GUARDADOS 100
 
-struct str_destinatarioPacote{
-	char* IP; //IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
-	int portaHospedeiro; //Porta do hospedeiro do SOPA.
-};
-
-typedef struct str_destinatarioPacote DESTINATARIO_PACOTE_SOPA;
-
 struct str_placaRede{
 	FIFO pacotesRecebidos;
-	
+	pthread_t threadIdConsumidor;
+	sem_t semaforoItens;
+	sem_t semaforoEspacos;
 };
 
 typedef struct str_placaRede PLACA_REDE;
@@ -38,10 +33,11 @@ void placaRede_rodar(PLACA_REDE *placaRede_param);
 
 /**
 * @param PLACA_REDE					*placaRede_param		A placa que realizará a operação.
-* @param DESTINATARIO_PACOTE_SOPA	destino_param			O destino do pacote.
-* @param PACOTE_APLICACAO_SOPA		*mensagem_param			A mensagem que será enviada.
+* @param char*						ipDestino_param			IP no formato "127.0.0.1". NENHUM campo 
+*															deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
+* @param char*						*mensagem_param			A mensagem que será enviada.
 */
-void placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, DESTINATARIO_PACOTE_SOPA destino_param, PACOTE_APLICACAO_SOPA *mensagem_param);
+void placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param);
 
 /**
 * @param PLACA_REDE					*placaRede_param		A placa que será consultada.

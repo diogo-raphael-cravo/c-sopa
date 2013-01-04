@@ -13,174 +13,84 @@
 //---------------------------------------------------------------------
 //			FUNÇÕES PÚBLICAS DO HEADER						
 //---------------------------------------------------------------------
-/* servidor
-enum erros {WSTARTUP, ABRESOCK, BIND, ACCEPT, LISTEN,RECEIVE}; 
-
-void TrataErro(SOCKET, int);
-
-int main(int argc, char* argv[])
-{
-  SOCKET s=0, s_cli;
-  struct sockaddr_in  addr_serv, addr_cli;
-  int addr_cli_len=sizeof(addr_cli);
-
-  char recvbuf[MAX_PACKET];
-
-  // Cria o socket na familia AF_INET (Internet) e do tipo TCP (SOCK_STREAM)
-  if ((s = socket(AF_INET, SOCK_STREAM, 0))==INVALID_SOCKET)
-	  TrataErro(s, ABRESOCK);
-
-  // Define domínio, IP e porta a receber dados
-  addr_serv.sin_family = AF_INET;
-  addr_serv.sin_addr.s_addr = htonl(INADDR_ANY); // recebe de qualquer IP
-  addr_serv.sin_port = htons(PORTA_SRV);
-
-  // Associa socket com estrutura addr_serv
-  if ((bind(s, (struct sockaddr *)&addr_serv, sizeof(addr_serv))) != 0)
-	  TrataErro(s, BIND);
-
-  // Coloca socket em estado de escuta para as conexoes na porta especificada
-  if((listen(s, 8)) != 0) // permite ateh 8 conexoes simultaneas
-	  TrataErro(s, LISTEN);
-
-  // permite conexoes entrantes utilizarem o socket
-  if((s_cli=accept(s, (struct sockaddr *)&addr_cli, &addr_cli_len)) < 0)
-	  TrataErro(s, ACCEPT);
-
-  // fica esperando chegar mensagem
-  while(1)
-  {
-    if ((recv(s_cli, recvbuf, MAX_PACKET, 0)) < 0)
-    {
-      close(s_cli);
-	  TrataErro(s, RECEIVE);
-    }
-
-    // mostra na tela
-    if(strcmp((const char *)&recvbuf, "q")==0)
-      break;
-    else
-      printf(" - msg recv - %s\n", recvbuf);
-  }
-
-  // fecha socket e termina programa
-  printf("Fim da conexao\n");
-  close(s);
-  close(s_cli);
-  exit(1);
+/**
+* Envia requisição RPC ao IP e porta fornecidos.
+* @param OPERACAO_RPC	operacao_param		A operação desejada.
+* @param void*			parametros_param	Os parâmetros enviados.
+* @return RPC*	O novo RPC.
+*/
+RPC* rpc_criarNovo(OPERACAO_RPC operacao_param, void* parametros_param){
+	RPC *novo = (RPC*) malloc(sizeof(RPC));
+	novo->operacao = operacao_param;
+	if(operacao_param == OPERACAO_ADD){
+		novo->parametros = parametros_param;
+	}
+	return novo;
 }
 
-void TrataErro(SOCKET s, int tipoerro)
-{
-	char tipo[20];
+/**
+* @param RPC		*rpc_param		O RPC que será transformado em string.
+* @return char*		String que representa o pacote.
+* @see rpc_deString 	Processo reverso.
+*/
+char* rpc_paraString(RPC *rpc_param){
+	char* stringRPC = (char*) malloc(TAMANHO_RPC_STRING*sizeof(char));
+	char* novaString  = (char*) malloc(TAMANHO_PACOTE_STRING*sizeof(char));
+	memset(stringRPC, '\0', TAMANHO_RPC_STRING);	
 
-	switch(tipoerro) {
-		case WSTARTUP:
-			strcpy(tipo, "Windows Startup");
-			break;
-		case ABRESOCK:
-			strcpy(tipo, "Open Socket");
-			break;
-		case BIND:
-			strcpy(tipo, "Bind");
-			break;
-		case ACCEPT:
-			strcpy(tipo, "Accept");
-			break;
-		case LISTEN:
-			strcpy(tipo, "Listen");
-			break;
-		case RECEIVE:
-			strcpy(tipo, "Receive");
-			break;
-		default:
-			strcpy(tipo, "Indefinido. Verificar");
+	memset(novaString, '\0', TAMANHO_PACOTE_STRING);
+	itoa(rpc_param->operacao, novaString, 10);
+	strcat(stringRPC, novaString);
+	strcat(stringRPC, "\n");
+
+	switch(rpc_param->operacao){
+		case OPERACAO_ADD:
+			memset(novaString, '\0', TAMANHO_PACOTE_STRING);
+			itoa(((int) rpc_param->parametros[0]), novaString, 10);
+			strcat(stringRPC, novaString);
+			strcat(stringRPC, "\n");
+
+			memset(novaString, '\0', TAMANHO_PACOTE_STRING);
+			itoa((int) rpc_param->parametros[1], novaString, 10);
+			strcat(stringRPC, novaString);
+			strcat(stringRPC, "\n");
 			break;
 	}
-    printf("erro no %s", tipo);
-    close(s);
-    exit(1);
+
+	return stringRPC;
 }
 
+/**
+* @param char*		string_param		String que representa o rpc.
+* @return RPC*		O rpc que será criado à partir da string.
+* @see rpc_paraString 	Processo reverso.
 */
-/* cliente
-#define PORTA_CLI 2345 // porta TCP do cliente
-#define PORTA_SRV 2023 // porta TCP do servidor
-#define STR_IPSERVIDOR "127.0.0.1"
-//#define STR_IPSERVIDOR "192.168.0.146"
+RPC* rpc_deString(char* string_param){
+	char* token = strtok(string_param, "\n");
 
-int main(int argc, char* argv[])
-{
-  SOCKET s;
-  struct sockaddr_in  s_cli, s_serv;
-  
-
-  // abre socket TCP
-  if ((s = socket(AF_INET, SOCK_STREAM, 0))==INVALID_SOCKET)
-  {
-    printf("Erro iniciando socket\n");
-    return(0);
-  }
-
-  // seta informacoes IP/Porta locais
-  s_cli.sin_family = AF_INET;
-  s_cli.sin_addr.s_addr = htonl(INADDR_ANY);
-  s_cli.sin_port = htons(PORTA_CLI);
-
-  // associa configuracoes locais com socket
-  if ((bind(s, (struct sockaddr *)&s_cli, sizeof(s_cli))) != 0)
-  {
-    printf("erro no bind\n");
-    close(s);
-    return(0);
-  }
-
-  // seta informacoes IP/Porta do servidor remoto
-  s_serv.sin_family = AF_INET;
-  s_serv.sin_addr.s_addr = inet_addr(STR_IPSERVIDOR);
-  s_serv.sin_port = htons(PORTA_SRV);
-
-  // connecta socket aberto no cliente com o servidor
-  if(connect(s, (struct sockaddr*)&s_serv, sizeof(s_serv)) != 0)
-  {
-    //printf("erro na conexao - %d\n", WSAGetLastError());
-    printf("erro na conexao");
-    close(s);
-    exit(1);
-  }
-
-  // recebe do teclado e envia ao servidor
-  char str[1250];
-  char ch;
-  int i;
-
-  while(1)
-  {
-    printf("$ ");
-
-    for(i=0; (i<80) &&  (ch = getchar()) != '\n'; i++ )
-      str[i] = (char)ch;
-    str[i] = '\0';
-    
-    //strcpy(str, "mensagem\0");
-
-    if ((send(s, (const char *)&str, sizeof(str),0)) < 0)
-    {
-      //printf("erro na transmissão - %d\n", WSAGetLastError());
-      printf("erro na transmissão\n");
-      close(s);
-      return 0;
-    }
-    if(strcmp((const char *)&str, "q")==0)
-      break;
-     
-     //usleep(100000);
-  }
-
-  // fecha socket e termina programa
-  printf("Fim da conexao\n");
-  close(s);
-  return 0;
+	OPERACAO_RPC operacao = atoi(token);
+	void* parametros;
+	switch(operacao){
+		case OPERACAO_ADD:
+			parametros = (void*) malloc(2*sizeof(int));
+			token = strtok(string_param, "\n");
+			parametros[0] = atoi(token);
+			token = strtok(string_param, "\n");
+			parametros[1] = atoi(token);
+			break;
+	}
+	return rpc_criarNovo(operacao, parametros);
 }
 
-*/
+
+
+
+
+
+
+
+
+
+
+
+
