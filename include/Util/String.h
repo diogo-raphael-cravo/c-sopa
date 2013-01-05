@@ -31,5 +31,10 @@ char* string_pegarSubtextoNaOrdem(char* texto_param, int tamanhoSubtexto_param, 
 */
 int string_paraInt(char* texto_param);
 
-
+/**
+* @param char*	texto_param	O texto que será convertido.
+* @return int	 Se char* contiver um caractere, retornará seu valor ASCII. Caso contrário, o interpretará como um número
+*				 e retornará o int correspondente ao número.
+*/
+int string_deInt(char* texto_param);
 

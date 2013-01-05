@@ -8,6 +8,8 @@
 //Constantes
 #define TAMANHOBUFFER 256
 #define SOCKET_SOPA_SEPARADOR '\n'
+#define PORTA_TCP 10000
+#define TAMANHOFILA 5
 
 struct str_socketSOPA{
 	struct sockaddr_in servidor;

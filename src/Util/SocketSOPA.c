@@ -1,4 +1,4 @@
-#include "../include/DadosComuns.h"
+#include "../../include/DadosComuns.h"
 
 /**
 * Variáveis globais acessíveis somente neste arquivo.
@@ -26,7 +26,6 @@ void GerenciaDados(int sockCliente_param, char* destino_param) {
 	}	
 	
 	destino_param[bytesRecebidos] = SOCKET_SOPA_SEPARADOR;
-	strcat(destino_param, inet_ntoa(cliente.sin_addr));
 
 	close(sockCliente_param);
 }
@@ -72,11 +71,13 @@ void socketSopa_esperarMensagem(SOCKET_SOPA *socket_param, char* destino_param){
 
 	unsigned int tamanhoCliente = sizeof(cliente);
 	//Aguarda pela conexao de algum cliente
-    if((clientSock = accept(serverSock, (struct sockaddr *) &cliente, &tamanhoCliente)) < 0){
+	if((clientSock = accept(socket_param->serverSock, (struct sockaddr *) &cliente, &tamanhoCliente)) < 0){
 		tela_imprimirTelaAzulDaMorte(&global_tela, "Falha ao tentar estabelecer comunicacao com o cliente");
-    }
+	}
 
-    GerenciaDados(clientSock, destino_param);
+	GerenciaDados(clientSock, destino_param);
+
+	strcat(destino_param, inet_ntoa(cliente.sin_addr));
 }
 
 /**
@@ -87,9 +88,7 @@ void socketSopa_esperarMensagem(SOCKET_SOPA *socket_param, char* destino_param){
 void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param){
 	int sock;
 	struct sockaddr_in server;
-	char buffer[TAMANHOBUFFER];
 	unsigned int tamanhoArray;
-	int totalDeBytes = 0;
 
 	//Criacao do Socket TCP
 	if((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0){
@@ -97,10 +96,10 @@ void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param){
 	}
 
 	//Preparando estrutura de enderecamento do socket
-	memset(&server, 0, sizeof(server));		//Limpando a area de memoria da estrutura
-	server.sin_family = AF_INET;			//IP
-	server.sin_addr.s_addr = inet_addr();	//Aceita conexoes apenas do servidor
-	server.sin_port = htons(PORTA_TCP);		//Especifica a porta do servidor
+	memset(&server, 0, sizeof(server));			//Limpando a area de memoria da estrutura
+	server.sin_family = AF_INET;				//IP
+	server.sin_addr.s_addr = htonl(INADDR_ANY);	//Aceita conexoes apenas do servidor
+	server.sin_port = htons(PORTA_TCP);			//Especifica a porta do servidor
 
 	//Estabelecimento da conexao com o servidor
 	if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0){

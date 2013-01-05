@@ -16,15 +16,13 @@
 /**
 * Envia requisição RPC ao IP e porta fornecidos.
 * @param OPERACAO_RPC	operacao_param		A operação desejada.
-* @param void*			parametros_param	Os parâmetros enviados.
+* @param FIFO			*parametros_param	Os parâmetros enviados.
 * @return RPC*	O novo RPC.
 */
-RPC* rpc_criarNovo(OPERACAO_RPC operacao_param, void* parametros_param){
+RPC* rpc_criarNovo(OPERACAO_RPC operacao_param, FIFO *parametros_param){
 	RPC *novo = (RPC*) malloc(sizeof(RPC));
 	novo->operacao = operacao_param;
-	if(operacao_param == OPERACAO_ADD){
-		novo->parametros = parametros_param;
-	}
+	FIFO_copiar(&novo->parametros, parametros_param);
 	return novo;
 }
 
@@ -36,26 +34,21 @@ RPC* rpc_criarNovo(OPERACAO_RPC operacao_param, void* parametros_param){
 char* rpc_paraString(RPC *rpc_param){
 	char* stringRPC = (char*) malloc(TAMANHO_RPC_STRING*sizeof(char));
 	char* novaString  = (char*) malloc(TAMANHO_PACOTE_STRING*sizeof(char));
-	memset(stringRPC, '\0', TAMANHO_RPC_STRING);	
+	memset(stringRPC, '\0', TAMANHO_RPC_STRING);
 
 	memset(novaString, '\0', TAMANHO_PACOTE_STRING);
-	itoa(rpc_param->operacao, novaString, 10);
-	strcat(stringRPC, novaString);
-	strcat(stringRPC, "\n");
+	sprintf(stringRPC, "%d\n", rpc_param->operacao);
 
 	switch(rpc_param->operacao){
 		case OPERACAO_ADD:
 			memset(novaString, '\0', TAMANHO_PACOTE_STRING);
-			itoa(((int) rpc_param->parametros[0]), novaString, 10);
-			strcat(stringRPC, novaString);
-			strcat(stringRPC, "\n");
-
-			memset(novaString, '\0', TAMANHO_PACOTE_STRING);
-			itoa((int) rpc_param->parametros[1], novaString, 10);
-			strcat(stringRPC, novaString);
-			strcat(stringRPC, "\n");
+			sprintf(novaString, "%d\n%d\n", 
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 0)),
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 1)));
 			break;
 	}
+
+	strcat(stringRPC, novaString);
 
 	return stringRPC;
 }
@@ -69,14 +62,20 @@ RPC* rpc_deString(char* string_param){
 	char* token = strtok(string_param, "\n");
 
 	OPERACAO_RPC operacao = atoi(token);
-	void* parametros;
+	FIFO *parametros = (FIFO*) malloc(sizeof(FIFO));
 	switch(operacao){
 		case OPERACAO_ADD:
-			parametros = (void*) malloc(2*sizeof(int));
+			FIFO_inicializar(parametros, 2);
+
 			token = strtok(string_param, "\n");
-			parametros[0] = atoi(token);
+			int *novoValor = (int*) malloc(sizeof(int));
+			*novoValor = atoi(token);
+
+			FIFO_inserir(parametros, novoValor);
 			token = strtok(string_param, "\n");
-			parametros[1] = atoi(token);
+			novoValor = (int*) malloc(sizeof(int));
+			*novoValor = atoi(token);
+			FIFO_inserir(parametros, novoValor);
 			break;
 	}
 	return rpc_criarNovo(operacao, parametros);

@@ -15,7 +15,7 @@
 * @param PLACA_REDE		*placaRede_param		A placa que irá rodar.
 */
 void placaRede_rodarProdutor(PLACA_REDE *placaRede_param){
-	char* stringRecebida;
+	char* stringRecebida = "";
 	SOCKET_SOPA socket;
 
 	socketSopa_inicializar(&socket);
@@ -55,7 +55,7 @@ void placaRede_inicializar(PLACA_REDE *placaRede_param){
 * @param PLACA_REDE		*placaRede_param		A placa que irá rodar.
 */
 void placaRede_rodar(PLACA_REDE *placaRede_param){
-	pthread_create(&threadIdConsumidor, NULL, placaRede_rodarConsumidor, 0); //UMA thread
+	pthread_create(&placaRede_param->threadIdConsumidor, NULL, placaRede_rodarConsumidor, placaRede_param); //UMA thread
 	placaRede_rodarProdutor(placaRede_param);								 //OUTRA thread
 }
 

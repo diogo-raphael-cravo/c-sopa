@@ -32,12 +32,10 @@ typedef struct str_pacoteAplicacaoSOPA PACOTE_APLICACAO_SOPA;
 * @param void*				parametros_param			Os parâmetros da operação RPC.
 * @param int				portaOrigemSOPA_param		A porta do SOPA do qual se origina o pacote.
 * @param int				portaDestinoSOPA_param		A porta do SOPA a que se destina o pacote.
-* @param char*				ipOrigem_param				IP no formato "127.0.0.1". NENHUM campo deve
-*														 começar em 0 (algo do tipo "127.0.0.01" causará erro).
 * @return PACOTE_APLICACAO_SOPA*	O pacote criado.
 */
 PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_criarPacoteRPC(OPERACAO_RPC operacao_param, void* parametros_param,
-	int portaOrigemSOPA_param, int portaDestinoSOPA_param, char* ipOrigem_param);
+	int portaOrigemSOPA_param, int portaDestinoSOPA_param);
 
 /**
 * @param PACOTE_APLICACAO_SOPA		*pacote_param		O pacote que será transformado em string.
