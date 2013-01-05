@@ -6,7 +6,7 @@
 //---------------------------------------------------------------------
 
 //Constantes
-#define SINCRONIZADOR_GLOBAL_QUANTUM_MILISSEGUNDOS 100
+#define SINCRONIZADOR_GLOBAL_QUANTUM_MILISSEGUNDOS 30
 #define MAXIMO_THREADS_SINCRONIZADAS 10
 
 

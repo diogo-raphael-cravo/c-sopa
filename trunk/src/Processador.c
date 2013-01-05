@@ -286,8 +286,9 @@ void privada_JCZ(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 
 	if(processador_param->Z == 1){
 		contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
+	} else {
+		contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 	}
-	contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 }
 void privada_JCE(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
 	sprintf(mensagemInstrucao_param, "   =JCE %d %d %d %d", 
@@ -298,8 +299,9 @@ void privada_JCE(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 
 	if(processador_param->E == 1){
 		contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
+	} else {
+		contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 	}
-	contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 }
 void privada_JCL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int enderecoDestino_param){
 	sprintf(mensagemInstrucao_param, "   =JCL %d %d %d %d", 
@@ -310,8 +312,9 @@ void privada_JCL(PROCESSADOR *processador_param, char* mensagemInstrucao_param, 
 
 	if(processador_param->L == 1){
 		contexto_setPC(&processador_param->contextoProcessador, enderecoDestino_param);
+	} else {
+		contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 	}
-	contexto_setPC(&processador_param->contextoProcessador, contexto_getPC(&processador_param->contextoProcessador)+1);
 }
 void privada_JRA(PROCESSADOR *processador_param, char* mensagemInstrucao_param, int registradorDestino_param){
 	sprintf(mensagemInstrucao_param, "   =JRA %d", registradorDestino_param);
