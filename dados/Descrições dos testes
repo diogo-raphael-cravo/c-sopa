@@ -306,9 +306,11 @@ Nome do Arquivo:					 J_CAZEL_RAZEL
 Resultado Esperado:					 *Faz 8 jumps (JCA, JCZ, JCE, JCL, JRA, JRZ, JRE e JRL).
 									 *Todos jumps condicionais falham uma vez antes de funcionarem.
 									 *Os jumps alternam entre a posição 0 e a posição 300.
+									 *Nenhum NOP é executado.
+									 *Ao terminar, registradores 5 a 10 possuem valor 99 99 99 99.
 									 *Programa termina sem falhas.
-Última revisão em que esteve OK:	 -
-Dependências:						 16, 17
+Última revisão em que esteve OK:	 80
+Dependências:						 9, 16, 17
 =====================================================
 
 
