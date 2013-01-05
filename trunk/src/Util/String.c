@@ -1,6 +1,4 @@
-#include "../../include/Util/String.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "../../include/DadosComuns.h"
 
 /**
 * Variáveis globais acessíveis somente neste arquivo.

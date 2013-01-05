@@ -706,7 +706,7 @@ void processador_rodar(PROCESSADOR *processador_param){
 	int houveAcessoIlegal;
 
 	while(1){
-		sincronizadorGlobal_dormir(100);
+		sincronizadorGlobal_dormir(1);
 		sprintf(mensagem, "PROCESSADOR: PC=%d", 	contexto_getPC(&processador_param->contextoProcessador));
 		tela_escreverNaColuna(&global_tela, mensagem, 1);
 		sprintf(mensagem, " IR=%d %d %d %d", processador_param->IR.conteudo[0], processador_param->IR.conteudo[1], 

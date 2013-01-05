@@ -16,7 +16,7 @@ typedef enum enum_operacoesRPC OPERACAO_RPC;
 
 struct str_RPC{
 	OPERACAO_RPC operacao;
-	void* parametros;
+	FIFO parametros;
 };
 
 typedef struct str_RPC RPC;
@@ -27,10 +27,10 @@ typedef struct str_RPC RPC;
 /**
 * Envia requisição RPC ao IP e porta fornecidos.
 * @param OPERACAO_RPC	operacao_param		A operação desejada.
-* @param void*			parametros_param	Os parâmetros enviados.
+* @param FIFO			*parametros_param	Os parâmetros enviados.
 * @return RPC*	O novo RPC.
 */
-RPC* rpc_criarNovo(OPERACAO_RPC operacao_param, void* parametros_param);
+RPC* rpc_criarNovo(OPERACAO_RPC operacao_param, FIFO *parametros_param);
 
 /**
 * @param RPC		*rpc_param		O RPC que será transformado em string.

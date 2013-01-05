@@ -80,6 +80,7 @@ void sincronizadorGlobal_dormir(int quantosMilissegundos_param){
 	sem_t *novoSemaforo = (sem_t*) malloc(sizeof(sem_t));
 	sem_init(novoSemaforo, 0, 0);
 	int quantosQuantums = quantosMilissegundos_param/SINCRONIZADOR_GLOBAL_QUANTUM_MILISSEGUNDOS;
+	quantosQuantums += (0<quantosMilissegundos_param%SINCRONIZADOR_GLOBAL_QUANTUM_MILISSEGUNDOS? 1 : 0);
 	for(; quantumsPassados<quantosQuantums; quantumsPassados++){
 		privada_dormir(novoSemaforo);
 	}

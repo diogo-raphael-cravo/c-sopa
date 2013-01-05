@@ -38,9 +38,8 @@ PACOTE_APLICACAO_SOPA* privada_criarPacoteAplicacaoSOPA(TIPO_PACOTE_APLICACAO_SO
 * @param int				portaDestinoSOPA_param		A porta do SOPA a que se destina o pacote.
 * @return PACOTE_APLICACAO_SOPA*	O pacote criado.
 */
-PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_criarPacoteRPC(OPERACAO_RPC operacao_param, void* parametros_param
+PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_criarPacoteRPC(OPERACAO_RPC operacao_param, void* parametros_param,
 		int portaOrigemSOPA_param, int portaDestinoSOPA_param){
-	PACOTE_APLICACAO_SOPA_RPC* pacote = (PACOTE_APLICACAO_SOPA_RPC*) malloc(sizeof(PACOTE_APLICACAO_SOPA_RPC));
 	return privada_criarPacoteAplicacaoSOPA(
 				TIPO_PACOTE_APLICACAO_SOPA_RPC, 
 				portaOrigemSOPA_param, portaDestinoSOPA_param, 
@@ -55,25 +54,13 @@ PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_criarPacoteRPC(OPERACAO_RPC operacao_
 */
 char* pacoteAplicacaoSOPA_paraString(PACOTE_APLICACAO_SOPA *pacote_param){
 	char* stringPacote = (char*) malloc(TAMANHO_PACOTE_STRING*sizeof(char));
-	char* novaString  = (char*) malloc(TAMANHO_PACOTE_STRING*sizeof(char));
 	memset(stringPacote, '\0', TAMANHO_PACOTE_STRING);
 
-	memset(novaString, '\0', TAMANHO_PACOTE_STRING);
-	itoa(pacote_param->tipo, novaString, 10);
-	strcat(stringPacote, novaString);
-	strcat(stringPacote, "\n");
+	sprintf(stringPacote, "%d\n%d\n%d\n", 
+		pacote_param->tipo,
+		pacote_param->portaOrigemSOPA,
+		pacote_param->portaDestinoSOPA);
 
-	memset(novaString, '\0', TAMANHO_PACOTE_STRING);
-	itoa(pacote_param->portaOrigemSOPA, novaString, 10);
-	strcat(stringPacote, novaString);
-	strcat(stringPacote, "\n");
-
-	memset(novaString, '\0', TAMANHO_PACOTE_STRING);
-	itoa(pacote_param->portaDestinoSOPA, novaString, 10);
-	strcat(stringPacote, novaString);
-	strcat(stringPacote, "\n");
-	
-	free(novaString);
 	switch(pacote_param->tipo){
 		case TIPO_PACOTE_APLICACAO_SOPA_RPC:
 			strcat(stringPacote, rpc_paraString((RPC*) pacote_param->conteudo));
@@ -104,7 +91,10 @@ PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_deString(char* string_param){
 			break;
 	}
 	char* ipOrigem = strtok(NULL, "\n");
-	return pacoteAplicacaoSOPA_criarPacoteRPC(tipo, portaOrigemSOPA, portaDestinoSOPA, conteudo);
+
+	PACOTE_APLICACAO_SOPA *pacote = pacoteAplicacaoSOPA_criarPacoteRPC(tipo, conteudo, portaOrigemSOPA, portaDestinoSOPA);
+	pacote->ipOrigem = ipOrigem;
+	return pacote;
 }
 
 /**
