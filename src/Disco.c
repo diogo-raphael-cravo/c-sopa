@@ -133,13 +133,13 @@ void privada_transferirParaMemoria(DISCO *disco_param, int enderecoMemoria_param
 
 			sprintf(mensagem, "*(%d)=%d=", enderecoMemoria_param+palavraLida, 
 				disco_param->conteudo[enderecoDisco_param+palavraLida]);
-			tela_escreverNaColuna(&global_tela, mensagem, 5);
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
 			sprintf(mensagem, "%d %d %d %d", 
 				(((disco_param->conteudo[enderecoDisco_param+palavraLida] & 0xFF000000)/256)/256)/256,
 				((disco_param->conteudo[enderecoDisco_param+palavraLida] & 0x00FF0000)/256)/256,
 				(disco_param->conteudo[enderecoDisco_param+palavraLida] & 0x0000FF00)/256,
 				disco_param->conteudo[enderecoDisco_param+palavraLida] & 0x000000FF);
-			tela_escreverNaColuna(&global_tela, mensagem, 5);
+			tela_escreverNaColuna(&global_tela, mensagem, 4);
 		}
 		//disco_imprimir(disco_param);
 	}
@@ -165,7 +165,7 @@ void privada_executarProximaOperacao(DISCO *disco_param){
 				disco_param->enderecoProximaOperacao, disco_param->tamanhoPalavrasProximaEscrita);
 			break;
 		case TIPO_OPERACAO_NENHUMA_DISCO:
-			tela_escreverNaColuna(&global_tela, "ERRO: A operacao especificada nao existe.",4);
+			tela_escreverNaColuna(&global_tela, "ERRO: A operacao especificada nao existe.", 4);
 	}
 
 	disco_param->realizandoOperacao = 0;

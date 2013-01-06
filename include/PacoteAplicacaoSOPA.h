@@ -7,6 +7,7 @@
 
 //Constantes
 #define TAMANHO_PACOTE_STRING TAMANHOBUFFER
+#define PORTA_QUALQUER -1
 
 enum enum_tipoPacoteAplicacaoSOPA{
 	TIPO_PACOTE_APLICACAO_SOPA_RPC
@@ -29,12 +30,12 @@ typedef struct str_pacoteAplicacaoSOPA PACOTE_APLICACAO_SOPA;
 //---------------------------------------------------------------------
 /**
 * @param OPERACAO_RPC		operacao_param				A operação RPC que será realizada.
-* @param void*				parametros_param			Os parâmetros da operação RPC.
+* @param FIFO*				parametros_param			Os parâmetros da operação RPC.
 * @param int				portaOrigemSOPA_param		A porta do SOPA do qual se origina o pacote.
 * @param int				portaDestinoSOPA_param		A porta do SOPA a que se destina o pacote.
 * @return PACOTE_APLICACAO_SOPA*	O pacote criado.
 */
-PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_criarPacoteRPC(OPERACAO_RPC operacao_param, void* parametros_param,
+PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_criarPacoteRPC(OPERACAO_RPC operacao_param, FIFO* parametros_param,
 	int portaOrigemSOPA_param, int portaDestinoSOPA_param);
 
 /**

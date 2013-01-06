@@ -36,7 +36,7 @@ int main(void){
 	tela_adicionarColuna(&global_tela, "          TIMER");
 	tela_adicionarColuna(&global_tela, "          KERNEL");
 	tela_adicionarColuna(&global_tela, "          DISCO");
-	tela_adicionarColuna(&global_tela, "           ETC");
+	tela_adicionarColuna(&global_tela, "         CONSOLE");
 
 	console_inicializar(&global_console);
 	memoria_sincronizado_inicializar(&global_memoria);

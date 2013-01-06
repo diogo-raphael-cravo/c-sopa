@@ -279,7 +279,7 @@ void privada_getParametroComandoUsuario(KERNEL *kernel_param, char* comando_para
 					strcpy(parametro, palavra);
 				}
 			}
-		}while(palavra=strtok(NULL," "));
+		}while((palavra=strtok(NULL," ")));
 	}
 
 	if(haParametro){
@@ -507,6 +507,90 @@ ERRO_KERNEL privada_agendarGetPalavraDeArquivoParaProcessoRodando(KERNEL *kernel
 			kernel_param->processoRodando, TIPO_OPERACAO_LEITURA_DISCO);
 
 		gerenciadorDisco_agendar(&kernel_param->gerenciadorAcessoDisco, operacaoDisco, operacaoKernel);
+	}
+
+	return erro;
+}
+
+/**
+* Faz uma chamada RPC, enviando mensagem ao IP destino.
+* @param KERNEL					*kernel_param				O kernel que realizará a chamada.
+* @param DESCRITOR_PROCESSO		*processoRequerente_param	Processo que solicita a chamada.
+*/
+ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *processoRequerente_param){
+	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
+
+	PALAVRA r0  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  0));
+	PALAVRA r1  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  1));
+	PALAVRA r2  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  2));
+	PALAVRA r3  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  3));
+	//PALAVRA r4  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  4));
+	//PALAVRA r5  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  5));
+	//PALAVRA r6  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  6));
+	//PALAVRA r7  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  7));
+	//PALAVRA r8  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  8));
+	//PALAVRA r9  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  9));
+	//PALAVRA r10 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 10));
+	//PALAVRA r11 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 11));
+	//PALAVRA r12 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 12));
+	//PALAVRA r13 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 13));
+	//PALAVRA r14 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 14));
+
+	int ip0 =  (((r0 & 0xFF000000)/256)/256)/256;
+	int ip1 =   ((r0 & 0x00FF0000)/256)/256;
+	int ip2 =    (r0 & 0x0000FF00)/256;
+	int ip3 =     r0 & 0x000000FF;
+
+	PACOTE_APLICACAO_SOPA *pacote;
+	FIFO *parametros;
+	OPERACAO_RPC operacao;
+	char* ipDestino;
+
+	operacao = r1;
+	if(erro == KERNEL_ERRO_NENHUM){
+		if(operacao == OPERACAO_ADD){
+			parametros = (FIFO*) malloc(sizeof(FIFO));
+			FIFO_inicializar(parametros, 2);
+			int *parametro = (int*) malloc(sizeof(int));
+			*parametro = r2;
+			FIFO_inserir(parametros, (void*) parametro);
+			parametro = (int*) malloc(sizeof(int));
+			*parametro = r3;
+			FIFO_inserir(parametros, (void*) parametro);
+		} else {
+			erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
+		}
+	}
+
+	if(erro == KERNEL_ERRO_NENHUM){
+tela_escreverNaColuna(&global_tela, "1", 3);
+		pacote = pacoteAplicacaoSOPA_criarPacoteRPC(operacao, parametros, 
+			descritorProcesso_getPID(processoRequerente_param), PORTA_QUALQUER);
+tela_escreverNaColuna(&global_tela, "2", 3);
+		ipDestino = (char*) malloc(3*5*sizeof(char));
+		sprintf(ipDestino, "%d.%d.%d.%d", ip0, ip1, ip2, ip3);
+tela_escreverNaColuna(&global_tela, "3", 3);
+		ERRO_REDE erroEnvio = placaRede_agendarEnvioMensagem(&global_placaRede, ipDestino, pacoteAplicacaoSOPA_paraString(pacote));
+tela_escreverNaColuna(&global_tela, "4", 3);
+		if(erroEnvio == ERRO_REDE_CRIACAO_SOCKET){
+			tela_escreverNaColuna(&global_tela, "RPC: ERRO: nao consegui criar o socket!", 3);
+			erro = KERNEL_ERRO_NAO_IDENTIFICADO;
+		} else if(erroEnvio == ERRO_REDE_CONEXAO_SERVIDOR){
+			tela_escreverNaColuna(&global_tela, "RPC: ERRO: nao consegui conectar ao servidor!", 3);
+			erro = KERNEL_ERRO_NAO_IDENTIFICADO;
+		} else if(erroEnvio == ERRO_REDE_ENVIO_DADOS){
+			tela_escreverNaColuna(&global_tela, "RPC: ERRO: nao consegui enviar os dados!", 3);
+			erro = KERNEL_ERRO_NAO_IDENTIFICADO;
+		} else if(erroEnvio != ERRO_REDE_NENHUM){
+			erro = KERNEL_ERRO_NAO_IDENTIFICADO;
+		}
+tela_escreverNaColuna(&global_tela, "5", 3);
+		FIFO_destruir(parametros);
+tela_escreverNaColuna(&global_tela, "6", 3);
+		free(pacote);
+tela_escreverNaColuna(&global_tela, "7", 3);
+		free(ipDestino);
+tela_escreverNaColuna(&global_tela, "8", 3);
 	}
 
 	return erro;
@@ -748,8 +832,26 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			break;
 		case INTERRUPCAO_SOFTWARE_PRINT:
-			sprintf(mensagem, "A interrupcao PRINT nao estah implementada.");
-			tela_escreverNaColuna(&global_tela, mensagem, 3);
+			sprintf(mensagem, "%c %c %c %c", 
+				(((registrador_lerPalavra(contexto_getRegistrador(
+					descritorProcesso_getContexto(*kernel_param->processoRodando), 0)) & 0xFF000000)/256)/256)/256,
+				((registrador_lerPalavra(contexto_getRegistrador(
+					descritorProcesso_getContexto(*kernel_param->processoRodando), 0)) & 0x00FF0000)/256)/256,
+				(registrador_lerPalavra(contexto_getRegistrador(
+					descritorProcesso_getContexto(*kernel_param->processoRodando), 0)) & 0x0000FF00)/256,
+				registrador_lerPalavra(contexto_getRegistrador(
+					descritorProcesso_getContexto(*kernel_param->processoRodando), 0)) & 0x000000FF);
+			tela_escreverNaColuna(&global_tela, mensagem, 5);
+			break;
+		case INTERRUPCAO_SOFTWARE_REQUISICAO_RPC:
+			erro = privada_solicitarRPC(kernel_param, *kernel_param->processoRodando);
+			if(erro == KERNEL_ERRO_NENHUM){
+				tela_escreverNaColuna(&global_tela, "RPC: chamada solicitada.", 3);
+			} else if(erro == KERNEL_ERRO_OPERACAO_RPC_INVALIDA){
+				tela_escreverNaColuna(&global_tela, "RPC: a operacao eh invalida.", 3);
+			} else {
+				tela_escreverNaColuna(&global_tela, "RPC: ocorreu um erro desconhecido.", 3);
+			}
 			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);

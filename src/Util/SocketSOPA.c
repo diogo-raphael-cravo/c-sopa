@@ -83,36 +83,44 @@ void socketSopa_esperarMensagem(SOCKET_SOPA *socket_param, char* destino_param){
 /**
 * @param char*		ip_param			IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
 * @param char*		mensagem_param		A mensagem que será enviada.
+* @return ERRO_REDE		Erro ocorrido durante tentativa de envio da mensagem.
 * ATENÇÃO: a mensagem já deve ter sido alocada!
 */
-void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param){
+ERRO_REDE socketSopa_enviarMensagem(char* ip_param, char* mensagem_param){
+	ERRO_REDE erro = ERRO_REDE_NENHUM;
 	int sock;
 	struct sockaddr_in server;
 	unsigned int tamanhoArray;
 
 	//Criacao do Socket TCP
 	if((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0){
-		tela_imprimirTelaAzulDaMorte(&global_tela, "Falha ao criar o socket");
+		erro = ERRO_REDE_CRIACAO_SOCKET;
 	}
+tela_escreverNaColuna(&global_tela, "3.1", 3);
+	if(erro == ERRO_REDE_NENHUM){
+		//Preparando estrutura de enderecamento do socket
+		memset(&server, 0, sizeof(server));				//Limpando a area de memoria da estrutura
+		server.sin_family = AF_INET;					//IP
+		server.sin_addr.s_addr = inet_addr(ip_param);	//Aceita conexoes apenas do servidor
+		server.sin_port = htons(PORTA_TCP);				//Especifica a porta do servidor
 
-	//Preparando estrutura de enderecamento do socket
-	memset(&server, 0, sizeof(server));			//Limpando a area de memoria da estrutura
-	server.sin_family = AF_INET;				//IP
-	server.sin_addr.s_addr = htonl(INADDR_ANY);	//Aceita conexoes apenas do servidor
-	server.sin_port = htons(PORTA_TCP);			//Especifica a porta do servidor
-
-	//Estabelecimento da conexao com o servidor
-	if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0){
-		tela_imprimirTelaAzulDaMorte(&global_tela, "Falha ao conectar com o servidor");
+		//Estabelecimento da conexao com o servidor
+		if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0){
+			erro = ERRO_REDE_CONEXAO_SERVIDOR;
+		}
 	}
+tela_escreverNaColuna(&global_tela, "3.2", 3);
+	if(erro == ERRO_REDE_NENHUM){
+		//Envia o array de bytes para o servidor
+		tamanhoArray = strlen(mensagem_param);
+		if(send(sock, mensagem_param, tamanhoArray, 0) != tamanhoArray){
+			erro = ERRO_REDE_ENVIO_DADOS;
+		}
 
-	//Envia o array de bytes para o servidor
-	tamanhoArray = strlen(mensagem_param);
-	if(send(sock, mensagem_param, tamanhoArray, 0) != tamanhoArray){
-		tela_imprimirTelaAzulDaMorte(&global_tela, "Erro no envio dos dados");
+		close(sock);
 	}
-
-	close(sock);
+tela_escreverNaColuna(&global_tela, "3.3", 3);
+	return erro;
 }
 
 

@@ -301,7 +301,7 @@ Dependências:						 28
 =====================================================
 
 =====================================================
-30)									 Long jumps (INCOMPLETO)
+30)									 Long jumps
 Nome do Arquivo:					 J_CAZEL_RAZEL
 Resultado Esperado:					 *Faz 8 jumps (JCA, JCZ, JCE, JCL, JRA, JRZ, JRE e JRL).
 									 *Todos jumps condicionais falham uma vez antes de funcionarem.
@@ -313,8 +313,28 @@ Resultado Esperado:					 *Faz 8 jumps (JCA, JCZ, JCE, JCL, JRA, JRZ, JRE e JRL).
 Dependências:						 9, 16, 17
 =====================================================
 
+=====================================================
+31)									 Print Interruption
+Nome do Arquivo:					 PRINT
+Resultado Esperado:					 *Programa termina sem erros.
+									 *Programa imprime as linhas:
+									 	I S T O
+									 	F U N C
+									 	I O N A
+Última revisão em que esteve OK:	 81
+Dependências:						 16, 17
+=====================================================
 
-
+=====================================================
+32)									 Remote Procedure Call Interruption
+Nome do Arquivo:					 RPC
+Resultado Esperado:					 *Programa termina sem erros.
+									 *Programa exibe a mensagem "RPC: ERRO: nao consegui conectar ao servidor!".
+									 
+Última revisão em que esteve OK:	 -
+Dependências:						 16, 17
+									 O IP 212.23.12.103 não deve estar rodando um SOPA.
+=====================================================
 
 
 

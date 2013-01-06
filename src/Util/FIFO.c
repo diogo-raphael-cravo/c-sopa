@@ -20,10 +20,11 @@
 * @param int	tamanho_param	O tamanho da FIFO, medido em número de elementos.
 */
 void FIFO_inicializar(FIFO *fifo_param, int tamanho_param){
-	fifo_param->tamanho = tamanho_param;
-	fifo_param->conteudo = (void**) malloc(tamanho_param*sizeof(void*));
+	int tamanho = tamanho_param+1; //quickfix
+	fifo_param->tamanho = tamanho;
+	fifo_param->conteudo = (void**) malloc(tamanho*sizeof(void*));
 	int elemento;
-	for(elemento=0; elemento<tamanho_param; elemento++){
+	for(elemento=0; elemento<tamanho; elemento++){
 		fifo_param->conteudo[elemento] = FIFO_ELEMENTO_INEXISTENTE;
 	}
 }
@@ -55,7 +56,7 @@ void FIFO_inserir(FIFO *fifo_param, void* dado_param){
 	int indiceElemento;
 	int indicePrimeiraPosicaoLivre = FIFO_INDICE_ELEMENTO_INEXISTENTE;
 
-	if(!FIFO_buscaElemento(fifo_param, dado_param)){
+	if(!FIFO_buscaElemento(fifo_param, dado_param) && !FIFO_cheia(fifo_param)){
 		for(indiceElemento=0; indiceElemento<fifo_param->tamanho; indiceElemento++){
 			if(fifo_param->conteudo[indiceElemento] == FIFO_ELEMENTO_INEXISTENTE 
 					&& indicePrimeiraPosicaoLivre == FIFO_INDICE_ELEMENTO_INEXISTENTE){
@@ -63,6 +64,8 @@ void FIFO_inserir(FIFO *fifo_param, void* dado_param){
 			}
 		}
 		fifo_param->conteudo[indicePrimeiraPosicaoLivre] = dado_param;
+	} else {
+		tela_escreverNaColuna(&global_tela, "Elemento jah existe!", 5);
 	}
 }
 
