@@ -51,7 +51,7 @@ int arquivo_lerDaMaquinaHospedeira(ARQUIVO *arquivo_param, DISCO *disco_param, c
 					palavraBytes[posicaoPalavra] = byte;
 					posicaoPalavra++;
 				}
-			}while(byte=strtok(NULL," \n"));
+			}while((byte=strtok(NULL," \n")));
 			palavra[0] = string_paraInt(palavraBytes[0]);
 			palavra[1] = string_paraInt(palavraBytes[1]);
 			palavra[2] = string_paraInt(palavraBytes[2]);

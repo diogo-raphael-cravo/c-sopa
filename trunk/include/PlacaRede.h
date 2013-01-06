@@ -36,8 +36,9 @@ void placaRede_rodar(PLACA_REDE *placaRede_param);
 * @param char*						ipDestino_param			IP no formato "127.0.0.1". NENHUM campo 
 *															deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
 * @param char*						*mensagem_param			A mensagem que será enviada.
+* @return ERRO_REDE		Erro ocorrido durante tentativa de envio da mensagem.
 */
-void placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param);
+ERRO_REDE placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param);
 
 /**
 * @param PLACA_REDE					*placaRede_param		A placa que será consultada.

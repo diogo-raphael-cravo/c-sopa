@@ -9,7 +9,7 @@
 #define TAMANHO_RPC_STRING 100
 
 enum enum_operacoesRPC{
-	OPERACAO_ADD
+	OPERACAO_ADD = 1
 };
 
 typedef enum enum_operacoesRPC OPERACAO_RPC;

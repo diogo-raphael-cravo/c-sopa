@@ -327,7 +327,7 @@ void tela_rodar(TELA *tela_param){
 			case KEY_DOWN: tela_rolar(tela_param, 1);
 				break;
 			case KEY_RIGHT: if(tela_param->abertaParaImpressoes == 1){
-								tela_param->abertaParaImpressoes = 0;								
+								tela_param->abertaParaImpressoes = 0;
 								sincronizadorGlobal_sincronizado_pausar();
 								//sem_wait(&global_mutexParaTela);
 							} else {
@@ -451,7 +451,8 @@ void tela_rolar(TELA *tela_param, int quantidadeLinhas_param){
 void tela_imprimirTelaAzulDaMorte(TELA *tela_param, char *descricaoErro_param){
 	if(tela_param->abertaParaImpressoes == 1){
 		tela_param->abertaParaImpressoes = 0;
-		sem_wait(&global_mutexParaTela);
+		//sem_wait(&global_mutexParaTela);
+		sincronizadorGlobal_sincronizado_pausar();
 	}
 	sem_wait(&global_mutexAcessoTela);
 

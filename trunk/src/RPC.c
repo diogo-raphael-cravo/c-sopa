@@ -22,6 +22,7 @@
 RPC* rpc_criarNovo(OPERACAO_RPC operacao_param, FIFO *parametros_param){
 	RPC *novo = (RPC*) malloc(sizeof(RPC));
 	novo->operacao = operacao_param;
+	FIFO_inicializar(&novo->parametros, FIFO_capacidadeNumeroElementos(parametros_param));
 	FIFO_copiar(&novo->parametros, parametros_param);
 	return novo;
 }
@@ -35,10 +36,8 @@ char* rpc_paraString(RPC *rpc_param){
 	char* stringRPC = (char*) malloc(TAMANHO_RPC_STRING*sizeof(char));
 	char* novaString  = (char*) malloc(TAMANHO_PACOTE_STRING*sizeof(char));
 	memset(stringRPC, '\0', TAMANHO_RPC_STRING);
-
 	memset(novaString, '\0', TAMANHO_PACOTE_STRING);
 	sprintf(stringRPC, "%d\n", rpc_param->operacao);
-
 	switch(rpc_param->operacao){
 		case OPERACAO_ADD:
 			memset(novaString, '\0', TAMANHO_PACOTE_STRING);
@@ -47,7 +46,6 @@ char* rpc_paraString(RPC *rpc_param){
 				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 1)));
 			break;
 	}
-
 	strcat(stringRPC, novaString);
 
 	return stringRPC;

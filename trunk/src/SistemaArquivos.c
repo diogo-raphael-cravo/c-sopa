@@ -36,7 +36,7 @@ void privada_lerArquivoInicializacao(SISTEMA_ARQUIVOS *sistemaArquivos_param){
 					palavraBytes[posicaoPalavra] = byte;
 					posicaoPalavra++;
 				}
-			}while(byte=strtok(NULL," \n"));
+			}while((byte=strtok(NULL," \n")));
 
 			arquivo = (DESCRITOR_ARQUIVO**) malloc(sizeof(DESCRITOR_ARQUIVO*));
 			*arquivo = (DESCRITOR_ARQUIVO*) malloc(sizeof(DESCRITOR_ARQUIVO));
