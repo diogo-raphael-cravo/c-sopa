@@ -582,7 +582,7 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 	FIFO *parametros;
 	OPERACAO_RPC operacao;
 	char* ipDestino;
-
+tela_escreverNaColuna(&global_tela, "1", 3);
 	operacao = r1;
 	if(erro == KERNEL_ERRO_NENHUM){
 		if(operacao == RPC_OPERACAO_ADD){
@@ -619,18 +619,22 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 			erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
 		}
 	}
-
+tela_escreverNaColuna(&global_tela, "2", 3);
 	if(erro == KERNEL_ERRO_NENHUM){
 		pacote = pacoteAplicacaoSOPA_criarPacoteRPC(operacao, parametros, 
 			descritorProcesso_getPID(processoRequerente_param), PORTA_QUALQUER);
 		ipDestino = (char*) malloc(3*5*sizeof(char));
 		sprintf(ipDestino, "%d.%d.%d.%d", ip0, ip1, ip2, ip3);
+tela_escreverNaColuna(&global_tela, "2.1", 3);
 		placaRede_agendarEnvioMensagem(&global_placaRede, ipDestino, pacoteAplicacaoSOPA_paraString(pacote));
+tela_escreverNaColuna(&global_tela, "2.2", 3);
 		FIFO_destruir(parametros);
+tela_escreverNaColuna(&global_tela, "2.3", 3);
 		free(pacote);
+tela_escreverNaColuna(&global_tela, "2.4", 3);
 		free(ipDestino);
 	}
-
+tela_escreverNaColuna(&global_tela, "3", 3);
 	return erro;
 }
 

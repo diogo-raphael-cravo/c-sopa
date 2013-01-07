@@ -9,7 +9,7 @@
 #define TAMANHOBUFFER 256
 #define SOCKET_SOPA_SEPARADOR ','
 #define SOCKET_SOPA_SEPARADOR_STRING ","
-#define PORTA_TCP 10000
+#define PORTA_TCP 10002
 #define TAMANHOFILA 5
 
 enum enum_erroRede{

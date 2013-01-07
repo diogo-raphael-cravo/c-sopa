@@ -62,9 +62,12 @@ char* pacoteAplicacaoSOPA_paraString(PACOTE_APLICACAO_SOPA *pacote_param){
 		SOCKET_SOPA_SEPARADOR,
 		pacote_param->portaDestinoSOPA,
 		SOCKET_SOPA_SEPARADOR);
+	char* stringConteudo;
 	switch(pacote_param->tipo){
 		case TIPO_PACOTE_APLICACAO_SOPA_RPC:
-			strcat(stringPacote, rpc_paraString((RPC*) pacote_param->conteudo));
+			stringConteudo = rpc_paraString((RPC*) pacote_param->conteudo);
+			strcat(stringPacote, stringConteudo);
+			free(stringConteudo);
 			break;
 	}
 	return stringPacote;
@@ -76,23 +79,21 @@ char* pacoteAplicacaoSOPA_paraString(PACOTE_APLICACAO_SOPA *pacote_param){
 * @see pacoteAplicacaoSOPA_paraString 	Processo reverso.
 */
 PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_deString(char* string_param){
-	char* token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
-	TIPO_PACOTE_APLICACAO_SOPA tipo = atoi(token);
-	token = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
-	int portaOrigemSOPA = atoi(token);
-	token = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
-	int portaDestinoSOPA = atoi(token);
-	token = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
+	TIPO_PACOTE_APLICACAO_SOPA tipo = atoi(string_pegarSubtexto(string_param, SOCKET_SOPA_SEPARADOR_STRING, 0));
+	int portaOrigemSOPA = atoi(string_pegarSubtexto(string_param, SOCKET_SOPA_SEPARADOR_STRING, 1));
+	int portaDestinoSOPA = atoi(string_pegarSubtexto(string_param, SOCKET_SOPA_SEPARADOR_STRING, 2));
+
+	char* stringConteudo = string_pegarSubtextoEntreSubtextos(string_param, SOCKET_SOPA_SEPARADOR_STRING, 3, 1);
 	void* conteudo; 
 	switch(tipo){
 		case TIPO_PACOTE_APLICACAO_SOPA_RPC:
-			conteudo = rpc_deString(token);
+			conteudo = rpc_deString(stringConteudo);
 			break;
 	}
+
 	PACOTE_APLICACAO_SOPA *pacote = privada_criarPacoteAplicacaoSOPA(tipo, portaOrigemSOPA, portaDestinoSOPA, conteudo);
 	pacote->ipOrigem = (char*) malloc((3*5+1)*sizeof(char));
-	strcpy(pacote->ipOrigem, "127.0.0.1"/*strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING)*/);
-
+	strcpy(pacote->ipOrigem, string_pegarSubtexto(string_param, SOCKET_SOPA_SEPARADOR_STRING, -1));
 	return pacote;
 }
 
@@ -143,6 +144,8 @@ int pacoteAplicacaoSOPA_getPortaDestino(PACOTE_APLICACAO_SOPA *pacote_param){
 PALAVRA pacoteAplicacaoSOPA_getPalavraOrigemIP(PACOTE_APLICACAO_SOPA *pacote_param){
 	PALAVRA ip = 0;
 
+tela_escreverNaColuna(&global_tela, "GetOrigem", 5);
+sincronizadorGlobal_sincronizado_pausar();
 	char* tokenIp = (char*) malloc(200*sizeof(char));
 tela_escreverNaColuna(&global_tela, tokenIp, 5);
 	tokenIp = strtok(pacote_param->ipOrigem, ".");
