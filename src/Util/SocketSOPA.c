@@ -33,8 +33,7 @@ void GerenciaDados(int sockCliente_param, char* destino_param) {
 	if((bytesRecebidos = recv(sockCliente_param, destino_param, TAMANHOBUFFER, 0)) < 0) {
 		tela_imprimirTelaAzulDaMorte(&global_tela, "Falha ao receber os dados do cliente");
 	}
-	destino_param[bytesRecebidos] = SOCKET_SOPA_SEPARADOR;
-	destino_param[bytesRecebidos+1] = '\0';
+	destino_param[bytesRecebidos] = '\0';
 	close(sockCliente_param);
 }
 
@@ -66,9 +65,12 @@ void privada_enviarMensagem(MENSAGEM_SOCKET_SOPA *mensagem_param){
 	}
 	if(erro == ERRO_REDE_NENHUM){
 		//Envia o array de bytes para o servidor
-		if(send(sock, mensagem_param->conteudo, tamanhoArray, 0) != tamanhoArray){
+		char *mensagemEnviada = (char*) malloc((strlen(mensagem_param->conteudo)+1)*sizeof(char));
+		strcpy(mensagemEnviada, mensagem_param->conteudo);
+		if(send(sock, mensagemEnviada, tamanhoArray, 0) != tamanhoArray){
 			erro = ERRO_REDE_ENVIO_DADOS;
 		}
+		free(mensagemEnviada);
 		close(sock);
 	}
 	placaRede_setErroUltimaOperacao(mensagem_param->placaRede, erro);
@@ -126,6 +128,7 @@ void socketSopa_esperarMensagem(SOCKET_SOPA *socket_param, char* destino_param){
 	}
 	GerenciaDados(clientSock, destino_param);
 	strcat(destino_param, inet_ntoa(cliente.sin_addr));
+	strcat(destino_param, SOCKET_SOPA_SEPARADOR_STRING);
 }
 
 /**
@@ -138,10 +141,12 @@ void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param){
 	MENSAGEM_SOCKET_SOPA *mensagem = (MENSAGEM_SOCKET_SOPA*) malloc(sizeof(MENSAGEM_SOCKET_SOPA));
 	mensagem->ip = (char*) malloc((strlen(ip_param)+1)*sizeof(char));
 	strcpy(mensagem->ip, ip_param);
-	mensagem->conteudo = mensagem_param;
+	mensagem->conteudo = (char*) malloc((strlen(mensagem_param)+1)*sizeof(char));
+	strcpy(mensagem->conteudo, mensagem_param);
 	mensagem->placaRede = &global_placaRede;
 	pthread_create(threadIdEnvioMensagem, NULL, privada_enviarMensagem, mensagem);
 }
+
 
 
 

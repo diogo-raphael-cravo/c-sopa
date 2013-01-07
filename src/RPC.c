@@ -93,7 +93,7 @@ RPC* rpc_deString(char* string_param){
 	int i;
 	FIFO_inicializar(parametros, iteracoes);
 	for(i=0; i<iteracoes; i++){
-		token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
+		token = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
 		novoValor = (int*) malloc(sizeof(int));
 		*novoValor = atoi(token);
 		FIFO_inserir(parametros, novoValor);
