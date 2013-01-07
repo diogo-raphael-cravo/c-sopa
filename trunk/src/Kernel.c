@@ -11,6 +11,53 @@
 //---------------------------------------------------------------------
 
 /**
+* @param KERNEL 		*kernel_param		O kernel cujo erro será consultado.
+* @param ERRO_KERNEL	erro_param			Erro que será impresso.
+*/
+void privada_imprimirErro(ERRO_KERNEL erro_param){
+	switch(erro_param){
+		case KERNEL_ERRO_NENHUM:
+			tela_escreverNaColuna(&global_tela, "Sucesso!", 3);
+			break;
+		case KERNEL_ERRO_ARQUIVO_INEXISTENTE:
+			tela_escreverNaColuna(&global_tela, "Arquivo inexistente.", 3);
+			break;
+		case KERNEL_ERRO_CRIANDO_PROCESSO:
+			tela_escreverNaColuna(&global_tela, "O kernel jah estah criando um processo.", 3);
+			break;
+		case KERNEL_ERRO_MEMORIA_INSUFICIENTE:
+			tela_escreverNaColuna(&global_tela, "O espaco livre em memoria eh insuficiente.", 3);
+			break;
+		case KERNEL_ERRO_MEMORIA_DISCO_INSUFICIENTE:
+			tela_escreverNaColuna(&global_tela, "O espaco livre em disco eh insuficiente.", 3);
+			break;
+		case KERNEL_ERRO_MAXIMO_PROCESSOS_ATINGIDO:
+			tela_escreverNaColuna(&global_tela, "O maximo de processos foi atingido.", 3);
+			break;
+		case KERNEL_ERRO_PROCESSO_NAO_TEM_ARQUIVO:
+			tela_escreverNaColuna(&global_tela, "O arquivo nao pertence ao processo.", 3);
+			break;
+		case KERNEL_ERRO_DISCO_OCUPADO:
+			tela_escreverNaColuna(&global_tela, "O disco estah ocupado.", 3);
+			break;
+		case KERNEL_ERRO_FIM_DO_ARQUIVO:
+			tela_escreverNaColuna(&global_tela, "Fim do arquivo alcancado.", 3);
+			break;
+		case KERNEL_ERRO_ARQUIVO_ABERTO_COM_OUTRO_FIM:
+			tela_escreverNaColuna(&global_tela, "Arquivo foi aberto com outro fim.", 3);
+			break;
+		case KERNEL_ERRO_OPERACAO_RPC_INVALIDA:
+			tela_escreverNaColuna(&global_tela, "Operacao de RPC invalida.", 3);
+			break;
+		case KERNEL_ERRO_NAO_IDENTIFICADO:
+			tela_escreverNaColuna(&global_tela, "Erro desconhecido!", 3);
+			break;
+		default:
+			tela_escreverNaColuna(&global_tela, "Erro desconhecido (e nao reconhecido como desconhecido)!", 3);
+	}
+}
+
+/**
 * @param KERNEL		*kernel_param	O kernel em que o processo será procurado.
 * @param int		PID_param		PID do processo procurado.
 * @return DESCRITOR_PROCESSO* 	O processo que tem o PID solicitado. Caso não exista neste kernel, retornará NULL.
@@ -26,8 +73,8 @@ DESCRITOR_PROCESSO* privada_buscaProcessoComPID(KERNEL *kernel_param, int PID_pa
 		processoEncontrado = *kernel_param->processoRodando;
 	}
 	for(posicaoTestada=0; posicaoTestada<
-			FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueados); posicaoTestada++){
-		processoTestado = * (DESCRITOR_PROCESSO**) FIFO_espiarPosicao(&kernel_param->filaProcessosBloqueados, posicaoTestada);
+			FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueadosRPC); posicaoTestada++){
+		processoTestado = * (DESCRITOR_PROCESSO**) FIFO_espiarPosicao(&kernel_param->filaProcessosBloqueadosRPC, posicaoTestada);
 		if(descritorProcesso_getPID(processoTestado) == PID_param){
 			processoEncontrado = processoTestado;
 		}
@@ -70,17 +117,6 @@ void privada_rodarProcesso(KERNEL *kernel_param, DESCRITOR_PROCESSO **descritorP
 */
 void privada_pararDeRodarProcessoRodando(KERNEL *kernel_param){
 	FIFO_inserir(&kernel_param->filaProcessosProntos, kernel_param->processoRodando);
-	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
-	MMU_sincronizado_setBase(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
-	MMU_sincronizado_setLimite(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
-}
-
-/**
-* Manda o processo esperar pelo disco.
-* @param KERNEL					*kernel_param				O kernel ao qual pertencem o processo.
-*/
-void privada_mandarProcessoRodandoEsperarDisco(KERNEL *kernel_param){
-	FIFO_inserir(&kernel_param->filaProcessosBloqueados, kernel_param->processoRodando);
 	kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
 	MMU_sincronizado_setBase(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
 	MMU_sincronizado_setLimite(&global_MMU, 0); //Estas duas ações impedem uso desautorizado da memória.
@@ -548,7 +584,7 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 
 	operacao = r1;
 	if(erro == KERNEL_ERRO_NENHUM){
-		if(operacao == OPERACAO_ADD){
+		if(operacao == RPC_OPERACAO_ADD){
 			parametros = (FIFO*) malloc(sizeof(FIFO));
 			FIFO_inicializar(parametros, 2);
 			int *parametro = (int*) malloc(sizeof(int));
@@ -557,40 +593,56 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 			parametro = (int*) malloc(sizeof(int));
 			*parametro = r3;
 			FIFO_inserir(parametros, (void*) parametro);
+		} else if(operacao == RPC_OPERACAO_RESULTADO){
+			
+
+
 		} else {
 			erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
 		}
 	}
 
 	if(erro == KERNEL_ERRO_NENHUM){
-tela_escreverNaColuna(&global_tela, "1", 3);
 		pacote = pacoteAplicacaoSOPA_criarPacoteRPC(operacao, parametros, 
 			descritorProcesso_getPID(processoRequerente_param), PORTA_QUALQUER);
-tela_escreverNaColuna(&global_tela, "2", 3);
 		ipDestino = (char*) malloc(3*5*sizeof(char));
 		sprintf(ipDestino, "%d.%d.%d.%d", ip0, ip1, ip2, ip3);
-tela_escreverNaColuna(&global_tela, "3", 3);
-		ERRO_REDE erroEnvio = placaRede_agendarEnvioMensagem(&global_placaRede, ipDestino, pacoteAplicacaoSOPA_paraString(pacote));
-tela_escreverNaColuna(&global_tela, "4", 3);
-		if(erroEnvio == ERRO_REDE_CRIACAO_SOCKET){
-			tela_escreverNaColuna(&global_tela, "RPC: ERRO: nao consegui criar o socket!", 3);
-			erro = KERNEL_ERRO_NAO_IDENTIFICADO;
-		} else if(erroEnvio == ERRO_REDE_CONEXAO_SERVIDOR){
-			tela_escreverNaColuna(&global_tela, "RPC: ERRO: nao consegui conectar ao servidor!", 3);
-			erro = KERNEL_ERRO_NAO_IDENTIFICADO;
-		} else if(erroEnvio == ERRO_REDE_ENVIO_DADOS){
-			tela_escreverNaColuna(&global_tela, "RPC: ERRO: nao consegui enviar os dados!", 3);
-			erro = KERNEL_ERRO_NAO_IDENTIFICADO;
-		} else if(erroEnvio != ERRO_REDE_NENHUM){
-			erro = KERNEL_ERRO_NAO_IDENTIFICADO;
-		}
-tela_escreverNaColuna(&global_tela, "5", 3);
+		placaRede_agendarEnvioMensagem(&global_placaRede, ipDestino, pacoteAplicacaoSOPA_paraString(pacote));
 		FIFO_destruir(parametros);
-tela_escreverNaColuna(&global_tela, "6", 3);
 		free(pacote);
-tela_escreverNaColuna(&global_tela, "7", 3);
 		free(ipDestino);
-tela_escreverNaColuna(&global_tela, "8", 3);
+	}
+
+	return erro;
+}
+
+/**
+* @param KERNEL 	*kernel_param		O kernel que atendará ao pedido.
+* @param RPC		*rpc_param			RPC que será atendido.
+* @return ERRO_KERNEL 	Erro ocorrido durante atendimento do pedido.
+*/
+ERRO_KERNEL privada_atenderRPC(KERNEL *kernel_param, RPC *rpc_param){
+	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
+
+	if(rpc_getOperacao(rpc_param) == RPC_OPERACAO_ADD){
+		privada_criarProcesso(kernel_param, RPC_NOME_ARQUIVO_OPERACAO_ADD);
+	} else {
+		erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
+	}
+
+	return erro;
+}
+
+/**
+* @param KERNEL 					*kernel_param		O kernel que atendará ao pedido.
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote da mensagem que será atendida.
+* @return ERRO_KERNEL 	Erro ocorrido durante atendimento do pedido.
+*/
+ERRO_KERNEL privada_atenderMensagemRede(KERNEL *kernel_param, PACOTE_APLICACAO_SOPA *pacote_param){
+	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
+
+	if(pacoteAplicacaoSOPA_getTipo(pacote_param) == TIPO_PACOTE_APLICACAO_SOPA_RPC){
+		erro = privada_atenderRPC(kernel_param, (RPC*) pacoteAplicacaoSOPA_getConteudo(pacote_param));
 	}
 
 	return erro;
@@ -606,7 +658,7 @@ void kernel_inicializar(KERNEL *kernel_param){
 	kernel_param->quantidadeProcessos = 0;
 	kernel_param->ultimoPIDUsado = -1;
 	FIFO_inicializar(&kernel_param->filaProcessosProntos, MAXIMO_PROCESSOS_KERNEL);
-	FIFO_inicializar(&kernel_param->filaProcessosBloqueados, MAXIMO_PROCESSOS_KERNEL);
+	FIFO_inicializar(&kernel_param->filaProcessosBloqueadosRPC, MAXIMO_PROCESSOS_KERNEL);
 
 	gerenciadorDisco_inicializar(&kernel_param->gerenciadorAcessoDisco, &global_disco);
 	sistemaArquivos_inicializarComArquivosDoHospedeiro(&kernel_param->sistemaDeArquivos, &global_disco);
@@ -847,11 +899,54 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			erro = privada_solicitarRPC(kernel_param, *kernel_param->processoRodando);
 			if(erro == KERNEL_ERRO_NENHUM){
 				tela_escreverNaColuna(&global_tela, "RPC: chamada solicitada.", 3);
+				FIFO_inserir(&kernel_param->filaProcessosBloqueadosRPC, kernel_param->processoRodando);
+				kernel_param->processoRodando = DESCRITOR_PROCESSO_INEXISTENTE;
+				privada_escalonar(kernel_param);
 			} else if(erro == KERNEL_ERRO_OPERACAO_RPC_INVALIDA){
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(
+					FIFO_espiar(&kernel_param->filaProcessosBloqueadosRPC)), 1, 0);
 				tela_escreverNaColuna(&global_tela, "RPC: a operacao eh invalida.", 3);
 			} else {
 				tela_escreverNaColuna(&global_tela, "RPC: ocorreu um erro desconhecido.", 3);
 			}
+			break;
+		case INTERRUPCAO_PLACA_REDE_SEND:
+			if(placaRede_getErroUltimaOperacao(&global_placaRede) == ERRO_REDE_NENHUM){
+				tela_escreverNaColuna(&global_tela, "Mensagem enviada.", 3);
+			} else if(placaRede_getErroUltimaOperacao(&global_placaRede) == ERRO_REDE_CRIACAO_SOCKET){
+				tela_escreverNaColuna(&global_tela, "SEND: erro na criacao do SOCKET.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(
+					FIFO_espiar(&kernel_param->filaProcessosBloqueadosRPC)), 2, 0);
+			} else if(placaRede_getErroUltimaOperacao(&global_placaRede) == ERRO_REDE_CONEXAO_SERVIDOR){
+				tela_escreverNaColuna(&global_tela, "SEND: erro na conexao com o SERVIDOR.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(
+					FIFO_espiar(&kernel_param->filaProcessosBloqueadosRPC)), 3, 0);
+			} else if(placaRede_getErroUltimaOperacao(&global_placaRede) == ERRO_REDE_ENVIO_DADOS){
+				tela_escreverNaColuna(&global_tela, "SEND: erro na efetivacao do ENVIO.", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(
+					FIFO_espiar(&kernel_param->filaProcessosBloqueadosRPC)), 4, 0);
+			} else if(placaRede_getErroUltimaOperacao(&global_placaRede) != ERRO_REDE_NENHUM){
+				tela_escreverNaColuna(&global_tela, "SEND: corram para as colinas! erro DESCONHECIDO!", 3);
+				contexto_setRegistradorPalavra(descritorProcesso_getContexto(
+					FIFO_espiar(&kernel_param->filaProcessosBloqueadosRPC)), 5, 0);
+			}
+
+			if(placaRede_getErroUltimaOperacao(&global_placaRede) != ERRO_REDE_NENHUM){
+				FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueadosRPC));
+			}
+			break;
+		case INTERRUPCAO_PLACA_REDE_RECEIVE:
+			tela_escreverNaColuna(&global_tela, "Acabo de receber uma mensagem via rede. Mensagem:", 3);
+			tela_escreverNaColuna(&global_tela, 
+				pacoteAplicacaoSOPA_paraString(
+					placaRede_getProximoPacoteRecebido(&global_placaRede)), 3);
+			erro = privada_atenderMensagemRede(kernel_param, placaRede_getProximoPacoteRecebido(&global_placaRede));
+			if(erro == KERNEL_ERRO_NENHUM){
+				tela_escreverNaColuna(&global_tela, "A mensagem foi atendida com sucesso.", 3);
+			} else {
+				privada_imprimirErro(erro);
+			}
+			placaRede_avancarFilaPacotesRecebidos(&global_placaRede);
 			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);

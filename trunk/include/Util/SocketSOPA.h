@@ -7,8 +7,9 @@
 
 //Constantes
 #define TAMANHOBUFFER 256
-#define SOCKET_SOPA_SEPARADOR '\n'
-#define PORTA_TCP 10000
+#define SOCKET_SOPA_SEPARADOR ','
+#define SOCKET_SOPA_SEPARADOR_STRING ","
+#define PORTA_TCP 10005
 #define TAMANHOFILA 5
 
 enum enum_erroRede{
@@ -45,12 +46,11 @@ void socketSopa_inicializar(SOCKET_SOPA *socket_param);
 void socketSopa_esperarMensagem(SOCKET_SOPA *socket_param, char* destino_param);
 
 /**
-* @param char*		ip_param			IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
-* @param char*		mensagem_param		A mensagem que será enviada.
-* @return ERRO_REDE		Erro ocorrido durante tentativa de envio da mensagem.
+* @param char*			ip_param				IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
+* @param char*			mensagem_param			A mensagem que será enviada.
 * ATENÇÃO: a mensagem já deve ter sido alocada!
 */
-ERRO_REDE socketSopa_enviarMensagem(char* ip_param, char* mensagem_param);
+void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param);
 
 
 

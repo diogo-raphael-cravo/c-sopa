@@ -55,10 +55,13 @@ PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_criarPacoteRPC(OPERACAO_RPC operacao_
 char* pacoteAplicacaoSOPA_paraString(PACOTE_APLICACAO_SOPA *pacote_param){
 	char* stringPacote = (char*) malloc(TAMANHO_PACOTE_STRING*sizeof(char));
 	memset(stringPacote, '\0', TAMANHO_PACOTE_STRING);
-	sprintf(stringPacote, "%d\n%d\n%d\n", 
+	sprintf(stringPacote, "%d%c%d%c%d%c", 
 		pacote_param->tipo,
+		SOCKET_SOPA_SEPARADOR,
 		pacote_param->portaOrigemSOPA,
-		pacote_param->portaDestinoSOPA);
+		SOCKET_SOPA_SEPARADOR,
+		pacote_param->portaDestinoSOPA,
+		SOCKET_SOPA_SEPARADOR);
 	switch(pacote_param->tipo){
 		case TIPO_PACOTE_APLICACAO_SOPA_RPC:
 			strcat(stringPacote, rpc_paraString((RPC*) pacote_param->conteudo));
@@ -73,24 +76,23 @@ char* pacoteAplicacaoSOPA_paraString(PACOTE_APLICACAO_SOPA *pacote_param){
 * @see pacoteAplicacaoSOPA_paraString 	Processo reverso.
 */
 PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_deString(char* string_param){
-	char* token = strtok(string_param, "\n");
-
+	char* token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
 	TIPO_PACOTE_APLICACAO_SOPA tipo = atoi(token);
-	token = strtok(NULL, "\n");
+	token = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
 	int portaOrigemSOPA = atoi(token);
-	token = strtok(NULL, "\n");
+	token = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
 	int portaDestinoSOPA = atoi(token);
-	token = strtok(NULL, "\n");
+	token = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
 	void* conteudo; 
 	switch(tipo){
 		case TIPO_PACOTE_APLICACAO_SOPA_RPC:
 			conteudo = rpc_deString(token);
 			break;
 	}
-	char* ipOrigem = strtok(NULL, "\n");
-
-	PACOTE_APLICACAO_SOPA *pacote = pacoteAplicacaoSOPA_criarPacoteRPC(tipo, conteudo, portaOrigemSOPA, portaDestinoSOPA);
+	char* ipOrigem = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
+	PACOTE_APLICACAO_SOPA *pacote = privada_criarPacoteAplicacaoSOPA(tipo, portaOrigemSOPA, portaDestinoSOPA, conteudo);
 	pacote->ipOrigem = ipOrigem;
+
 	return pacote;
 }
 
@@ -101,9 +103,21 @@ void pacoteAplicacaoSOPA_destruir(PACOTE_APLICACAO_SOPA *pacote_param){
 
 }
 
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return TIPO_PACOTE_APLICACAO_SOPA	O tipo do pacote, o que pode ser encontrado nele.
+*/
+TIPO_PACOTE_APLICACAO_SOPA pacoteAplicacaoSOPA_getTipo(PACOTE_APLICACAO_SOPA *pacote_param){
+	return pacote_param->tipo;
+}
 
-
-
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return void*		Conteúdo do pacote, a mensagem mesmo.
+*/
+void* pacoteAplicacaoSOPA_getConteudo(PACOTE_APLICACAO_SOPA *pacote_param){
+	return pacote_param->conteudo;
+}
 
 
 

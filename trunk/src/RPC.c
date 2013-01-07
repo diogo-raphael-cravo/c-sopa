@@ -37,13 +37,15 @@ char* rpc_paraString(RPC *rpc_param){
 	char* novaString  = (char*) malloc(TAMANHO_PACOTE_STRING*sizeof(char));
 	memset(stringRPC, '\0', TAMANHO_RPC_STRING);
 	memset(novaString, '\0', TAMANHO_PACOTE_STRING);
-	sprintf(stringRPC, "%d\n", rpc_param->operacao);
+	sprintf(stringRPC, "%d%c", rpc_param->operacao, SOCKET_SOPA_SEPARADOR);
 	switch(rpc_param->operacao){
-		case OPERACAO_ADD:
+		case RPC_OPERACAO_ADD:
 			memset(novaString, '\0', TAMANHO_PACOTE_STRING);
-			sprintf(novaString, "%d\n%d\n", 
+			sprintf(novaString, "%d%c%d%c", 
 				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 0)),
-				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 1)));
+				SOCKET_SOPA_SEPARADOR,
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 1)),
+				SOCKET_SOPA_SEPARADOR);
 			break;
 	}
 	strcat(stringRPC, novaString);
@@ -57,20 +59,20 @@ char* rpc_paraString(RPC *rpc_param){
 * @see rpc_paraString 	Processo reverso.
 */
 RPC* rpc_deString(char* string_param){
-	char* token = strtok(string_param, "\n");
+	char* token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
 
 	OPERACAO_RPC operacao = atoi(token);
 	FIFO *parametros = (FIFO*) malloc(sizeof(FIFO));
 	switch(operacao){
-		case OPERACAO_ADD:
+		case RPC_OPERACAO_ADD:
 			FIFO_inicializar(parametros, 2);
 
-			token = strtok(string_param, "\n");
+			token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
 			int *novoValor = (int*) malloc(sizeof(int));
 			*novoValor = atoi(token);
 
 			FIFO_inserir(parametros, novoValor);
-			token = strtok(string_param, "\n");
+			token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
 			novoValor = (int*) malloc(sizeof(int));
 			*novoValor = atoi(token);
 			FIFO_inserir(parametros, novoValor);
@@ -79,7 +81,13 @@ RPC* rpc_deString(char* string_param){
 	return rpc_criarNovo(operacao, parametros);
 }
 
-
+/**
+* @param RPC		*rpc_param		O RPC que será consultado.
+* @return OPERACAO_RPC		Operação solicitada no RPC.
+*/
+OPERACAO_RPC rpc_getOperacao(RPC *rpc_param){
+	return rpc_param->operacao;
+}
 
 
 

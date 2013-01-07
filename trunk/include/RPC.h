@@ -7,9 +7,11 @@
 
 //Constantes
 #define TAMANHO_RPC_STRING 100
+#define RPC_NOME_ARQUIVO_OPERACAO_ADD "RPC_ADD"
 
 enum enum_operacoesRPC{
-	OPERACAO_ADD = 1
+	RPC_OPERACAO_RESULTADO = 0,
+	RPC_OPERACAO_ADD = 1
 };
 
 typedef enum enum_operacoesRPC OPERACAO_RPC;
@@ -45,6 +47,12 @@ char* rpc_paraString(RPC *rpc_param);
 * @see rpc_paraString 	Processo reverso.
 */
 RPC* rpc_deString(char* string_param);
+
+/**
+* @param RPC		*rpc_param		O RPC que será consultado.
+* @return OPERACAO_RPC		Operação solicitada no RPC.
+*/
+OPERACAO_RPC rpc_getOperacao(RPC *rpc_param);
 
 /*
 * @param KERNEL		*kernel_param		O kernel que executará a operação.

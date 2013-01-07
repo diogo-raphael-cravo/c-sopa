@@ -6,6 +6,7 @@
 //---------------------------------------------------------------------
 
 //Constantes
+#define PACOTE_APLICACAO_SEPARADOR 
 #define TAMANHO_PACOTE_STRING TAMANHOBUFFER
 #define PORTA_QUALQUER -1
 
@@ -58,8 +59,17 @@ PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_deString(char* string_param);
 */
 void pacoteAplicacaoSOPA_destruir(PACOTE_APLICACAO_SOPA *pacote_param);
 
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return TIPO_PACOTE_APLICACAO_SOPA	O tipo do pacote, o que pode ser encontrado nele.
+*/
+TIPO_PACOTE_APLICACAO_SOPA pacoteAplicacaoSOPA_getTipo(PACOTE_APLICACAO_SOPA *pacote_param);
 
-
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return void*		Conteúdo do pacote, a mensagem mesmo.
+*/
+void* pacoteAplicacaoSOPA_getConteudo(PACOTE_APLICACAO_SOPA *pacote_param);
 
 
 
