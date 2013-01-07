@@ -39,8 +39,7 @@ typedef enum enum_comandosUsuario COMANDO_USUARIO;
 
 struct str_kernel{
 		//Espera para escalonamento
-	FIFO filaProcessosBloqueados; //Processos que estão bloqueados, por algum motivo. 
-									//DIFERENTE de filaProcessosRequisicaoDisco.
+	FIFO filaProcessosBloqueadosRPC; //Processos que estão bloqueados, esperando requisição RPC.
 	FIFO filaProcessosProntos; //Indica os índices de descritoresProcessos que contém processos prontos para rodar.
 								//Os processos são ordenados em uma fila por ordem de "chegada".
 

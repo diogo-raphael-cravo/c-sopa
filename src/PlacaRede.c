@@ -21,6 +21,7 @@ void placaRede_rodarProdutor(PLACA_REDE *placaRede_param){
 	socketSopa_inicializar(&socket);
 	while(1){
 		sem_wait(&placaRede_param->semaforoEspacos);
+		stringRecebida = (char*) malloc(TAMANHOBUFFER*sizeof(char));
 		socketSopa_esperarMensagem(&socket, stringRecebida);
 		FIFO_inserir(&placaRede_param->pacotesRecebidos, pacoteAplicacaoSOPA_deString(stringRecebida));
 		sem_post(&placaRede_param->semaforoItens);
@@ -34,7 +35,7 @@ void placaRede_rodarProdutor(PLACA_REDE *placaRede_param){
 void placaRede_rodarConsumidor(PLACA_REDE *placaRede_param){
 	while(1){
 		sem_wait(&placaRede_param->semaforoItens);
-		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_MENSAGEM_REDE);
+		controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_PLACA_REDE_RECEIVE);
 		sem_post(&placaRede_param->semaforoEspacos);
 	}
 }
@@ -49,6 +50,7 @@ void placaRede_inicializar(PLACA_REDE *placaRede_param){
 	FIFO_inicializar(&placaRede_param->pacotesRecebidos, MAXIMO_PACOTES_GUARDADOS);
 	sem_init(&placaRede_param->semaforoItens, 0, 0);
 	sem_init(&placaRede_param->semaforoEspacos, 0, MAXIMO_PACOTES_GUARDADOS);
+	placaRede_param->erro = ERRO_REDE_NENHUM;
 }
 
 /**
@@ -64,10 +66,9 @@ void placaRede_rodar(PLACA_REDE *placaRede_param){
 * @param char*						ipDestino_param			IP no formato "127.0.0.1". NENHUM campo 
 *															deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
 * @param char*						*mensagem_param			A mensagem que será enviada.
-* @return ERRO_REDE		Erro ocorrido durante tentativa de envio da mensagem.
 */
-ERRO_REDE placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param){
-	return socketSopa_enviarMensagem(ipDestino_param, mensagem_param);
+void placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param){
+	socketSopa_enviarMensagem(ipDestino_param, mensagem_param);
 }
 
 /**
@@ -77,7 +78,7 @@ ERRO_REDE placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDe
 *									Retornará PLACA_REDE_PACOTE_INEXISTENTE, se não houver.
 */
 PACOTE_APLICACAO_SOPA* placaRede_getProximoPacoteRecebido(PLACA_REDE *placaRede_param){
-	PACOTE_APLICACAO_SOPA* pacote = (PACOTE_APLICACAO_SOPA*) FIFO_remover(&placaRede_param->pacotesRecebidos);
+	PACOTE_APLICACAO_SOPA* pacote = (PACOTE_APLICACAO_SOPA*) FIFO_espiar(&placaRede_param->pacotesRecebidos);
 	return pacote;
 }
 
@@ -92,4 +93,21 @@ void placaRede_avancarFilaPacotesRecebidos(PLACA_REDE *placaRede_param){
 		pacoteAplicacaoSOPA_destruir(pacote);
 	}
 }
+
+/**
+* @param PLACA_REDE		*placaRede_param		A placa de rede cujo erro será consultado.
+* @return ERRO_REDE		Erro ocorrido na última requisição feita à placa.
+*/
+ERRO_REDE placaRede_getErroUltimaOperacao(PLACA_REDE *placaRede_param){
+	return placaRede_param->erro;
+}
+
+/**
+* @param PLACA_REDE		*placaRede_param		A placa de rede cujo erro será consultado.
+* @param ERRO_REDE		erro_param				Erro ocorrido na última requisição feita à placa.
+*/
+void placaRede_setErroUltimaOperacao(PLACA_REDE *placaRede_param, ERRO_REDE erro_param){
+	placaRede_param->erro = erro_param;
+}
+
 

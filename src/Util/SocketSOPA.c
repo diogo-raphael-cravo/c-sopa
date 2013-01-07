@@ -5,6 +5,17 @@
 */
 
 
+//---------------------------------------------------------------------
+//			DEFINIÇÕES PRIVADAS DESTE ARQUIVO						
+//---------------------------------------------------------------------
+
+struct str_mensagemSocketSOPA{
+	char* ip;
+	char* conteudo;
+	PLACA_REDE *placaRede;
+};
+
+typedef struct str_mensagemSocketSOPA MENSAGEM_SOCKET_SOPA;
 
 //---------------------------------------------------------------------
 //			FUNÇÕES PRIVADAS DESTE ARQUIVO						
@@ -17,17 +28,55 @@
 */
 void GerenciaDados(int sockCliente_param, char* destino_param) {
 	int bytesRecebidos;
-	
-	destino_param = (char*) malloc(TAMANHOBUFFER*sizeof(char));
 	memset(destino_param, '\0', TAMANHOBUFFER);
 	//Recebe os dados do cliente
 	if((bytesRecebidos = recv(sockCliente_param, destino_param, TAMANHOBUFFER, 0)) < 0) {
 		tela_imprimirTelaAzulDaMorte(&global_tela, "Falha ao receber os dados do cliente");
-	}	
-	
+	}
 	destino_param[bytesRecebidos] = SOCKET_SOPA_SEPARADOR;
-
+	destino_param[bytesRecebidos+1] = '\0';
 	close(sockCliente_param);
+}
+
+/**
+* @param int	*sock_param			Socket que será utilizado para enviar a mensagem.
+* @param char	*mensagem_param		Mensagem que será enviada.
+* ATENÇÃO: irá destruir a thread que a executar!
+*/
+void privada_enviarMensagem(MENSAGEM_SOCKET_SOPA *mensagem_param){
+	unsigned int tamanhoArray = strlen(mensagem_param->conteudo);
+	ERRO_REDE erro = ERRO_REDE_NENHUM;
+	int sock;
+	struct sockaddr_in server;
+	//Criac5ao do Socket TCP
+	if((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0){
+		placaRede_setErroUltimaOperacao(mensagem_param->placaRede, ERRO_REDE_CRIACAO_SOCKET);
+		erro = ERRO_REDE_CRIACAO_SOCKET;
+	}
+	if(erro == ERRO_REDE_NENHUM){
+		//Preparando estrutura de enderecamento do socket
+		memset(&server, 0, sizeof(server));							//Limpando a area de memoria da estrutura
+		server.sin_family = AF_INET;								//IP
+		server.sin_addr.s_addr = inet_addr(mensagem_param->ip);		//Aceita conexoes apenas do servidor
+		server.sin_port = htons(PORTA_TCP);							//Especifica a porta do servidor
+		//Estabelecimento da conexao com o servidor
+		if(connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0){
+			erro = ERRO_REDE_CONEXAO_SERVIDOR;
+		}
+	}
+	if(erro == ERRO_REDE_NENHUM){
+		//Envia o array de bytes para o servidor
+		if(send(sock, mensagem_param->conteudo, tamanhoArray, 0) != tamanhoArray){
+			erro = ERRO_REDE_ENVIO_DADOS;
+		}
+		close(sock);
+	}
+	placaRede_setErroUltimaOperacao(mensagem_param->placaRede, erro);
+	controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_PLACA_REDE_SEND);
+	free(mensagem_param->ip);
+	free(mensagem_param->conteudo);
+	free(mensagem_param);
+	pthread_exit(0);
 }
 
 //---------------------------------------------------------------------
@@ -71,56 +120,27 @@ void socketSopa_esperarMensagem(SOCKET_SOPA *socket_param, char* destino_param){
 
 	unsigned int tamanhoCliente = sizeof(cliente);
 	//Aguarda pela conexao de algum cliente
+
 	if((clientSock = accept(socket_param->serverSock, (struct sockaddr *) &cliente, &tamanhoCliente)) < 0){
 		tela_imprimirTelaAzulDaMorte(&global_tela, "Falha ao tentar estabelecer comunicacao com o cliente");
 	}
-
 	GerenciaDados(clientSock, destino_param);
-
 	strcat(destino_param, inet_ntoa(cliente.sin_addr));
 }
 
 /**
-* @param char*		ip_param			IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
-* @param char*		mensagem_param		A mensagem que será enviada.
-* @return ERRO_REDE		Erro ocorrido durante tentativa de envio da mensagem.
+* @param char*			ip_param				IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
+* @param char*			mensagem_param			A mensagem que será enviada.
 * ATENÇÃO: a mensagem já deve ter sido alocada!
 */
-ERRO_REDE socketSopa_enviarMensagem(char* ip_param, char* mensagem_param){
-	ERRO_REDE erro = ERRO_REDE_NENHUM;
-	int sock;
-	struct sockaddr_in server;
-	unsigned int tamanhoArray;
-
-	//Criacao do Socket TCP
-	if((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0){
-		erro = ERRO_REDE_CRIACAO_SOCKET;
-	}
-tela_escreverNaColuna(&global_tela, "3.1", 3);
-	if(erro == ERRO_REDE_NENHUM){
-		//Preparando estrutura de enderecamento do socket
-		memset(&server, 0, sizeof(server));				//Limpando a area de memoria da estrutura
-		server.sin_family = AF_INET;					//IP
-		server.sin_addr.s_addr = inet_addr(ip_param);	//Aceita conexoes apenas do servidor
-		server.sin_port = htons(PORTA_TCP);				//Especifica a porta do servidor
-
-		//Estabelecimento da conexao com o servidor
-		if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0){
-			erro = ERRO_REDE_CONEXAO_SERVIDOR;
-		}
-	}
-tela_escreverNaColuna(&global_tela, "3.2", 3);
-	if(erro == ERRO_REDE_NENHUM){
-		//Envia o array de bytes para o servidor
-		tamanhoArray = strlen(mensagem_param);
-		if(send(sock, mensagem_param, tamanhoArray, 0) != tamanhoArray){
-			erro = ERRO_REDE_ENVIO_DADOS;
-		}
-
-		close(sock);
-	}
-tela_escreverNaColuna(&global_tela, "3.3", 3);
-	return erro;
+void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param){
+	pthread_t *threadIdEnvioMensagem = (pthread_t*) malloc(sizeof(pthread_t));
+	MENSAGEM_SOCKET_SOPA *mensagem = (MENSAGEM_SOCKET_SOPA*) malloc(sizeof(MENSAGEM_SOCKET_SOPA));
+	mensagem->ip = (char*) malloc((strlen(ip_param)+1)*sizeof(char));
+	strcpy(mensagem->ip, ip_param);
+	mensagem->conteudo = mensagem_param;
+	mensagem->placaRede = &global_placaRede;
+	pthread_create(threadIdEnvioMensagem, NULL, privada_enviarMensagem, mensagem);
 }
 
 
