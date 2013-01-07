@@ -52,6 +52,9 @@ void privada_imprimirErro(ERRO_KERNEL erro_param){
 		case KERNEL_ERRO_NAO_IDENTIFICADO:
 			tela_escreverNaColuna(&global_tela, "Erro desconhecido!", 3);
 			break;
+		case KERNEL_ERRO_PROCESSO_INEXISTENTE:
+			tela_escreverNaColuna(&global_tela, "O processo nao existe.", 3);
+			break;
 		default:
 			tela_escreverNaColuna(&global_tela, "Erro desconhecido (e nao reconhecido como desconhecido)!", 3);
 	}
@@ -200,12 +203,13 @@ void privada_matarProcessoRodando(KERNEL *kernel_param){
 
 /**
 * Inicia a criação de um processo.
-* @param KERNEL	*kernel_param			O kernel que criará o processo.
-* @param char*	nomeArquivo_param		Nome do arquivo que contém o processo.
+* @param KERNEL			*kernel_param				O kernel que criará o processo.
+* @param char*			nomeArquivo_param			Nome do arquivo que contém o processo.
+* @param CONTEXTO		*contextoInicial_param		Contexto inicial do processo. NULL, caso seja default.
 * @return ERRO_KERNEL	Indica o erro que aconteceu, caso algum erro tenha acontecido.
 * ATENÇÃO: se o disco não estiver rodando, vai travar o processo até que o disco rode!
 */
-int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
+int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param, CONTEXTO *contextoInicial_param){
 	int PID, enderecoMemoria;
 	int erro = KERNEL_ERRO_NENHUM;
 	int tamanhoStackProcesso = TAMANHO_PADRAO_STACK_PALAVRAS;
@@ -238,6 +242,10 @@ int privada_criarProcesso(KERNEL *kernel_param, char* nomeArquivo_param){
 		*novoProcesso = (DESCRITOR_PROCESSO*) malloc(sizeof(DESCRITOR_PROCESSO));
 		descritorProcesso_inicializar(*novoProcesso, PID, enderecoMemoria, 
 			arquivo_getTamanhoEmPalavras(arquivoTransferido), tamanhoStackProcesso);
+		if(contextoInicial_param != NULL){
+			contexto_copiar(descritorProcesso_getContexto(*novoProcesso), contextoInicial_param);
+			free(contextoInicial_param);
+		}
 		contexto_setPC(descritorProcesso_getContexto(*novoProcesso), 0);
 		memoria_sincronizado_escreverPalavra(&global_memoria, 
 			descritorProcesso_getEnderecoInicioCodigo(*novoProcesso)-1, 
@@ -341,7 +349,7 @@ void privada_executarComandoUsuario(KERNEL *kernel_param, char* comando_param){
 	switch(comandoExecutado){
 		case COMANDO_EXECUCAO_PROGRAMA:
 				privada_getParametroComandoUsuario(kernel_param, comando_param, parametro, 1);
-				erro = privada_criarProcesso(kernel_param, parametro);
+				erro = privada_criarProcesso(kernel_param, parametro, NULL);
 				if(erro == KERNEL_ERRO_NENHUM){
 					sprintf(mensagem, "Executando programa %s", parametro);
 					tela_escreverNaColuna(&global_tela, mensagem, 3);
@@ -560,17 +568,10 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 	PALAVRA r1  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  1));
 	PALAVRA r2  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  2));
 	PALAVRA r3  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  3));
-	//PALAVRA r4  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  4));
-	//PALAVRA r5  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  5));
-	//PALAVRA r6  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  6));
-	//PALAVRA r7  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  7));
-	//PALAVRA r8  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  8));
-	//PALAVRA r9  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  9));
-	//PALAVRA r10 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 10));
-	//PALAVRA r11 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 11));
-	//PALAVRA r12 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 12));
-	//PALAVRA r13 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 13));
-	//PALAVRA r14 = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando), 14));
+	PALAVRA r4  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  4));
+	PALAVRA r5  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  5));
+	PALAVRA r6  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  6));
+	PALAVRA r7  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  7));
 
 	int ip0 =  (((r0 & 0xFF000000)/256)/256)/256;
 	int ip1 =   ((r0 & 0x00FF0000)/256)/256;
@@ -594,9 +595,26 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 			*parametro = r3;
 			FIFO_inserir(parametros, (void*) parametro);
 		} else if(operacao == RPC_OPERACAO_RESULTADO){
-			
-
-
+			parametros = (FIFO*) malloc(sizeof(FIFO));
+			FIFO_inicializar(parametros, 2);
+			int *parametro = (int*) malloc(sizeof(int));
+			*parametro = r2;
+			FIFO_inserir(parametros, (void*) parametro);
+			parametro = (int*) malloc(sizeof(int));
+			*parametro = r3;
+			FIFO_inserir(parametros, (void*) parametro);
+			parametro = (int*) malloc(sizeof(int));
+			*parametro = r4;
+			FIFO_inserir(parametros, (void*) parametro);
+			parametro = (int*) malloc(sizeof(int));
+			*parametro = r5;
+			FIFO_inserir(parametros, (void*) parametro);
+			parametro = (int*) malloc(sizeof(int));
+			*parametro = r6;
+			FIFO_inserir(parametros, (void*) parametro);
+			parametro = (int*) malloc(sizeof(int));
+			*parametro = r7;
+			FIFO_inserir(parametros, (void*) parametro);
 		} else {
 			erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
 		}
@@ -617,15 +635,49 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 }
 
 /**
-* @param KERNEL 	*kernel_param		O kernel que atendará ao pedido.
-* @param RPC		*rpc_param			RPC que será atendido.
+* @param KERNEL 					*kernel_param		O kernel que atendará ao pedido.
+* @param RPC						*rpc_param			RPC que será atendido.
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote da mensagem que será atendida.
 * @return ERRO_KERNEL 	Erro ocorrido durante atendimento do pedido.
 */
-ERRO_KERNEL privada_atenderRPC(KERNEL *kernel_param, RPC *rpc_param){
+ERRO_KERNEL privada_atenderRPC(KERNEL *kernel_param, RPC *rpc_param, PACOTE_APLICACAO_SOPA *pacote_param){
 	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
 
 	if(rpc_getOperacao(rpc_param) == RPC_OPERACAO_ADD){
-		privada_criarProcesso(kernel_param, RPC_NOME_ARQUIVO_OPERACAO_ADD);
+tela_escreverNaColuna(&global_tela, "Eh um ADD.", 3);
+		CONTEXTO *contextoProcesso = (CONTEXTO*) malloc(sizeof(CONTEXTO));
+		contexto_inicializar(contextoProcesso);
+tela_escreverNaColuna(&global_tela, "1.", 3);
+		contexto_setRegistradorPalavra(contextoProcesso, pacoteAplicacaoSOPA_getPalavraOrigemIP(pacote_param), 0);
+tela_escreverNaColuna(&global_tela, "2.", 3);
+		contexto_setRegistradorPalavra(contextoProcesso, pacoteAplicacaoSOPA_getPortaOrigem(pacote_param), 1);
+tela_escreverNaColuna(&global_tela, "3.", 3);
+		contexto_setRegistradorPalavra(contextoProcesso, * (int*) rpc_getParametro(rpc_param, 0), 2);
+tela_escreverNaColuna(&global_tela, "4.", 3);
+		contexto_setRegistradorPalavra(contextoProcesso, * (int*) rpc_getParametro(rpc_param, 1), 3);
+tela_escreverNaColuna(&global_tela, "contexto ok.", 3);
+		privada_criarProcesso(kernel_param, RPC_NOME_ARQUIVO_OPERACAO_ADD, contextoProcesso);
+tela_escreverNaColuna(&global_tela, "processo criado.", 3);
+	} else if(rpc_getOperacao(rpc_param) == RPC_OPERACAO_RESULTADO){
+		int PID_processoQueEsperou = * (int*) rpc_getParametro(rpc_param, 0);
+		DESCRITOR_PROCESSO *processoQueEsperou = privada_buscaProcessoComPID(kernel_param, PID_processoQueEsperou);
+		if(processoQueEsperou == NULL){
+			erro = KERNEL_ERRO_PROCESSO_INEXISTENTE;
+		} else {
+			int resultadoOperacao = * (int*) rpc_getParametro(rpc_param, 1);
+			contexto_setRegistradorPalavra(descritorProcesso_getContexto(processoQueEsperou), 0, 0);
+			contexto_setRegistradorPalavra(descritorProcesso_getContexto(processoQueEsperou), resultadoOperacao, 1);
+			int processo=0;
+			int encontrouProcesso=0;
+			for(; processo<MAXIMO_PROCESSOS_KERNEL; processo++){
+				encontrouProcesso = (descritorProcesso_getPID(FIFO_espiarPosicao(&kernel_param->filaProcessosBloqueadosRPC, processo))
+									 == PID_processoQueEsperou);
+				if(encontrouProcesso){
+					FIFO_inserir(&kernel_param->filaProcessosProntos, 
+								FIFO_removerPosicao(&kernel_param->filaProcessosBloqueadosRPC, processo));
+				}
+			}
+		}
 	} else {
 		erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
 	}
@@ -642,7 +694,7 @@ ERRO_KERNEL privada_atenderMensagemRede(KERNEL *kernel_param, PACOTE_APLICACAO_S
 	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
 
 	if(pacoteAplicacaoSOPA_getTipo(pacote_param) == TIPO_PACOTE_APLICACAO_SOPA_RPC){
-		erro = privada_atenderRPC(kernel_param, (RPC*) pacoteAplicacaoSOPA_getConteudo(pacote_param));
+		erro = privada_atenderRPC(kernel_param, (RPC*) pacoteAplicacaoSOPA_getConteudo(pacote_param), pacote_param);
 	}
 
 	return erro;
@@ -689,7 +741,9 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 	sprintf(mensagem, "Kernel chamado para a interrupcao %d.", interrupcao_param);
 	tela_escreverNaColuna(&global_tela, mensagem, 3);
 
-	descritorProcesso_setContexto(*kernel_param->processoRodando, processador_getContexto(&global_processador));
+	contexto_copiar(descritorProcesso_getContexto(*kernel_param->processoRodando),
+					processador_getContexto(&global_processador));
+	//descritorProcesso_setContexto(*kernel_param->processoRodando, processador_getContexto(&global_processador));
 	switch(interrupcao_param){
 		case INTERRUPCAO_PROCESSADOR:
 			sprintf(mensagem, "O processo %d foi morto porque tentou executar uma instrucao ilegal.", descritorProcesso_getPID(*kernel_param->processoRodando));
@@ -951,7 +1005,9 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 		default:
 			tela_escreverNaColuna(&global_tela, "Interrupcao desconhecida.", 3);
 	}
-	processador_setContexto(&global_processador, descritorProcesso_getContexto(*kernel_param->processoRodando));
+	contexto_copiar(processador_getContexto(&global_processador),
+					descritorProcesso_getContexto(*kernel_param->processoRodando));
+//	processador_setContexto(&global_processador, descritorProcesso_getContexto(*kernel_param->processoRodando));
 }
 
 
