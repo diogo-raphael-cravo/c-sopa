@@ -54,6 +54,13 @@ RPC* rpc_deString(char* string_param);
 */
 OPERACAO_RPC rpc_getOperacao(RPC *rpc_param);
 
+/**
+* @param RPC		*rpc_param					O RPC que será consultado.
+* @param int		ordemParametro_param		Qual parâmetro: primeiro, segundo, terceiro...
+* @return void*		Parâmetro do RPC.
+*/
+void* rpc_getParametro(RPC *rpc_param, int ordemParametro_param);
+
 /*
 * @param KERNEL		*kernel_param		O kernel que executará a operação.
 * @param RPC		*rpc_param			A solicitação RPC.

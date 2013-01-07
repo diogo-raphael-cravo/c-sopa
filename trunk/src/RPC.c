@@ -47,6 +47,22 @@ char* rpc_paraString(RPC *rpc_param){
 				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 1)),
 				SOCKET_SOPA_SEPARADOR);
 			break;
+		case RPC_OPERACAO_RESULTADO:
+			memset(novaString, '\0', TAMANHO_PACOTE_STRING);
+			sprintf(novaString, "%d%c%d%c%d%c%d%c%d%c%d%c", 
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 2)),
+				SOCKET_SOPA_SEPARADOR,
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 3)),
+				SOCKET_SOPA_SEPARADOR,
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 4)),
+				SOCKET_SOPA_SEPARADOR,
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 5)),
+				SOCKET_SOPA_SEPARADOR,
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 6)),
+				SOCKET_SOPA_SEPARADOR,
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 7)),
+				SOCKET_SOPA_SEPARADOR);
+			break;
 	}
 	strcat(stringRPC, novaString);
 
@@ -60,24 +76,29 @@ char* rpc_paraString(RPC *rpc_param){
 */
 RPC* rpc_deString(char* string_param){
 	char* token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
+	int iteracoes=0;
+	int *novoValor;
 
 	OPERACAO_RPC operacao = atoi(token);
 	FIFO *parametros = (FIFO*) malloc(sizeof(FIFO));
 	switch(operacao){
 		case RPC_OPERACAO_ADD:
-			FIFO_inicializar(parametros, 2);
-
-			token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
-			int *novoValor = (int*) malloc(sizeof(int));
-			*novoValor = atoi(token);
-
-			FIFO_inserir(parametros, novoValor);
-			token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
-			novoValor = (int*) malloc(sizeof(int));
-			*novoValor = atoi(token);
-			FIFO_inserir(parametros, novoValor);
+			iteracoes = 2;
+			break;
+		case RPC_OPERACAO_RESULTADO:
+			iteracoes = 7;
 			break;
 	}
+
+	int i;
+	FIFO_inicializar(parametros, iteracoes);
+	for(i=0; i<iteracoes; i++){
+		token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
+		novoValor = (int*) malloc(sizeof(int));
+		*novoValor = atoi(token);
+		FIFO_inserir(parametros, novoValor);
+	}
+
 	return rpc_criarNovo(operacao, parametros);
 }
 
@@ -89,7 +110,14 @@ OPERACAO_RPC rpc_getOperacao(RPC *rpc_param){
 	return rpc_param->operacao;
 }
 
-
+/**
+* @param RPC		*rpc_param					O RPC que será consultado.
+* @param int		ordemParametro_param		Qual parâmetro: primeiro, segundo, terceiro...
+* @return void*		Parâmetro do RPC.
+*/
+void* rpc_getParametro(RPC *rpc_param, int ordemParametro_param){
+	return FIFO_espiarPosicao(&rpc_param->parametros, ordemParametro_param);
+}
 
 
 

@@ -71,7 +71,23 @@ TIPO_PACOTE_APLICACAO_SOPA pacoteAplicacaoSOPA_getTipo(PACOTE_APLICACAO_SOPA *pa
 */
 void* pacoteAplicacaoSOPA_getConteudo(PACOTE_APLICACAO_SOPA *pacote_param);
 
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return int		Porta de origem (PID do processo do SOPA que requisitou o pacote).
+*/
+int pacoteAplicacaoSOPA_getPortaOrigem(PACOTE_APLICACAO_SOPA *pacote_param);
 
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return int		Porta de desstino (PID do processo do SOPA a que se destina o pacote).
+*/
+int pacoteAplicacaoSOPA_getPortaDestino(PACOTE_APLICACAO_SOPA *pacote_param);
+
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return PALAVRA		IP do hospedeiro de que se origina o pacote.
+*/
+PALAVRA pacoteAplicacaoSOPA_getPalavraOrigemIP(PACOTE_APLICACAO_SOPA *pacote_param);
 
 
 

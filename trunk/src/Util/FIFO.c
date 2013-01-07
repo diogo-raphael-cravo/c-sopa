@@ -207,7 +207,7 @@ void* FIFO_espiarPosicao(FIFO *fifo_param, int posicaoElemento_param){
 * ATENÇÃO: retorna/recebe um void*! É necessário utilizar cast!
 */
 void* FIFO_removerPosicao(FIFO *fifo_param, int posicaoElemento_param){
-if(FIFO_capacidadeNumeroElementos(fifo_param) <= posicaoElemento_param){
+	if(FIFO_capacidadeNumeroElementos(fifo_param) <= posicaoElemento_param){
 		return FIFO_ELEMENTO_INEXISTENTE;
 	} else if(FIFO_quantidadeElementos(fifo_param) <= posicaoElemento_param){
 		return FIFO_ELEMENTO_INEXISTENTE;

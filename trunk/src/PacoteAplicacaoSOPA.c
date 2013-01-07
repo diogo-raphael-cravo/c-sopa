@@ -89,9 +89,9 @@ PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_deString(char* string_param){
 			conteudo = rpc_deString(token);
 			break;
 	}
-	char* ipOrigem = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
 	PACOTE_APLICACAO_SOPA *pacote = privada_criarPacoteAplicacaoSOPA(tipo, portaOrigemSOPA, portaDestinoSOPA, conteudo);
-	pacote->ipOrigem = ipOrigem;
+	pacote->ipOrigem = (char*) malloc((3*5+1)*sizeof(char));
+	strcpy(pacote->ipOrigem, "127.0.0.1"/*strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING)*/);
 
 	return pacote;
 }
@@ -119,6 +119,48 @@ void* pacoteAplicacaoSOPA_getConteudo(PACOTE_APLICACAO_SOPA *pacote_param){
 	return pacote_param->conteudo;
 }
 
+
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return int		Porta de origem (PID do processo do SOPA que requisitou o pacote).
+*/
+int pacoteAplicacaoSOPA_getPortaOrigem(PACOTE_APLICACAO_SOPA *pacote_param){
+	return pacote_param->portaOrigemSOPA;
+}
+
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return int		Porta de desstino (PID do processo do SOPA a que se destina o pacote).
+*/
+int pacoteAplicacaoSOPA_getPortaDestino(PACOTE_APLICACAO_SOPA *pacote_param){
+	return pacote_param->portaDestinoSOPA;
+}
+
+/**
+* @param PACOTE_APLICACAO_SOPA		*pacote_param		Pacote que será consultado.
+* @return PALAVRA		IP do hospedeiro de que se origina o pacote.
+*/
+PALAVRA pacoteAplicacaoSOPA_getPalavraOrigemIP(PACOTE_APLICACAO_SOPA *pacote_param){
+	PALAVRA ip = 0;
+
+	char* tokenIp = (char*) malloc(200*sizeof(char));
+tela_escreverNaColuna(&global_tela, tokenIp, 5);
+	tokenIp = strtok(pacote_param->ipOrigem, ".");
+tela_escreverNaColuna(&global_tela, tokenIp, 5);
+	ip = ip | (atoi(tokenIp)*256*256*256 & 0xFF000000);
+	tokenIp = strtok(NULL, ".");
+tela_escreverNaColuna(&global_tela, tokenIp, 5);
+	ip = ip | (atoi(tokenIp)*256*256 & 0x00FF0000);
+	tokenIp = strtok(NULL, ".");
+tela_escreverNaColuna(&global_tela, tokenIp, 5);
+	ip = ip | (atoi(tokenIp)*256 & 0x0000FF00);
+	tokenIp = strtok(NULL, ".");
+tela_escreverNaColuna(&global_tela, tokenIp, 5);
+	ip = ip | (atoi(tokenIp) & 0x000000FF);
+	free(tokenIp);
+
+	return ip;
+}
 
 
 
