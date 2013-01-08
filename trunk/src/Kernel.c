@@ -61,6 +61,30 @@ void privada_imprimirErro(ERRO_KERNEL erro_param){
 }
 
 /**
+* @param KERNEL		*kernel_param			O kernel em que o processo será procurado.
+* @param int		PID_param				PID do processo sobre o qual a ação será realizada.
+* @param FIFO		*fila_param				Fila da qual o processo será retirado.
+*/
+void privada_desbloquearProcessoComPID(KERNEL *kernel_param, int PID_param, FIFO *fila_param){
+	int processo=0;
+	int encontrouProcesso=0;
+	int haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL && processo<FIFO_quantidadeElementos(fila_param);
+
+char mensagem[200];
+sprintf(mensagem, "ha %d processos bloqueados", FIFO_quantidadeElementos(fila_param));
+tela_escreverNaColuna(&global_tela, mensagem, 3);
+	for(; haMaisProcessosBloqueadosRPC; processo++){
+		encontrouProcesso = (descritorProcesso_getPID(FIFO_espiarPosicao(fila_param, processo)) == PID_param);
+		if(encontrouProcesso){
+tela_escreverNaColuna(&global_tela, "Encontrou.", 3);
+			FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_removerPosicao(fila_param, processo));
+		}
+		haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL && processo<FIFO_quantidadeElementos(fila_param);
+	}
+tela_escreverNaColuna(&global_tela, "deu.", 3);
+}
+
+/**
 * @param KERNEL		*kernel_param	O kernel em que o processo será procurado.
 * @param int		PID_param		PID do processo procurado.
 * @return DESCRITOR_PROCESSO* 	O processo que tem o PID solicitado. Caso não exista neste kernel, retornará NULL.
@@ -633,7 +657,9 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 		pacoteAplicacaoSOPA_imprimir(pacote);
 		ipDestino = (char*) malloc(3*5*sizeof(char));
 		sprintf(ipDestino, "%d.%d.%d.%d", ip0, ip1, ip2, ip3);
-//		void* dadosRequerente = ;
+		DADOS_REQUERENTE* dadosRequerente = (DADOS_REQUERENTE*) malloc(sizeof(DADOS_REQUERENTE));
+		dadosRequerente->PID_processoRequerente = descritorProcesso_getPID(processoRequerente_param);
+		dadosRequerente->chamadaBloqueante = (operacao != RPC_OPERACAO_RESULTADO);
 		placaRede_agendarEnvioMensagem(&global_placaRede, ipDestino, pacoteAplicacaoSOPA_paraString(pacote), dadosRequerente);
 		FIFO_destruir(parametros);
 		free(pacote);
@@ -671,24 +697,7 @@ ERRO_KERNEL privada_atenderRPC(KERNEL *kernel_param, RPC *rpc_param, PACOTE_APLI
 			int resultadoOperacao = * (int*) rpc_getParametro(rpc_param, 0);
 			contexto_setRegistradorPalavra(descritorProcesso_getContexto(processoQueEsperou), 0, 0);
 			contexto_setRegistradorPalavra(descritorProcesso_getContexto(processoQueEsperou), resultadoOperacao, 1);
-			int processo=0;
-			int encontrouProcesso=0;
-			int haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL
-				&& processo<FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueadosRPC);
-char mensagem[200];
-sprintf(mensagem, "ha %d processos bloqueados", FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueadosRPC));
-tela_escreverNaColuna(&global_tela, mensagem, 3);
-			for(; haMaisProcessosBloqueadosRPC; processo++){
-				encontrouProcesso = (descritorProcesso_getPID(FIFO_espiarPosicao(&kernel_param->filaProcessosBloqueadosRPC, processo))
-									 == PID_processoQueEsperou);
-				if(encontrouProcesso){tela_escreverNaColuna(&global_tela, "Encontrou.", 3);
-					FIFO_inserir(&kernel_param->filaProcessosProntos, 
-								FIFO_removerPosicao(&kernel_param->filaProcessosBloqueadosRPC, processo));
-				}
-				haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL
-					&& processo<FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueadosRPC);
-			}
-tela_escreverNaColuna(&global_tela, "deu.", 3);
+			privada_desbloquearProcessoComPID(kernel_param, PID_processoQueEsperou, &kernel_param->filaProcessosBloqueadosRPC);
 		}
 	} else {
 		erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
@@ -1002,9 +1011,13 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			}
 
 			if(placaRede_getErroUltimaOperacao(&global_placaRede) != ERRO_REDE_NENHUM
-					OR ){
-				FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueadosRPC));
+					|| (placaRede_getDadosUltimaOperacao(&global_placaRede)->chamadaBloqueante)){
+				privada_desbloquearProcessoComPID(
+					kernel_param, 
+					placaRede_getDadosUltimaOperacao(&global_placaRede)->PID_processoRequerente,
+					&kernel_param->filaProcessosBloqueadosRPC);
 			}
+			free(placaRede_getDadosUltimaOperacao(&global_placaRede));
 			break;
 		case INTERRUPCAO_PLACA_REDE_RECEIVE:
 			tela_escreverNaColuna(&global_tela, "Acabo de receber uma mensagem via rede. Mensagem:", 3);

@@ -2,6 +2,8 @@
 * Este arquivo concentra variáveis que devem ser vistas por muitos arquivos.
 */
 
+#define BOOLEANO int
+
 /*----------------------------------------------------------------------
 *						INCLUDES E DEFINES
 ----------------------------------------------------------------------*/

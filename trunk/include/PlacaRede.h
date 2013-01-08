@@ -16,7 +16,7 @@ struct str_placaRede{
 	sem_t semaforoEspacos;
 	sem_t mutexDadosEnvio;
 	ERRO_REDE erro;
-	void* dadosRequerente;
+	DADOS_REQUERENTE* dadosRequerente;
 };
 
 typedef struct str_placaRede PLACA_REDE;
@@ -39,11 +39,11 @@ void placaRede_rodar(PLACA_REDE *placaRede_param);
 * @param char*						ipDestino_param			IP no formato "127.0.0.1". NENHUM campo 
 *															deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
 * @param char*						*mensagem_param			A mensagem que será enviada.
-* @param void*						*dadosRequerente_param	Dados que estarão disponíveis depois que uma
+* @param DADOS_REQUERENTE*			*dadosRequerente_param	Dados que estarão disponíveis depois que uma
 *															mensagem for enviada.
-*															É de responsabilidade de quem chamar cuidar o TIPO e alocação!
 */
-void placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param, void* dadosRequerente_param);
+void placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param, 
+		DADOS_REQUERENTE* dadosRequerente_param);
 
 /**
 * @param PLACA_REDE					*placaRede_param		A placa que será consultada.
@@ -74,18 +74,16 @@ void placaRede_setErroUltimaOperacao(PLACA_REDE *placaRede_param, ERRO_REDE erro
 
 /**
 * @param PLACA_REDE		*placaRede_param		A placa de rede cujo erro será consultado.
-* @return void*		Dados que foram fornecidos junto a mensagem que acaba de ser enviada.
-*					É de responsabilidade de quem chamar cuidar o TIPO e alocação!
+* @return DADOS_REQUERENTE*		Dados que estarão disponíveis depois que uma mensagem for enviada.
 */
-void* placaRede_getDadosUltimaOperacao(PLACA_REDE *placaRede_param);
+DADOS_REQUERENTE* placaRede_getDadosUltimaOperacao(PLACA_REDE *placaRede_param);
 
 /**
-* @param PLACA_REDE		*placaRede_param			A placa de rede cujo erro será consultado.
-* @param void*			*dadosRequerente_param		Dados que estarão disponíveis depois que uma
-*													mensagem for enviada.
-*													É de responsabilidade de quem chamar cuidar o TIPO e alocação!
+* @param PLACA_REDE			*placaRede_param			A placa de rede cujo erro será consultado.
+* @param DADOS_REQUERENTE*	*dadosRequerente_param		Dados que estarão disponíveis depois que uma
+*														mensagem for enviada.
 */
-void placaRede_setDadosUltimaOperacao(PLACA_REDE *placaRede_param, void* dadosRequerente_param);
+void placaRede_setDadosUltimaOperacao(PLACA_REDE *placaRede_param, DADOS_REQUERENTE* dadosRequerente_param);
 
 /**
 * @param PLACA_REDE		*placaRede_param		Tranca acesso aos dados de envio (erro e requerente).
