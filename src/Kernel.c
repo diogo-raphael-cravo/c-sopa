@@ -572,20 +572,23 @@ ERRO_KERNEL privada_solicitarRPC(KERNEL *kernel_param, DESCRITOR_PROCESSO *proce
 	PALAVRA r5  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  5));
 	PALAVRA r6  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  6));
 	PALAVRA r7  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  7));
+	PALAVRA r8  = registrador_lerPalavra(contexto_getRegistrador(descritorProcesso_getContexto(*kernel_param->processoRodando),  8));
 
 	int ip0 =  (((r0 & 0xFF000000)/256)/256)/256;
 	int ip1 =   ((r0 & 0x00FF0000)/256)/256;
 	int ip2 =    (r0 & 0x0000FF00)/256;
 	int ip3 =     r0 & 0x000000FF;
+	int portaDestino = PORTA_QUALQUER;
 
 	PACOTE_APLICACAO_SOPA *pacote;
 	FIFO *parametros;
 	OPERACAO_RPC operacao;
 	char* ipDestino;
-tela_escreverNaColuna(&global_tela, "1", 3);
+
 	operacao = r1;
 	if(erro == KERNEL_ERRO_NENHUM){
 		if(operacao == RPC_OPERACAO_ADD){
+			tela_escreverNaColuna(&global_tela, "Solicitando ADD.", 3);
 			parametros = (FIFO*) malloc(sizeof(FIFO));
 			FIFO_inicializar(parametros, 2);
 			int *parametro = (int*) malloc(sizeof(int));
@@ -595,12 +598,12 @@ tela_escreverNaColuna(&global_tela, "1", 3);
 			*parametro = r3;
 			FIFO_inserir(parametros, (void*) parametro);
 		} else if(operacao == RPC_OPERACAO_RESULTADO){
+			tela_escreverNaColuna(&global_tela, "Solicitando RESULTADO_OPERACAO.", 3);
+			portaDestino = r2;
+
 			parametros = (FIFO*) malloc(sizeof(FIFO));
-			FIFO_inicializar(parametros, 2);
+			FIFO_inicializar(parametros, 6);
 			int *parametro = (int*) malloc(sizeof(int));
-			*parametro = r2;
-			FIFO_inserir(parametros, (void*) parametro);
-			parametro = (int*) malloc(sizeof(int));
 			*parametro = r3;
 			FIFO_inserir(parametros, (void*) parametro);
 			parametro = (int*) malloc(sizeof(int));
@@ -615,26 +618,28 @@ tela_escreverNaColuna(&global_tela, "1", 3);
 			parametro = (int*) malloc(sizeof(int));
 			*parametro = r7;
 			FIFO_inserir(parametros, (void*) parametro);
+			parametro = (int*) malloc(sizeof(int));
+			*parametro = r8;
+			FIFO_inserir(parametros, (void*) parametro);
 		} else {
 			erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
 		}
 	}
-tela_escreverNaColuna(&global_tela, "2", 3);
+
 	if(erro == KERNEL_ERRO_NENHUM){
 		pacote = pacoteAplicacaoSOPA_criarPacoteRPC(operacao, parametros, 
-			descritorProcesso_getPID(processoRequerente_param), PORTA_QUALQUER);
+			descritorProcesso_getPID(processoRequerente_param), portaDestino);
+		tela_escreverNaColuna(&global_tela, "Pacote Enviado:", 3);
+		pacoteAplicacaoSOPA_imprimir(pacote);
 		ipDestino = (char*) malloc(3*5*sizeof(char));
 		sprintf(ipDestino, "%d.%d.%d.%d", ip0, ip1, ip2, ip3);
-tela_escreverNaColuna(&global_tela, "2.1", 3);
-		placaRede_agendarEnvioMensagem(&global_placaRede, ipDestino, pacoteAplicacaoSOPA_paraString(pacote));
-tela_escreverNaColuna(&global_tela, "2.2", 3);
+//		void* dadosRequerente = ;
+		placaRede_agendarEnvioMensagem(&global_placaRede, ipDestino, pacoteAplicacaoSOPA_paraString(pacote), dadosRequerente);
 		FIFO_destruir(parametros);
-tela_escreverNaColuna(&global_tela, "2.3", 3);
 		free(pacote);
-tela_escreverNaColuna(&global_tela, "2.4", 3);
 		free(ipDestino);
 	}
-tela_escreverNaColuna(&global_tela, "3", 3);
+
 	return erro;
 }
 
@@ -648,39 +653,42 @@ ERRO_KERNEL privada_atenderRPC(KERNEL *kernel_param, RPC *rpc_param, PACOTE_APLI
 	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
 
 	if(rpc_getOperacao(rpc_param) == RPC_OPERACAO_ADD){
-tela_escreverNaColuna(&global_tela, "Eh um ADD.", 3);
+		tela_escreverNaColuna(&global_tela, "Atendendo ADD.", 3);
 		CONTEXTO *contextoProcesso = (CONTEXTO*) malloc(sizeof(CONTEXTO));
 		contexto_inicializar(contextoProcesso);
-tela_escreverNaColuna(&global_tela, "1.", 3);
 		contexto_setRegistradorPalavra(contextoProcesso, pacoteAplicacaoSOPA_getPalavraOrigemIP(pacote_param), 0);
-tela_escreverNaColuna(&global_tela, "2.", 3);
 		contexto_setRegistradorPalavra(contextoProcesso, pacoteAplicacaoSOPA_getPortaOrigem(pacote_param), 1);
-tela_escreverNaColuna(&global_tela, "3.", 3);
 		contexto_setRegistradorPalavra(contextoProcesso, * (int*) rpc_getParametro(rpc_param, 0), 2);
-tela_escreverNaColuna(&global_tela, "4.", 3);
 		contexto_setRegistradorPalavra(contextoProcesso, * (int*) rpc_getParametro(rpc_param, 1), 3);
-tela_escreverNaColuna(&global_tela, "contexto ok.", 3);
 		privada_criarProcesso(kernel_param, RPC_NOME_ARQUIVO_OPERACAO_ADD, contextoProcesso);
-tela_escreverNaColuna(&global_tela, "processo criado.", 3);
 	} else if(rpc_getOperacao(rpc_param) == RPC_OPERACAO_RESULTADO){
-		int PID_processoQueEsperou = * (int*) rpc_getParametro(rpc_param, 0);
+		tela_escreverNaColuna(&global_tela, "Atendendo RESULTADO_OPERACAO.", 3);
+		int PID_processoQueEsperou = pacoteAplicacaoSOPA_getPortaDestino(pacote_param);
 		DESCRITOR_PROCESSO *processoQueEsperou = privada_buscaProcessoComPID(kernel_param, PID_processoQueEsperou);
 		if(processoQueEsperou == NULL){
 			erro = KERNEL_ERRO_PROCESSO_INEXISTENTE;
 		} else {
-			int resultadoOperacao = * (int*) rpc_getParametro(rpc_param, 1);
+			int resultadoOperacao = * (int*) rpc_getParametro(rpc_param, 0);
 			contexto_setRegistradorPalavra(descritorProcesso_getContexto(processoQueEsperou), 0, 0);
 			contexto_setRegistradorPalavra(descritorProcesso_getContexto(processoQueEsperou), resultadoOperacao, 1);
 			int processo=0;
 			int encontrouProcesso=0;
-			for(; processo<MAXIMO_PROCESSOS_KERNEL; processo++){
+			int haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL
+				&& processo<FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueadosRPC);
+char mensagem[200];
+sprintf(mensagem, "ha %d processos bloqueados", FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueadosRPC));
+tela_escreverNaColuna(&global_tela, mensagem, 3);
+			for(; haMaisProcessosBloqueadosRPC; processo++){
 				encontrouProcesso = (descritorProcesso_getPID(FIFO_espiarPosicao(&kernel_param->filaProcessosBloqueadosRPC, processo))
 									 == PID_processoQueEsperou);
-				if(encontrouProcesso){
+				if(encontrouProcesso){tela_escreverNaColuna(&global_tela, "Encontrou.", 3);
 					FIFO_inserir(&kernel_param->filaProcessosProntos, 
 								FIFO_removerPosicao(&kernel_param->filaProcessosBloqueadosRPC, processo));
 				}
+				haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL
+					&& processo<FIFO_quantidadeElementos(&kernel_param->filaProcessosBloqueadosRPC);
 			}
+tela_escreverNaColuna(&global_tela, "deu.", 3);
 		}
 	} else {
 		erro = KERNEL_ERRO_OPERACAO_RPC_INVALIDA;
@@ -697,6 +705,8 @@ tela_escreverNaColuna(&global_tela, "processo criado.", 3);
 ERRO_KERNEL privada_atenderMensagemRede(KERNEL *kernel_param, PACOTE_APLICACAO_SOPA *pacote_param){
 	ERRO_KERNEL erro = KERNEL_ERRO_NENHUM;
 
+	tela_escreverNaColuna(&global_tela, "Pacote Recebido:", 3);
+	pacoteAplicacaoSOPA_imprimir(pacote_param);
 	if(pacoteAplicacaoSOPA_getTipo(pacote_param) == TIPO_PACOTE_APLICACAO_SOPA_RPC){
 		erro = privada_atenderRPC(kernel_param, (RPC*) pacoteAplicacaoSOPA_getConteudo(pacote_param), pacote_param);
 	}
@@ -969,8 +979,10 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			}
 			break;
 		case INTERRUPCAO_PLACA_REDE_SEND:
+			placaRede_esperarAcessoDados(&global_placaRede);
+
 			if(placaRede_getErroUltimaOperacao(&global_placaRede) == ERRO_REDE_NENHUM){
-				tela_escreverNaColuna(&global_tela, "Mensagem enviada.", 3);
+				tela_escreverNaColuna(&global_tela, "Mensagem enviada. Fica a pergunta: quem queria envia-la mesmo?", 3);
 			} else if(placaRede_getErroUltimaOperacao(&global_placaRede) == ERRO_REDE_CRIACAO_SOCKET){
 				tela_escreverNaColuna(&global_tela, "SEND: erro na criacao do SOCKET.", 3);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(
@@ -989,7 +1001,8 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 					FIFO_espiar(&kernel_param->filaProcessosBloqueadosRPC)), 5, 0);
 			}
 
-			if(placaRede_getErroUltimaOperacao(&global_placaRede) != ERRO_REDE_NENHUM){
+			if(placaRede_getErroUltimaOperacao(&global_placaRede) != ERRO_REDE_NENHUM
+					OR ){
 				FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_remover(&kernel_param->filaProcessosBloqueadosRPC));
 			}
 			break;

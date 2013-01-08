@@ -24,6 +24,7 @@ PACOTE_APLICACAO_SOPA* privada_criarPacoteAplicacaoSOPA(TIPO_PACOTE_APLICACAO_SO
 	novoPacote->portaOrigemSOPA = portaOrigemSOPA_param;
 	novoPacote->portaDestinoSOPA = portaDestinoSOPA_param;
 	novoPacote->conteudo = conteudo_param;
+	novoPacote->ipOrigem = NULL;
 
 	return novoPacote;
 }
@@ -93,7 +94,7 @@ PACOTE_APLICACAO_SOPA* pacoteAplicacaoSOPA_deString(char* string_param){
 
 	PACOTE_APLICACAO_SOPA *pacote = privada_criarPacoteAplicacaoSOPA(tipo, portaOrigemSOPA, portaDestinoSOPA, conteudo);
 	pacote->ipOrigem = (char*) malloc((3*5+1)*sizeof(char));
-	strcpy(pacote->ipOrigem, string_pegarSubtexto(string_param, SOCKET_SOPA_SEPARADOR_STRING, -1));
+	strcpy(pacote->ipOrigem, string_pegarSubtexto(string_param, SOCKET_SOPA_SEPARADOR_STRING, 6));
 	return pacote;
 }
 
@@ -144,26 +145,61 @@ int pacoteAplicacaoSOPA_getPortaDestino(PACOTE_APLICACAO_SOPA *pacote_param){
 PALAVRA pacoteAplicacaoSOPA_getPalavraOrigemIP(PACOTE_APLICACAO_SOPA *pacote_param){
 	PALAVRA ip = 0;
 
-tela_escreverNaColuna(&global_tela, "GetOrigem", 5);
-sincronizadorGlobal_sincronizado_pausar();
-	char* tokenIp = (char*) malloc(200*sizeof(char));
-tela_escreverNaColuna(&global_tela, tokenIp, 5);
-	tokenIp = strtok(pacote_param->ipOrigem, ".");
-tela_escreverNaColuna(&global_tela, tokenIp, 5);
-	ip = ip | (atoi(tokenIp)*256*256*256 & 0xFF000000);
-	tokenIp = strtok(NULL, ".");
-tela_escreverNaColuna(&global_tela, tokenIp, 5);
-	ip = ip | (atoi(tokenIp)*256*256 & 0x00FF0000);
-	tokenIp = strtok(NULL, ".");
-tela_escreverNaColuna(&global_tela, tokenIp, 5);
-	ip = ip | (atoi(tokenIp)*256 & 0x0000FF00);
-	tokenIp = strtok(NULL, ".");
-tela_escreverNaColuna(&global_tela, tokenIp, 5);
-	ip = ip | (atoi(tokenIp) & 0x000000FF);
+	char** tokenIp = (char**) malloc(sizeof(char*));
+	*tokenIp = string_pegarSubtexto(pacote_param->ipOrigem, ".", 0);
+	ip = ip | (atoi(*tokenIp)*256*256*256 & 0xFF000000);
+	free(*tokenIp);
+	*tokenIp = string_pegarSubtexto(pacote_param->ipOrigem, ".", 1);
+	ip = ip | (atoi(*tokenIp)*256*256 & 0x00FF0000);
+	free(*tokenIp);
+	*tokenIp = string_pegarSubtexto(pacote_param->ipOrigem, ".", 2);
+	ip = ip | (atoi(*tokenIp)*256 & 0x0000FF00);
+	free(*tokenIp);
+	*tokenIp = string_pegarSubtexto(pacote_param->ipOrigem, ".", 3);
+	ip = ip | (atoi(*tokenIp) & 0x000000FF);
+	free(*tokenIp);
 	free(tokenIp);
-
 	return ip;
 }
+
+/**
+* @param PACOTE_APLICACAO_SOPA			*pacote_param		Pacote que será impresso.
+*/
+void pacoteAplicacaoSOPA_imprimir(PACOTE_APLICACAO_SOPA *pacote_param){
+	char mensagem[200];
+
+	sprintf(mensagem, "Pacote Aplicacao SOPA");
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+	sprintf(mensagem, "{");
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+
+	sprintf(mensagem, " Tipo=%d", pacote_param->tipo);
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+
+	sprintf(mensagem, " Porta Origem=%d", pacote_param->portaOrigemSOPA);
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+	sprintf(mensagem, " Porta Destino=%d", pacote_param->portaDestinoSOPA);
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+
+	switch(pacote_param->tipo){
+		case TIPO_PACOTE_APLICACAO_SOPA_RPC:
+			rpc_imprimir((RPC*) pacote_param->conteudo);
+			break;
+	}
+
+	if(pacote_param->ipOrigem != NULL){
+		sprintf(mensagem, " IP=%s", pacote_param->ipOrigem);
+		tela_escreverNaColuna(&global_tela, mensagem, 3);
+	} else {
+		sprintf(mensagem, " IP=NULL");
+		tela_escreverNaColuna(&global_tela, mensagem, 3);
+	}
+	sprintf(mensagem, "}");
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+}
+
+
+
 
 
 

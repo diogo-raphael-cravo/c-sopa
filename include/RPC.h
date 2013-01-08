@@ -61,12 +61,10 @@ OPERACAO_RPC rpc_getOperacao(RPC *rpc_param);
 */
 void* rpc_getParametro(RPC *rpc_param, int ordemParametro_param);
 
-/*
-* @param KERNEL		*kernel_param		O kernel que executará a operação.
-* @param RPC		*rpc_param			A solicitação RPC.
-* ATENÇÃO: só deve ser usada pelo kernel! Usa contexto de processos.
+/**
+* @param RPC		*rpc_param			O RPC que será impresso na tela.
 */
-
+void rpc_imprimir(RPC *rpc_param);
 
 
 

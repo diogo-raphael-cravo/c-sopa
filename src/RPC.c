@@ -50,6 +50,10 @@ char* rpc_paraString(RPC *rpc_param){
 		case RPC_OPERACAO_RESULTADO:
 			memset(novaString, '\0', TAMANHO_PACOTE_STRING);
 			sprintf(novaString, "%d%c%d%c%d%c%d%c%d%c%d%c", 
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 0)),
+				SOCKET_SOPA_SEPARADOR,
+				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 1)),
+				SOCKET_SOPA_SEPARADOR,
 				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 2)),
 				SOCKET_SOPA_SEPARADOR,
 				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 3)),
@@ -57,10 +61,6 @@ char* rpc_paraString(RPC *rpc_param){
 				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 4)),
 				SOCKET_SOPA_SEPARADOR,
 				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 5)),
-				SOCKET_SOPA_SEPARADOR,
-				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 6)),
-				SOCKET_SOPA_SEPARADOR,
-				(* (int*) FIFO_espiarPosicao(&rpc_param->parametros, 7)),
 				SOCKET_SOPA_SEPARADOR);
 			break;
 	}
@@ -75,27 +75,28 @@ char* rpc_paraString(RPC *rpc_param){
 * @see rpc_paraString 	Processo reverso.
 */
 RPC* rpc_deString(char* string_param){
-	char* token = strtok(string_param, SOCKET_SOPA_SEPARADOR_STRING);
 	int iteracoes=0;
 	int *novoValor;
 
-	OPERACAO_RPC operacao = atoi(token);
+	OPERACAO_RPC operacao = atoi(string_pegarSubtexto(string_param, SOCKET_SOPA_SEPARADOR_STRING, 0));
 	FIFO *parametros = (FIFO*) malloc(sizeof(FIFO));
 	switch(operacao){
 		case RPC_OPERACAO_ADD:
 			iteracoes = 2;
 			break;
 		case RPC_OPERACAO_RESULTADO:
-			iteracoes = 7;
+			iteracoes = 6;
 			break;
 	}
 
 	int i;
+	char *buffer;
 	FIFO_inicializar(parametros, iteracoes);
-	for(i=0; i<iteracoes; i++){
-		token = strtok(NULL, SOCKET_SOPA_SEPARADOR_STRING);
+	for(i=1; i<=iteracoes; i++){
+		buffer = string_pegarSubtexto(string_param, SOCKET_SOPA_SEPARADOR_STRING, i);
 		novoValor = (int*) malloc(sizeof(int));
-		*novoValor = atoi(token);
+		*novoValor = atoi(buffer);
+		free(buffer);
 		FIFO_inserir(parametros, novoValor);
 	}
 
@@ -119,7 +120,27 @@ void* rpc_getParametro(RPC *rpc_param, int ordemParametro_param){
 	return FIFO_espiarPosicao(&rpc_param->parametros, ordemParametro_param);
 }
 
+/**
+* @param RPC		*rpc_param			O RPC que será impresso na tela.
+*/
+void rpc_imprimir(RPC *rpc_param){
+	char mensagem[200];
 
+	tela_escreverNaColuna(&global_tela, " RPC", 3);
+	sprintf(mensagem, " {");
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+
+	sprintf(mensagem, "  Operacao=%d", rpc_param->operacao);
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+
+	int i=0;
+	for(; i<FIFO_quantidadeElementos(&rpc_param->parametros); i++){
+		sprintf(mensagem, "  p(%d)=%d", i, * (int*) FIFO_espiarPosicao(&rpc_param->parametros, i));
+		tela_escreverNaColuna(&global_tela, mensagem, 3);
+	}
+	sprintf(mensagem, " }");
+	tela_escreverNaColuna(&global_tela, mensagem, 3);
+}
 
 
 

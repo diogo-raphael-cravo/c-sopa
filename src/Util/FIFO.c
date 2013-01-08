@@ -64,8 +64,10 @@ void FIFO_inserir(FIFO *fifo_param, void* dado_param){
 			}
 		}
 		fifo_param->conteudo[indicePrimeiraPosicaoLivre] = dado_param;
-	} else {
+	} else if(FIFO_buscaElemento(fifo_param, dado_param)){
 		tela_escreverNaColuna(&global_tela, "Elemento jah existe!", 5);
+	} else if(FIFO_cheia(fifo_param)){
+		tela_escreverNaColuna(&global_tela, "A FIFO estah cheia!", 5);
 	}
 }
 
