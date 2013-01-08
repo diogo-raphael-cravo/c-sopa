@@ -70,18 +70,16 @@ void privada_desbloquearProcessoComPID(KERNEL *kernel_param, int PID_param, FIFO
 	int encontrouProcesso=0;
 	int haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL && processo<FIFO_quantidadeElementos(fila_param);
 
-char mensagem[200];
-sprintf(mensagem, "ha %d processos bloqueados", FIFO_quantidadeElementos(fila_param));
-tela_escreverNaColuna(&global_tela, mensagem, 3);
 	for(; haMaisProcessosBloqueadosRPC; processo++){
-		encontrouProcesso = (descritorProcesso_getPID(FIFO_espiarPosicao(fila_param, processo)) == PID_param);
+		encontrouProcesso = (descritorProcesso_getPID(* (DESCRITOR_PROCESSO**) FIFO_espiarPosicao(fila_param, processo)) == PID_param);
 		if(encontrouProcesso){
-tela_escreverNaColuna(&global_tela, "Encontrou.", 3);
+			char mensagem[200];
+			sprintf(mensagem, "Desbloqueando processo com PID=%d de %d processos bloqueados.", PID_param, FIFO_quantidadeElementos(fila_param));
+			tela_escreverNaColuna(&global_tela, mensagem, 3);
 			FIFO_inserir(&kernel_param->filaProcessosProntos, FIFO_removerPosicao(fila_param, processo));
 		}
-		haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL && processo<FIFO_quantidadeElementos(fila_param);
+		haMaisProcessosBloqueadosRPC = processo<MAXIMO_PROCESSOS_KERNEL && processo<FIFO_quantidadeElementos(fila_param) && !encontrouProcesso;
 	}
-tela_escreverNaColuna(&global_tela, "deu.", 3);
 }
 
 /**
@@ -991,7 +989,7 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			placaRede_esperarAcessoDados(&global_placaRede);
 
 			if(placaRede_getErroUltimaOperacao(&global_placaRede) == ERRO_REDE_NENHUM){
-				tela_escreverNaColuna(&global_tela, "Mensagem enviada. Fica a pergunta: quem queria envia-la mesmo?", 3);
+				tela_escreverNaColuna(&global_tela, "Mensagem enviada.", 3);
 			} else if(placaRede_getErroUltimaOperacao(&global_placaRede) == ERRO_REDE_CRIACAO_SOCKET){
 				tela_escreverNaColuna(&global_tela, "SEND: erro na criacao do SOCKET.", 3);
 				contexto_setRegistradorPalavra(descritorProcesso_getContexto(
@@ -1011,13 +1009,15 @@ void kernel_rodar(KERNEL *kernel_param, INTERRUPCAO interrupcao_param){
 			}
 
 			if(placaRede_getErroUltimaOperacao(&global_placaRede) != ERRO_REDE_NENHUM
-					|| (placaRede_getDadosUltimaOperacao(&global_placaRede)->chamadaBloqueante)){
+					|| !placaRede_getDadosUltimaOperacao(&global_placaRede)->chamadaBloqueante){
 				privada_desbloquearProcessoComPID(
 					kernel_param, 
 					placaRede_getDadosUltimaOperacao(&global_placaRede)->PID_processoRequerente,
 					&kernel_param->filaProcessosBloqueadosRPC);
 			}
 			free(placaRede_getDadosUltimaOperacao(&global_placaRede));
+
+			placaRede_liberarAcessoDados(&global_placaRede);
 			break;
 		case INTERRUPCAO_PLACA_REDE_RECEIVE:
 			tela_escreverNaColuna(&global_tela, "Acabo de receber uma mensagem via rede. Mensagem:", 3);

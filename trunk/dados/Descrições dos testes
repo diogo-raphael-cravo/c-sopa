@@ -328,12 +328,12 @@ Dependências:						 16, 17
 =====================================================
 32)									 Remote Procedure Call Interruption
 Nome do Arquivo:					 RPC
-Resultado Esperado:					 *Programa termina sem erros.
-									 *Programa exibe a mensagem "RPC: ERRO: nao consegui conectar ao servidor!".
-									 
-Última revisão em que esteve OK:	 -
+Resultado Esperado:					 *Processo servidor e cliente terminam sem erros.
+									 *Chama um RPC na própria máquina.
+									 *Processo cliente termina com valor 319358067 no registrador r1.
+Última revisão em que esteve OK:	 87
 Dependências:						 16, 17
-									 O IP 212.23.12.103 não deve estar rodando um SOPA.
+									 O IP 127.0.0.1 não deve estar rodando mais de um SOPA.
 =====================================================
 
 
