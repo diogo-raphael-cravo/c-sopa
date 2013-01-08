@@ -75,8 +75,9 @@ void privada_enviarMensagem(MENSAGEM_SOCKET_SOPA *mensagem_param){
 		close(sock);
 	}
 
-	placaRede_travarAcessoDados(mensagem_param->placaRede);
+	
 	controladorInterrupcoes_set(&global_controladorInterrupcoes, INTERRUPCAO_PLACA_REDE_SEND);
+	placaRede_travarAcessoDados(mensagem_param->placaRede);
 	placaRede_setErroUltimaOperacao(mensagem_param->placaRede, erro);
 	placaRede_setDadosUltimaOperacao(mensagem_param->placaRede, mensagem_param->dadosRequerente);
 	placaRede_liberarAcessoDados(mensagem_param->placaRede);
