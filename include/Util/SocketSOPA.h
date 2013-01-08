@@ -21,6 +21,13 @@ enum enum_erroRede{
 
 typedef enum enum_erroRede ERRO_REDE;
 
+struct str_dadosRequerente{
+	int PID_processoRequerente;
+	BOOLEANO chamadaBloqueante;
+};
+
+typedef struct str_dadosRequerente DADOS_REQUERENTE;
+
 struct str_socketSOPA{
 	struct sockaddr_in servidor;
 	int serverSock;
@@ -46,14 +53,13 @@ void socketSopa_inicializar(SOCKET_SOPA *socket_param);
 void socketSopa_esperarMensagem(SOCKET_SOPA *socket_param, char* destino_param);
 
 /**
-* @param char*			ip_param					IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
-* @param char*			mensagem_param				A mensagem que será enviada.
-* @param void*			*dadosRequerente_param		Dados que estarão disponíveis depois que uma
-*													mensagem for enviada.
-*													É de responsabilidade de quem chamar cuidar o TIPO e alocação!
+* @param char*				ip_param					IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
+* @param char*				mensagem_param				A mensagem que será enviada.
+* @param DADOS_REQUERENTE*	*dadosRequerente_param		Dados que estarão disponíveis depois que uma
+*														mensagem for enviada.
 * ATENÇÃO: a mensagem já deve ter sido alocada!
 */
-void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param, void* dadosRequerente_param);
+void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param, DADOS_REQUERENTE* dadosRequerente_param);
 
 
 

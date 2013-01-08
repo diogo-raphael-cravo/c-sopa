@@ -13,7 +13,7 @@ struct str_mensagemSocketSOPA{
 	char* ip;
 	char* conteudo;
 	PLACA_REDE *placaRede;
-	void* dadosRequerente;
+	DADOS_REQUERENTE* dadosRequerente;
 };
 
 typedef struct str_mensagemSocketSOPA MENSAGEM_SOCKET_SOPA;
@@ -137,14 +137,13 @@ void socketSopa_esperarMensagem(SOCKET_SOPA *socket_param, char* destino_param){
 }
 
 /**
-* @param char*			ip_param					IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
-* @param char*			mensagem_param				A mensagem que será enviada.
-* @param void*			*dadosRequerente_param		Dados que estarão disponíveis depois que uma
-*													mensagem for enviada.
-*													É de responsabilidade de quem chamar cuidar o TIPO e alocação!
+* @param char*				ip_param					IP no formato "127.0.0.1". NENHUM campo deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
+* @param char*				mensagem_param				A mensagem que será enviada.
+* @param DADOS_REQUERENTE*	*dadosRequerente_param		Dados que estarão disponíveis depois que uma
+*														mensagem for enviada.
 * ATENÇÃO: a mensagem já deve ter sido alocada!
 */
-void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param, void* dadosRequerente_param){
+void socketSopa_enviarMensagem(char* ip_param, char* mensagem_param, DADOS_REQUERENTE* dadosRequerente_param){
 	pthread_t *threadIdEnvioMensagem = (pthread_t*) malloc(sizeof(pthread_t));
 	MENSAGEM_SOCKET_SOPA *mensagem = (MENSAGEM_SOCKET_SOPA*) malloc(sizeof(MENSAGEM_SOCKET_SOPA));
 	mensagem->ip = (char*) malloc((strlen(ip_param)+1)*sizeof(char));
