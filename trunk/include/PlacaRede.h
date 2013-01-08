@@ -14,7 +14,9 @@ struct str_placaRede{
 	pthread_t threadIdConsumidor;
 	sem_t semaforoItens;
 	sem_t semaforoEspacos;
+	sem_t mutexDadosEnvio;
 	ERRO_REDE erro;
+	void* dadosRequerente;
 };
 
 typedef struct str_placaRede PLACA_REDE;
@@ -37,8 +39,11 @@ void placaRede_rodar(PLACA_REDE *placaRede_param);
 * @param char*						ipDestino_param			IP no formato "127.0.0.1". NENHUM campo 
 *															deve começar em 0 (algo do tipo "127.0.0.01" causará erro).
 * @param char*						*mensagem_param			A mensagem que será enviada.
+* @param void*						*dadosRequerente_param	Dados que estarão disponíveis depois que uma
+*															mensagem for enviada.
+*															É de responsabilidade de quem chamar cuidar o TIPO e alocação!
 */
-void placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param);
+void placaRede_agendarEnvioMensagem(PLACA_REDE *placaRede_param, char* ipDestino_param, char* mensagem_param, void* dadosRequerente_param);
 
 /**
 * @param PLACA_REDE					*placaRede_param		A placa que será consultada.
@@ -67,7 +72,35 @@ ERRO_REDE placaRede_getErroUltimaOperacao(PLACA_REDE *placaRede_param);
 */
 void placaRede_setErroUltimaOperacao(PLACA_REDE *placaRede_param, ERRO_REDE erro_param);
 
+/**
+* @param PLACA_REDE		*placaRede_param		A placa de rede cujo erro será consultado.
+* @return void*		Dados que foram fornecidos junto a mensagem que acaba de ser enviada.
+*					É de responsabilidade de quem chamar cuidar o TIPO e alocação!
+*/
+void* placaRede_getDadosUltimaOperacao(PLACA_REDE *placaRede_param);
 
+/**
+* @param PLACA_REDE		*placaRede_param			A placa de rede cujo erro será consultado.
+* @param void*			*dadosRequerente_param		Dados que estarão disponíveis depois que uma
+*													mensagem for enviada.
+*													É de responsabilidade de quem chamar cuidar o TIPO e alocação!
+*/
+void placaRede_setDadosUltimaOperacao(PLACA_REDE *placaRede_param, void* dadosRequerente_param);
+
+/**
+* @param PLACA_REDE		*placaRede_param		Tranca acesso aos dados de envio (erro e requerente).
+*/
+void placaRede_travarAcessoDados(PLACA_REDE *placaRede_param);
+
+/**
+* @param PLACA_REDE		*placaRede_param		Espera acesso aos dados de envio (erro e requerente) ser liberado.
+*/
+void placaRede_esperarAcessoDados(PLACA_REDE *placaRede_param);
+
+/**
+* @param PLACA_REDE		*placaRede_param		Libera acesso aos dados de envio (erro e requerente).
+*/
+void placaRede_liberarAcessoDados(PLACA_REDE *placaRede_param);
 
 
 

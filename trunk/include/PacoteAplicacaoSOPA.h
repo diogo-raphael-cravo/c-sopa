@@ -89,7 +89,10 @@ int pacoteAplicacaoSOPA_getPortaDestino(PACOTE_APLICACAO_SOPA *pacote_param);
 */
 PALAVRA pacoteAplicacaoSOPA_getPalavraOrigemIP(PACOTE_APLICACAO_SOPA *pacote_param);
 
-
+/**
+* @param PACOTE_APLICACAO_SOPA			*pacote_param		Pacote que será impresso.
+*/
+void pacoteAplicacaoSOPA_imprimir(PACOTE_APLICACAO_SOPA *pacote_param);
 
 
 
